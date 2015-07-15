@@ -42,22 +42,95 @@ ndelete_rpaths = 0
 
 #######
 
-i, j = 0, 0
+i = 0
 archs = []
 narchs = 0
 input = nil
 
-ARGV.each_with_index do |opt, i|
-	case opt
+while i < ARGV.length
+	case ARGV[i]
 	when "-id"
-		abort("more than one: #{opt} option specified") if !id.nil?
+		abort("more than one: #{ARGV[i]} option specified") if !id.nil?
 		id = ARGV[i + 1]
-		abort("missing argument to: #{opt} option") if id.nil?
+		abort("missing argument to: #{ARGV[i]} option") if id.nil?
+		i += 1
 	when "-change"
-		abort("missing argument(s) to: #{opt} option") if ARGV[i + 1].nil? || ARGV[i + 2].nil?
-		changes << INTHelpers::Changes.new(ARGV[i + 1], ARGV[i + 2])
+		abort("missing argument(s) to: #{ARGV[i]} option") if ARGV[i + 1].nil? || ARGV[i + 2].nil?
+		changes << INTHelpers::Change.new(ARGV[i + 1], ARGV[i + 2])
 		nchanges += 1
+		i += 2
 	when "-rpath"
-		abort("missing argument(s) to: #{opt} option") if ARGV[i + 1].nil? || ARGV[i + 2].nil?
+		abort("missing argument(s) to: #{ARGV[i]} option") if ARGV[i + 1].nil? || ARGV[i + 2].nil?
+
+		nrpaths.times do |j|
+			if rpaths[j].old == ARGV[i + 1]
+				if rpaths[j].new == ARGV[i + 2]
+					abort("\"-rpath #{ARGV[i + 1]} #{ARGV[i + 2]}\" specified more than once")
+				end
+
+				abort("can't specify both \"-rpath #{rpaths[j].old} #{rpaths[j].new}\" and \"-rpath #{ARGV[i + 1]} #{ARGV[i + 2]}\"")
+			end
+
+			if rpaths[j].new == ARGV[i + 1] || rpaths[j].old == ARGV[i + 2] || rpaths[j].new == ARGV[i + 2]
+				abort("can't specify both \"-rpath #{rpaths[j].old} #{rpaths[j].new}\" and \"-rpath #{ARGV[i + 1]} #{ARGV[i + 2]}\"")
+			end
+		end
+
+		nadd_rpaths.times do |j|
+			if add_rpaths[j].new == ARGV[i + 1] || add_rpaths[j].new == ARGV[i + 2]
+				abort("can't specify both \"-add_rpath #{add_rpaths[j].new}\" and \"-rpath #{ARGV[i + 1]} #{ARGV[i + 2]}\"")
+			end
+		end
+
+		ndelete_rpaths.times do |j|
+			if delete_rpaths[j].old == ARGV[i + 1] || delete_rpaths[j].old == ARGV[i + 2]
+				abort("can't specify both \"-delete_rpath #{delete_rpaths[j].old}\" and \"-rpath #{ARGV[i + 1]} #{ARGV[i + 2]}\"")
+			end
+		end
+
+		rpaths << INTHelpers::Rpath.new(ARGV[i + 1], ARGV[i + 2], false)
+		nrpaths += 1
+		i += 2
+	when "-add_rpath"
+		abort("missing argument(s) to: #{ARGV[i]} option") if ARGV[i + 1].nil?
+
+		nadd_rpaths.times do |j|
+
+		end
+
+		nrpaths.times do |j|
+
+		end
+
+		ndelete_rpaths.times do |j|
+
+		end
+
+		add_rpaths << INTHelpers::AddRpath.new(ARGV[i + 1])
+		nadd_rpaths += 1
+		i += 1
+	when "-delete_rpath"
+		abort("missing argument(s) to: #{ARGV[i]} option") if ARGV[i + 1].nil?
+
+		ndelete_rpaths.times do |j|
+
+		end
+
+		nrpaths.times do |j|
+
+		end
+
+		nadd_rpaths.times do |j|
+
+		end
+
+		delete_rpaths << INTHelpers::DeleteRpath.new(ARGV[i + 1], false)
+		ndelete_rpaths += 1
+		i += 1
+	else
+		abort("more than one input file specified (#{ARGV[i]} and #{input})") if !input.nil?
+		input = ARGV[i]
 	end
+
+	i += 1
 end
