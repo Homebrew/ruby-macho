@@ -95,15 +95,21 @@ while i < ARGV.length
 		abort("missing argument(s) to: #{ARGV[i]} option") if ARGV[i + 1].nil?
 
 		nadd_rpaths.times do |j|
-
+			if add_rpaths[j].new == ARGV[i + 1]
+				abort("\"-add_rpath #{add_rpaths[j].new} specified more than once\"")
+			end
 		end
 
 		nrpaths.times do |j|
-
+			if rpaths[j].old == ARGV[i + 1] || rpaths[j].new == ARGV[i + 1]
+				abort("can't specify both \"-rpath #{rpaths[j].old} #{rpaths[j].new}\" and \"-add_rpath #{ARGV[i + 1]}\"")
+			end
 		end
 
 		ndelete_rpaths.times do |j|
-
+			if delete_rpaths[j].old == ARGV[i + 1]
+				abort("can't specify both \"-delete_rpath #{delete_rpaths[j].old}\" and \"-add_rpath #{ARGV[i + 1]}\"")
+			end
 		end
 
 		add_rpaths << INTHelpers::AddRpath.new(ARGV[i + 1])
@@ -113,15 +119,21 @@ while i < ARGV.length
 		abort("missing argument(s) to: #{ARGV[i]} option") if ARGV[i + 1].nil?
 
 		ndelete_rpaths.times do |j|
-
+			if delete_rpaths[j].old == ARGV[i + 1]
+				abort("\"-delete_rpath #{delete_rpaths[j].old} specified more than once\"")
+			end
 		end
 
 		nrpaths.times do |j|
-
+			if rpaths[j].old == ARGV[i + 1] || rpaths[j].new == ARGV[i + 1]
+				abort("can't specify both \"-rpath #{rpaths[j].old} #{rpaths[j].new}\" and \"-delete_rpath #{ARGV[i + 1]}\"")
+			end
 		end
 
 		nadd_rpaths.times do |j|
-
+			if add_rpaths[j].new == ARGV[i + 1]
+				abort("can't specify both \"-add_rpath #{add_rpaths[j].new}\" and \"-delete_rpath #{ARGV[i + 1]}\"")
+			end
 		end
 
 		delete_rpaths << INTHelpers::DeleteRpath.new(ARGV[i + 1], false)
