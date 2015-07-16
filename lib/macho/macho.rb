@@ -3,6 +3,25 @@ require "macho/cstruct"
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/loader.h
 
 module MachO
+	# 'Fat' binaries envelop Mach-O binaries, so include them for completeness
+	# Fat binary header structure
+	class FatHeader < CStruct
+		uint32 :magic
+		uint32 :nfat_arch # number of FatArchs that follow
+	end
+
+	# Fat binary architecture structure
+	class FatArch < CStruct
+		int32 :cputype
+		int32 :cpusubtype
+		uint32 :offset
+		uint32 :size
+		uint32 :align
+	end
+
+	FAT_MAGIC = 0xcafebabe # big-endian fat magic
+	FAT_CIGAM = 0xbebafeca # little-endian fat magic
+
 	# 32-bit Mach-O file header structure
 	class MachHeader < CStruct
 		uint32 :magic
