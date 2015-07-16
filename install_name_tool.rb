@@ -162,3 +162,14 @@ while i < ARGV.length
 
 	i += 1
 end
+
+if input.nil? || (id.nil? && nchanges.zero? && nrpaths.zero? && nadd_rpaths.zero? && ndelete_rpaths.zero?)
+	usage
+end
+
+# prototyped in include/stuff/breakout.h
+# declared in libstuff/breakout.c
+# breakout(input, &archs, &narchs, FALSE);
+
+# TODO: install_name_tool uses an extern uint32_t errors to register errors.
+# needs to be restructured.
