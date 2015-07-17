@@ -1,6 +1,8 @@
-require "macho/cstruct"
+require "./lib/cstruct.rb"
+require "./lib/macho/file"
 
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/loader.h
+# http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/fat.h
 
 module MachO
 	# 'Fat' binaries envelop Mach-O binaries, so include them for completeness
@@ -192,5 +194,22 @@ module MachO
 		uint32 :reserved1
 		uint32 :reserved2
 		uint32 :reserved3
+	end
+
+	def self.magic?(num)
+		num == FAT_MAGIC || num == FAT_CIGAM || num == MH_MAGIC ||
+		num == MH_CIGAM || num == MH_MAGIC_64 || num == MH_CIGAM_64
+	end
+
+	def self.fat_magic?(num)
+		num == FAT_MAGIC || num == FAT_CIGAM
+	end
+
+	def self.magic32?(num)
+		num == MH_MAGIC || num == MH_CIGAM
+	end
+
+	def self.magic64?(num)
+		num == MH_MAGIC_64 || num == MH_CIGAM_64
 	end
 end
