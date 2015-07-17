@@ -1,1 +1,4 @@
 *.dylib
+*.so
+*.a
+*.bin

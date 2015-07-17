@@ -2,4 +2,9 @@
 
 require './lib/macho'
 
-MachO::File.new("libmacho.dylib")
+file = MachO::File.new("as.bin")
+
+puts "Header type: #{file.header.class}"
+puts "Magic: #{file.magic}"
+puts "Filetype: #{file.filetype}"
+puts "CPU type: #{file.cputype}"

@@ -53,6 +53,28 @@ module MachO
 	MH_MAGIC_64 = 0xfeedfacf # 64-bit big-endian magic
 	MH_CIGAM_64 = 0xcffaedfe # 64-bit little-endian magic
 
+	# capability bits used in the definition of cputype
+	CPU_ARCH_MASK = 0xff
+	CPU_ARCH_ABI64 = 0x01
+
+	# (select) values for cputype in MachHeader/MachHeader64
+	CPU_TYPE_ANY = -1
+	CPU_TYPE_X86 = 0x07000000
+	CPU_TYPE_I386 = CPU_TYPE_X86
+	CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64)
+	CPU_TYPE_POWERPC = 0x24000000 # 18
+	CPU_TYPE_POWERPC64 = (CPU_TYPE_POWERPC | CPU_ARCH_ABI64)
+
+	# convenience array
+	CPU_TYPES = [
+		CPU_TYPE_ANY,
+		CPU_TYPE_X86,
+		CPU_TYPE_I386,
+		CPU_TYPE_X86_64,
+		CPU_TYPE_POWERPC,
+		CPU_TYPE_POWERPC64
+	]
+
 	# values for filetype in MachHeader/MachHeader64
 	MH_OBJECT = 0x1			# relocatable object file
 	MH_EXECUTE = 0x2		# demand paged executable file
