@@ -1,5 +1,6 @@
 require "./lib/cstruct.rb"
 require "./lib/macho/file"
+require "./lib/macho/exceptions"
 
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/loader.h
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/fat.h
@@ -63,15 +64,15 @@ module MachO
 	}
 
 	# capability bits used in the definition of cputype
-	CPU_ARCH_MASK = 0xff
-	CPU_ARCH_ABI64 = 0x01
+	CPU_ARCH_MASK = 0xff000000
+	CPU_ARCH_ABI64 = 0x01000000
 
 	# (select) values for cputype in MachHeader/MachHeader64
 	CPU_TYPE_ANY = -1
-	CPU_TYPE_X86 = 0x07000000
+	CPU_TYPE_X86 = 0x07
 	CPU_TYPE_I386 = CPU_TYPE_X86
 	CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64)
-	CPU_TYPE_POWERPC = 0x24000000 # 18
+	CPU_TYPE_POWERPC = 0x24 # 18
 	CPU_TYPE_POWERPC64 = (CPU_TYPE_POWERPC | CPU_ARCH_ABI64)
 
 	# convenience array of CPU types
@@ -110,7 +111,10 @@ module MachO
 	CPU_SUBTYPE_X86_ALL = 3
 	CPU_SUBTYPE_X86_ARCH1 = 4
 
-
+	CPU_SUBTYPES = {
+		CPU_SUBTYPE_X86_ALL => "CPU_SUBTYPE_X86_ALL",
+		CPU_SUBTYPE_X86_ARCH1 => "CPU_SUBTYPE_X86_ARCH1"
+	}
 
 	# values for filetype in MachHeader/MachHeader64
 	MH_OBJECT = 0x1			# relocatable object file

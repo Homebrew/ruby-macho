@@ -3,9 +3,10 @@ module MachO
 		attr_reader :header, :load_commands
 
 		def initialize(file)
-			@raw_data = open(file, "rb") { |f| f.read }.unpack("C*")
+			@raw_data = open(file, "rb") { |f| f.read }
 			@header = get_mach_header
 			# @load_commands = get_load_commands
+			# @segment_commands = get_segment_commands
 		end
 
 		def executable?
@@ -33,11 +34,19 @@ module MachO
 		end
 
 		def cpusubtype
-			header[:cpusubtype]
+			CPU_SUBTYPES[header[:cpusubtype]]
 		end
 
 		def ncmds
 			header[:ncmds]
+		end
+
+		def sizeofcmds
+			header[:sizeofcmds]
+		end
+
+		def flags
+			header[:flags]
 		end
 
 		private
@@ -54,37 +63,29 @@ module MachO
 			if MachO.magic32?(magic)
 				header = MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
 			else
-				# the reserved field is a mystery, so just fill it with 0
+				# the reserved field is reserved, so just fill it with 0
 				header = MachHeader64.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags, 0)
 			end
 		end
 
 		def get_magic
-			# TODO: find a better way to join 4 ints as hex, not dec
-			magic = @raw_data[0..3].map { |b| b.to_s(16) }.join.hex
+			magic = @raw_data[0..3].unpack("N").first
 
 			if !MachO.magic?(magic)
-				# TODO: custom exceptions
-				raise "bad magic"
+				raise MagicError.new(magic)
 			end
 
 			
-			# we have to do extra work to get offsets for fat binaries
+			# TODO: support fat (universal) binaries
 			if MachO.fat_magic?(magic)
-				raise "fat binary, not supported yet"
+				raise FatBinaryError.new(magic)
 			end
-			# # if we're given a fat binary, we need to get its real magic first
-			# if magic == FAT_MAGIC || magic == FAT_CIGAM
-			# 	# NOTE: this is probably the Wrong Thing.
-			# 	@raw_data.shift(4096)
-			# 	magic = @raw_data[0..3].map { |b| b.to_s(16) }.join.hex
-			# end
 
 			magic
 		end
 
 		def get_cputype
-			cputype = @raw_data[4..7].map { |b| "%02x" % b }.join.hex
+			cputype = @raw_data[4..7].unpack("V").first
 
 			if !CPU_TYPES.keys.include?(cputype)
 				raise "bad cpu type: #{cputype}"
@@ -93,45 +94,39 @@ module MachO
 			cputype
 		end
 
-		# TODO: unstub
 		def get_cpusubtype
-			cpusubtype = @raw_data[8..11].map { |b| "%02x" % b }.join
+			cpusubtype = @raw_data[8..11].unpack("V").first
 
-			# puts cpusubtype
-
-			# TODO: decode cpusubtype
 			cpusubtype
 		end
 
 		def get_filetype
-			# NOTE: the filetype field is actually 4 bytes [12..15], but
-			# there aren't any filetype constants above 0xb in loader.h
-			filetype = @raw_data[12].to_s(16).hex
+			filetype = @raw_data[12..15].unpack("V").first
 
 			if filetype < 0x1 || filetype > 0xb
-				raise "bad filetype"
+				raise FiletypeError(filetype)
 			end
 
 			filetype
 		end
 
-		# TODO: unstub
 		def get_ncmds
-			# NOTE: the ncmds field is actually 4 bytes, so this won't work
-			# if a binary has more than 255 load commands (!!)
-			ncmds = @raw_data[16]
+			ncmds = @raw_data[16..19].unpack("V").first
 
 			ncmds
 		end
 
-		# TODO: unstub
 		def get_sizeofcmds
-			0
+			sizeofcmds = @raw_data[20..23].unpack("V").first
+
+			sizeofcmds
 		end
 
-		# TODO: unstub
+		# TODO: parse flags, maybe?
 		def get_flags
-			0
+			flags = @raw_data[24..27].unpack("V").first
+
+			flags
 		end
 	end
 end
