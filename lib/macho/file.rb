@@ -21,56 +21,15 @@ module MachO
 		end
 
 		def magic
-			case header[:magic]
-			when MH_MAGIC
-				"MH_MAGIC"
-			when MH_CIGAM
-				"MH_CIGAM"
-			when MH_MAGIC_64
-				"MH_MAGIC_64"
-			when MH_CIGAM_64
-				"MH_CIGAM_64"
-			end
+			MH_MAGICS[header[:magic]]
 		end
 
 		def filetype
-			case header[:filetype]
-			when MH_OBJECT
-				"MH_OBJECT"
-			when MH_EXECUTE
-				"MH_EXECUTE"
-			when MH_FVMLIB
-				"MH_FVMLIB"
-			when MH_CORE
-				"MH_CORE"
-			when MH_PRELOAD
-				"MH_PRELOAD"
-			when MH_DYLIB
-				"MH_DYLIB"
-			when MH_DYLINKER
-				"MH_DYLINKER"
-			when MH_DYLIB_STUB
-				"MH_DYLIB_STUB"
-			when MH_DSYM
-				"MH_DSYM"
-			when MH_KEXT_BUNDLE
-				"MH_KEXT_BUNDLE"
-			end
+			MH_FILETYPES[header[:filetype]]
 		end
 
 		def cputype
-			case header[:cputype]
-			when CPU_TYPE_ANY
-				"CPU_TYPE_ANY"
-			when CPU_TYPE_X86, CPU_TYPE_I386
-				"CPU_TYPE_X86"
-			when CPU_TYPE_X86_64
-				"CPU_TYPE_X86_64"
-			when CPU_TYPE_POWERPC
-				"CPU_TYPE_POWERPC"
-			when CPU_TYPE_POWERPC64
-				"CPU_TYPE_POWERPC64"
-			end
+			CPU_TYPES[header[:cputype]]
 		end
 
 		def cpusubtype
@@ -127,7 +86,7 @@ module MachO
 		def get_cputype
 			cputype = @raw_data[4..7].map { |b| "%02x" % b }.join.hex
 
-			if !MachO::CPU_TYPES.include?(cputype)
+			if !CPU_TYPES.keys.include?(cputype)
 				raise "bad cpu type: #{cputype}"
 			end
 

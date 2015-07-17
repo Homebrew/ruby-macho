@@ -5,7 +5,7 @@ require "./lib/macho/file"
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/fat.h
 
 module MachO
-	# 'Fat' binaries envelop Mach-O binaries, so include them for completeness
+	# 'Fat' binaries envelop Mach-O binaries so include them for completeness,
 	# Fat binary header structure
 	class FatHeader < CStruct
 		uint32 :magic
@@ -53,6 +53,15 @@ module MachO
 	MH_MAGIC_64 = 0xfeedfacf # 64-bit big-endian magic
 	MH_CIGAM_64 = 0xcffaedfe # 64-bit little-endian magic
 
+	MH_MAGICS = {
+		FAT_MAGIC => "FAT_MAGIC",
+		FAT_CIGAM => "FAT_CIGAM",
+		MH_MAGIC => "MH_MAGIC",
+		MH_CIGAM => "MH_CIGAM",
+		MH_MAGIC_64 => "MH_MAGIC_64",
+		MH_CIGAM_64 => "MH_CIGAM_64"
+	}
+
 	# capability bits used in the definition of cputype
 	CPU_ARCH_MASK = 0xff
 	CPU_ARCH_ABI64 = 0x01
@@ -66,17 +75,17 @@ module MachO
 	CPU_TYPE_POWERPC64 = (CPU_TYPE_POWERPC | CPU_ARCH_ABI64)
 
 	# convenience array of CPU types
-	CPU_TYPES = [
-		CPU_TYPE_ANY,
-		CPU_TYPE_X86,
-		CPU_TYPE_I386,
-		CPU_TYPE_X86_64,
-		CPU_TYPE_POWERPC,
-		CPU_TYPE_POWERPC64
-	]
+	CPU_TYPES = {
+		CPU_TYPE_ANY => "CPU_TYPE_ANY",
+		CPU_TYPE_X86 => "CPU_TYPE_X86",
+		CPU_TYPE_I386 => "CPU_TYPE_I386",
+		CPU_TYPE_X86_64 => "CPU_TYPE_X86_64",
+		CPU_TYPE_POWERPC => "CPU_TYPE_POWERPC",
+		CPU_TYPE_POWERPC64 => "CPU_TYPE_POWERPC64"
+	}
 
 	# (select) values for cpusubtype
-	# #define CPU_SUBTYPE_INTEL(f, m)	((cpu_subtype_t) (f) + ((m) << 4))
+	# #define CPU_SUBTYPE_INTEL(f m)	((cpu_subtype_t) (f) + ((m) << 4)),
 	# CPU_SUBTYPE_I386_ALL = 3
 	# CPU_SUBTYPE_486 = 4
 	# CPU_SUBTYPE_586 = 5
@@ -112,10 +121,24 @@ module MachO
 	MH_DYLIB = 0x6			# dynamically bound shared library
 	MH_DYLINKER = 0x7		# dynamic link editor
 	MH_BUNDLE = 0x8			# dynamically bound bundle file
-	MH_DYLIB_STUB = 0x9		# shared library stub for static linking only, no
+	MH_DYLIB_STUB = 0x9		# shared library stub for static linking only no,
 							# section contents
 	MH_DSYM = 0xa			# companion file with only debug sections
 	MH_KEXT_BUNDLE = 0xb	# x86_64 lexts
+
+	MH_FILETYPES = {
+		MH_OBJECT => "MH_OBJECT",
+		MH_EXECUTE => "MH_EXECUTE",
+		MH_FVMLIB => "MH_FVMLIB",
+		MH_CORE => "MH_CORE",
+		MH_PRELOAD => "MH_PRELOAD",
+		MH_DYLIB => "MH_DYLIB",
+		MH_DYLINKER => "MH_DYLINKER",
+		MH_BUNDLE => "MH_BUNDLE",
+		MH_DYLIB_STUB => "MH_DYLIB_STUB",
+		MH_DSYM => "MH_DSYM",
+		MH_KEXT_BUNDLE => "MH_KEXT_BUNDLE"
+	}
 
 	# TODO: declare values for flags in MachHeader/MachHeader64
 
@@ -213,7 +236,7 @@ module MachO
 		uint32 :flags
 	end
 
-	# TODO: declare values for protection, flag fields of SegmentCommand{64}
+	# TODO: declare values for protection flag fields of SegmentCommand{64},
 
 	# 32-bit Mach-O segment section structure
 	class Section < CStruct
