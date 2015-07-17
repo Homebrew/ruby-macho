@@ -8,6 +8,18 @@ module MachO
 			# @load_commands = get_load_commands
 		end
 
+		def executable?
+			header[:filetype] == MH_EXECUTE
+		end
+
+		def dylib?
+			header[:filetype] == MH_DYLIB
+		end
+
+		def bundle?
+			header[:filetype] == MH_BUNDLE
+		end
+
 		def magic
 			case header[:magic]
 			when MH_MAGIC
@@ -61,6 +73,14 @@ module MachO
 			end
 		end
 
+		def cpusubtype
+			header[:cpusubtype]
+		end
+
+		def ncmds
+			header[:ncmds]
+		end
+
 		private
 
 		def get_mach_header
@@ -90,6 +110,7 @@ module MachO
 			end
 
 			
+			# we have to do extra work to get offsets for fat binaries
 			if MachO.fat_magic?(magic)
 				raise "fat binary, not supported yet"
 			end
@@ -103,7 +124,6 @@ module MachO
 			magic
 		end
 
-		# TODO: unstub
 		def get_cputype
 			cputype = @raw_data[4..7].map { |b| "%02x" % b }.join.hex
 
@@ -116,10 +136,14 @@ module MachO
 
 		# TODO: unstub
 		def get_cpusubtype
-			0
+			cpusubtype = @raw_data[8..11].map { |b| "%02x" % b }.join
+
+			# puts cpusubtype
+
+			# TODO: decode cpusubtype
+			cpusubtype
 		end
 
-		# TODO: unstub
 		def get_filetype
 			# NOTE: the filetype field is actually 4 bytes [12..15], but
 			# there aren't any filetype constants above 0xb in loader.h
@@ -134,7 +158,11 @@ module MachO
 
 		# TODO: unstub
 		def get_ncmds
-			0
+			# NOTE: the ncmds field is actually 4 bytes, so this won't work
+			# if a binary has more than 255 load commands (!!)
+			ncmds = @raw_data[16]
+
+			ncmds
 		end
 
 		# TODO: unstub

@@ -65,7 +65,7 @@ module MachO
 	CPU_TYPE_POWERPC = 0x24000000 # 18
 	CPU_TYPE_POWERPC64 = (CPU_TYPE_POWERPC | CPU_ARCH_ABI64)
 
-	# convenience array
+	# convenience array of CPU types
 	CPU_TYPES = [
 		CPU_TYPE_ANY,
 		CPU_TYPE_X86,
@@ -74,6 +74,34 @@ module MachO
 		CPU_TYPE_POWERPC,
 		CPU_TYPE_POWERPC64
 	]
+
+	# (select) values for cpusubtype
+	# #define CPU_SUBTYPE_INTEL(f, m)	((cpu_subtype_t) (f) + ((m) << 4))
+	# CPU_SUBTYPE_I386_ALL = 3
+	# CPU_SUBTYPE_486 = 4
+	# CPU_SUBTYPE_586 = 5
+	# CPU_SUBTYPE_PENTIUM_3 = 8
+	# CPU_SUBTYPE_PENTIUM_M = 9
+	# CPU_SUBTYPE_PENTIUM_4 = 10
+	# CPU_SUBTYPE_ITANIUM = 11
+	# CPU_SUBTYPE_XEON = 12
+	# CPU_SUBTYPE_XEON_MP = 34
+	# CPU_SUBTYPE_PENTIUM_4_M = 42
+	# CPU_SUBTYPE_ITANIUM_2 = 43
+	# CPU_SUBTYPE_PENTPRO = 38
+	# CPU_SUBTYPE_PENTIUM_3_M = 40
+	# CPU_SUBTYPE_PENTIUM_3_XEON = 52
+	# CPU_SUBTYPE_PENTII_M3 = 102
+	# CPU_SUBTYPE_486SX = 132
+	# CPU_SUBTYPE_PENTII_M5 = 166
+	# CPU_SUBTYPE_CELERON = 199
+	# CPU_SUBTYPE_CELERON_MOBILE = 231
+
+	# (select) cpusubtypes
+	CPU_SUBTYPE_X86_ALL = 3
+	CPU_SUBTYPE_X86_ARCH1 = 4
+
+
 
 	# values for filetype in MachHeader/MachHeader64
 	MH_OBJECT = 0x1			# relocatable object file
