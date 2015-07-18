@@ -2,7 +2,7 @@
 
 require './lib/macho'
 
-file = MachO::File.new(ARGV.shift)
+file = MachO::MachOFile.new(ARGV.shift)
 
 puts "Header type: #{file.header.class}"
 puts "Magic: #{file.magic}"
@@ -21,3 +21,5 @@ end
 puts "======================="
 
 puts "dylib ID: #{file.dylib_id}" if file.dylib?
+
+file.write("test.bin")

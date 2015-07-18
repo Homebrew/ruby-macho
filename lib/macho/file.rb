@@ -1,9 +1,10 @@
 module MachO
-	class File
+	class MachOFile
 		attr_reader :header, :load_commands
 
-		def initialize(file)
-			@raw_data = open(file, "rb") { |f| f.read }
+		def initialize(filename)
+			@filename = filename
+			@raw_data = open(@filename, "rb") { |f| f.read }
 			@header = get_mach_header
 			@load_commands = get_load_commands
 			# @segment_commands = get_segment_commands
@@ -82,6 +83,19 @@ module MachO
 			dylib_id = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
 
 			dylib_id
+		end
+
+		# TODO: unstub
+		def dylib_id=(new_id)
+			0
+		end
+
+		def write(filename)
+			File.open(filename, "wb") { |f| f.write(@raw_data) }
+		end
+
+		def write!
+			File.open(@filename, "wb") { |f| f.write(@raw_data) }
 		end
 
 		private
