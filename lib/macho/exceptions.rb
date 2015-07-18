@@ -23,4 +23,11 @@ module MachO
 			super "Unrecognized Mach-O filetype code: 0x#{"%02x" % num}"
 		end
 	end
+
+	# raised when an unknown load command is encountered
+	class LoadCommandError < MachOError
+		def initialize(num)
+			super "Unrecognized Mach-O load command: 0x#{"%02x" % num}"
+		end
+	end
 end

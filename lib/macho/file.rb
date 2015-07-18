@@ -7,7 +7,6 @@ module MachO
 			@raw_data = open(@filename, "rb") { |f| f.read }
 			@header = get_mach_header
 			@load_commands = get_load_commands
-			# @segment_commands = get_segment_commands
 		end
 
 		# is the file executable?
@@ -153,7 +152,7 @@ module MachO
 			filetype = @raw_data[12..15].unpack("V").first
 
 			if filetype < 0x1 || filetype > 0xb
-				raise FiletypeError(filetype)
+				raise FiletypeError.new(filetype)
 			end
 
 			filetype
@@ -184,12 +183,16 @@ module MachO
 
 			header[:ncmds].times do
 				cmd, cmdsize = @raw_data.slice(offset, 8).unpack("VV")
+
+				if !LOAD_COMMANDS.keys.include?(cmd)
+					raise LoadCommandError.new(cmd)
+				end
+
 				load_commands << LoadCommand.new(cmd, cmdsize)
 				offset += cmdsize
 			end
 
-			# the order of the load commands is crucial, so freeze the array
-			load_commands.freeze
+			load_commands
 		end
 	end
 end
