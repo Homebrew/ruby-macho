@@ -49,7 +49,7 @@ module MachO
 			header[:ncmds]
 		end
 
-		# size of each load command
+		# size of all load commands
 		def sizeofcmds
 			header[:sizeofcmds]
 		end
@@ -57,6 +57,31 @@ module MachO
 		# various execution flags
 		def flags
 			header[:flags]
+		end
+
+		# get the file's dylib id, if it is a dylib
+		def dylib_id
+			if !dylib?
+				return nil
+			end
+
+			offset = header.bytesize
+
+			load_commands.each do |lc|
+				break if lc[:cmd] == LC_ID_DYLIB
+				offset += lc[:cmdsize]
+			end
+
+			cmd, cmdsize = @raw_data.slice(offset, 8).unpack("VV")
+
+			if !cmd == LC_ID_DYLIB
+				return nil
+			end
+
+			stroffset = @raw_data.slice(offset + 8, 4).unpack("V").first
+			dylib_id = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
+
+			dylib_id
 		end
 
 		private
@@ -149,7 +174,8 @@ module MachO
 				offset += cmdsize
 			end
 
-			load_commands
+			# the order of the load commands is crucial, so freeze the array
+			load_commands.freeze
 		end
 	end
 end

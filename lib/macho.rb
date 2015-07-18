@@ -260,90 +260,53 @@ module MachO
 		LC_LINKER_OPTIMIZATION_HINT => "LC_LINKER_OPTIMIZATION_HINT"
 	}
 
-	class LCStr < CStruct
-		uint32 :offset
-	end
+	# # 64-bit Mach-O segment command structure
+	# class SegmentCommand64 < CStruct
+	# 	uint32 :cmd
+	# 	uint32 :cmdsize
+	# 	string :segname, 16
+	# 	uint64 :vmaddr
+	# 	uint64 :vmsize
+	# 	uint64 :fileoff
+	# 	uint64 :filesize
+	# 	int32 :maxprot
+	# 	int32 :initprot
+	# 	uint32 :nsects
+	# 	uint32 :flags
+	# end
 
-	class Dylib
-		def initialize(name, timestamp, current_version, compatibility_version)
-			@name = name
-			@timestamp = timestamp
-			@current_version = current_version
-			@compatibility_version = compatibility_version
-		end
-	end
+	# # TODO: declare values for protection flag fields of SegmentCommand{64},
 
-	# does NOT inherit from CStruct
-	class DylibCommand
-		def initialize(cmd, cmdsize, dylib)
-			@cmd = cmd
-			@cmdsize = cmdsize
-			@dylib = dylib
-		end
-	end
+	# # 32-bit Mach-O segment section structure
+	# class Section < CStruct
+	# 	string :sectname, 16
+	# 	string :segname, 16
+	# 	uint32 :addr
+	# 	uint32 :size
+	# 	uint32 :offset
+	# 	uint32 :align
+	# 	uint32 :reloff
+	# 	uint32 :nreloc
+	# 	uint32 :flags
+	# 	uint32 :reserved1
+	# 	uint32 :reserved2
+	# end
 
-	# 32-bit Mach-O segment command structure
-	class SegmentCommand < CStruct
-		uint32 :cmd
-		uint32 :cmdsize
-		string :segname, 16
-		uint32 :vmaddr
-		uint32 :vmsize
-		uint32 :fileoff
-		uint32 :filesize
-		int32 :maxprot
-		int32 :initprot
-		uint32 :nsects
-		uint32 :flags
-	end
-
-	# 64-bit Mach-O segment command structure
-	class SegmentCommand64 < CStruct
-		uint32 :cmd
-		uint32 :cmdsize
-		string :segname, 16
-		uint64 :vmaddr
-		uint64 :vmsize
-		uint64 :fileoff
-		uint64 :filesize
-		int32 :maxprot
-		int32 :initprot
-		uint32 :nsects
-		uint32 :flags
-	end
-
-	# TODO: declare values for protection flag fields of SegmentCommand{64},
-
-	# 32-bit Mach-O segment section structure
-	class Section < CStruct
-		string :sectname, 16
-		string :segname, 16
-		uint32 :addr
-		uint32 :size
-		uint32 :offset
-		uint32 :align
-		uint32 :reloff
-		uint32 :nreloc
-		uint32 :flags
-		uint32 :reserved1
-		uint32 :reserved2
-	end
-
-	# 64-bit Mach-O segment section structure
-	class Section64 < CStruct
-		string :sectname, 16
-		string :segname, 16
-		uint32 :addr
-		uint32 :size
-		uint32 :offset
-		uint32 :align
-		uint32 :reloff
-		uint32 :nreloc
-		uint32 :flags
-		uint32 :reserved1
-		uint32 :reserved2
-		uint32 :reserved3
-	end
+	# # 64-bit Mach-O segment section structure
+	# class Section64 < CStruct
+	# 	string :sectname, 16
+	# 	string :segname, 16
+	# 	uint32 :addr
+	# 	uint32 :size
+	# 	uint32 :offset
+	# 	uint32 :align
+	# 	uint32 :reloff
+	# 	uint32 :nreloc
+	# 	uint32 :flags
+	# 	uint32 :reserved1
+	# 	uint32 :reserved2
+	# 	uint32 :reserved3
+	# end
 
 	def self.magic?(num)
 		num == FAT_MAGIC || num == FAT_CIGAM || num == MH_MAGIC ||

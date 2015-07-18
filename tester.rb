@@ -19,3 +19,5 @@ file.load_commands.each do |lc|
 	puts "#{MachO::LOAD_COMMANDS[lc[:cmd]]} (#{lc[:cmdsize]} bytes)"
 end
 puts "======================="
+
+puts "dylib ID: #{file.dylib_id}" if file.dylib?
