@@ -17,6 +17,18 @@ module MachO
 		end
 	end
 
+	class CPUTypeError < MachOError
+		def initialize(num)
+			super "Unrecognized CPU type: 0x#{"%02x" % num}"
+		end
+	end
+
+	class CPUSubtypeError < MachOError
+		def initialize(num)
+			super "Unrecognized CPU sub-type: 0x#{"%02x" % num}"
+		end
+	end
+
 	# raised when a mach-o file's filetype field is unknown
 	class FiletypeError < MachOError
 		def initialize(num)

@@ -85,28 +85,6 @@ module MachO
 		CPU_TYPE_POWERPC64 => "CPU_TYPE_POWERPC64"
 	}
 
-	# (select) values for cpusubtype
-	# #define CPU_SUBTYPE_INTEL(f m)	((cpu_subtype_t) (f) + ((m) << 4)),
-	# CPU_SUBTYPE_I386_ALL = 3
-	# CPU_SUBTYPE_486 = 4
-	# CPU_SUBTYPE_586 = 5
-	# CPU_SUBTYPE_PENTIUM_3 = 8
-	# CPU_SUBTYPE_PENTIUM_M = 9
-	# CPU_SUBTYPE_PENTIUM_4 = 10
-	# CPU_SUBTYPE_ITANIUM = 11
-	# CPU_SUBTYPE_XEON = 12
-	# CPU_SUBTYPE_XEON_MP = 34
-	# CPU_SUBTYPE_PENTIUM_4_M = 42
-	# CPU_SUBTYPE_ITANIUM_2 = 43
-	# CPU_SUBTYPE_PENTPRO = 38
-	# CPU_SUBTYPE_PENTIUM_3_M = 40
-	# CPU_SUBTYPE_PENTIUM_3_XEON = 52
-	# CPU_SUBTYPE_PENTII_M3 = 102
-	# CPU_SUBTYPE_486SX = 132
-	# CPU_SUBTYPE_PENTII_M5 = 166
-	# CPU_SUBTYPE_CELERON = 199
-	# CPU_SUBTYPE_CELERON_MOBILE = 231
-
 	# (select) cpusubtypes
 	CPU_SUBTYPE_X86_ALL = 3
 	CPU_SUBTYPE_X86_ARCH1 = 4
@@ -259,54 +237,6 @@ module MachO
 		LC_LINKER_OPTION => "LC_LINKER_OPTION",
 		LC_LINKER_OPTIMIZATION_HINT => "LC_LINKER_OPTIMIZATION_HINT"
 	}
-
-	# # 64-bit Mach-O segment command structure
-	# class SegmentCommand64 < CStruct
-	# 	uint32 :cmd
-	# 	uint32 :cmdsize
-	# 	string :segname, 16
-	# 	uint64 :vmaddr
-	# 	uint64 :vmsize
-	# 	uint64 :fileoff
-	# 	uint64 :filesize
-	# 	int32 :maxprot
-	# 	int32 :initprot
-	# 	uint32 :nsects
-	# 	uint32 :flags
-	# end
-
-	# # TODO: declare values for protection flag fields of SegmentCommand{64},
-
-	# # 32-bit Mach-O segment section structure
-	# class Section < CStruct
-	# 	string :sectname, 16
-	# 	string :segname, 16
-	# 	uint32 :addr
-	# 	uint32 :size
-	# 	uint32 :offset
-	# 	uint32 :align
-	# 	uint32 :reloff
-	# 	uint32 :nreloc
-	# 	uint32 :flags
-	# 	uint32 :reserved1
-	# 	uint32 :reserved2
-	# end
-
-	# # 64-bit Mach-O segment section structure
-	# class Section64 < CStruct
-	# 	string :sectname, 16
-	# 	string :segname, 16
-	# 	uint32 :addr
-	# 	uint32 :size
-	# 	uint32 :offset
-	# 	uint32 :align
-	# 	uint32 :reloff
-	# 	uint32 :nreloc
-	# 	uint32 :flags
-	# 	uint32 :reserved1
-	# 	uint32 :reserved2
-	# 	uint32 :reserved3
-	# end
 
 	def self.magic?(num)
 		num == FAT_MAGIC || num == FAT_CIGAM || num == MH_MAGIC ||

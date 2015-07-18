@@ -89,6 +89,26 @@ module MachO
 			0
 		end
 
+		# get a list of dylibs linked to this file
+		def linked_dylibs
+			dylibs = []
+			offset = header.bytesize
+
+			load_commands.each do |lc|
+				if lc[:cmd] == LC_LOAD_DYLIB
+					cmdsize = @raw_data.slice(offset + 4, 4).unpack("V").first
+					stroffset = @raw_data.slice(offset + 8, 4).unpack("V").first
+
+					dylib = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
+					dylibs << dylib
+				end
+
+				offset += lc[:cmdsize]
+			end
+
+			dylibs
+		end
+
 		def write(filename)
 			File.open(filename, "wb") { |f| f.write(@raw_data) }
 		end
@@ -136,7 +156,7 @@ module MachO
 			cputype = @raw_data[4..7].unpack("V").first
 
 			if !CPU_TYPES.keys.include?(cputype)
-				raise "bad cpu type: #{cputype}"
+				raise CPUTypeError.new(cputype)
 			end
 
 			cputype
@@ -145,13 +165,22 @@ module MachO
 		def get_cpusubtype
 			cpusubtype = @raw_data[8..11].unpack("V").first
 
+			# hooray for undocumented masks!
+			# CPU_SUBTYPE_LIB64 = 0x80000000
+			# found in: http://llvm.org/docs/doxygen/html/Support_2MachO_8h_source.html
+			cpusubtype &= ~0x80000000
+
+			if !CPU_SUBTYPES.keys.include?(cpusubtype)
+				raise CPUSubtypeError.new(cpusubtype)
+			end
+
 			cpusubtype
 		end
 
 		def get_filetype
 			filetype = @raw_data[12..15].unpack("V").first
 
-			if filetype < 0x1 || filetype > 0xb
+			if !MH_FILETYPES.keys.include?(filetype)
 				raise FiletypeError.new(filetype)
 			end
 
