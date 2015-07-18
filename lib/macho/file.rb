@@ -165,10 +165,7 @@ module MachO
 		def get_cpusubtype
 			cpusubtype = @raw_data[8..11].unpack("V").first
 
-			# hooray for undocumented masks!
-			# CPU_SUBTYPE_LIB64 = 0x80000000
-			# found in: http://llvm.org/docs/doxygen/html/Support_2MachO_8h_source.html
-			cpusubtype &= ~0x80000000
+			cpusubtype &= ~CPU_SUBTYPE_LIB64
 
 			if !CPU_SUBTYPES.keys.include?(cpusubtype)
 				raise CPUSubtypeError.new(cpusubtype)

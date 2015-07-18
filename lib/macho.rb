@@ -85,6 +85,11 @@ module MachO
 		CPU_TYPE_POWERPC64 => "CPU_TYPE_POWERPC64"
 	}
 
+	# capability bits used in the definition of cpusubtype
+	# http://llvm.org/docs/doxygen/html/Support_2MachO_8h_source.html
+	CPU_SUBTYPE_MASK = 0xff000000
+	CPU_SUBTYPE_LIB64 = 0x80000000
+
 	# (select) cpusubtypes
 	CPU_SUBTYPE_X86_ALL = 3
 	CPU_SUBTYPE_X86_ARCH1 = 4
