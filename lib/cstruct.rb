@@ -65,6 +65,8 @@ class CStruct
     :uint16 => 2,
     :int32  => 4,
     :uint32 => 4,
+    :int64  => 8,
+    :uint64 => 8,
     :string => lambda { |*opts| opts.first }, # first opt is size
     # the last 3 are to make the language more C-like
     :int    => 4,
@@ -80,6 +82,8 @@ class CStruct
     :uint16 => 'S',
     :int32  => 'i',
     :uint32 => 'I',
+    :int64  => 'q',
+    :uint64 => 'Q',
     :string => lambda do |str, *opts|
                         len = opts.first
                         str.ljust(len, "\0")[0, len]

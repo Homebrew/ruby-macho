@@ -162,7 +162,7 @@ module MachO
 	LC_REQ_DYLD = 0x80000000
 
 	# values for cmd in LoadCommand
-	LC_SECMENT = 0x1
+	LC_SEGMENT = 0x1
 	LC_SYMTAB = 0x2
 	LC_SYMSEC = 0x3
 	LC_THREAD = 0x4
@@ -210,6 +210,78 @@ module MachO
 	LC_LINKER_OPTION = 0x2d
 	LC_LINKER_OPTIMIZATION_HINT = 0x2e
 
+	LOAD_COMMANDS = {
+		LC_SEGMENT => "LC_SEGMENT",
+		LC_SYMTAB => "LC_SYMTAB",
+		LC_SYMSEC => "LC_SYMSEC",
+		LC_THREAD => "LC_THREAD",
+		LC_UNIXTHREAD => "LC_UNIXTHREAD",
+		LC_LOADFVMLIB => "LC_LOADFVMLIB",
+		LC_IDFVMLIB => "LC_IDFVMLIB",
+		LC_IDENT => "LC_IDENT",
+		LC_FVMFILE => "LC_FVMFILE",
+		LC_PREPAGE => "LC_PREPAGE",
+		LC_DSYMTAB => "LC_DSYMTAB",
+		LC_LOAD_DYLIB => "LC_LOAD_DYLIB",
+		LC_ID_DYLIB => "LC_ID_DYLIB",
+		LC_LOAD_DYLINKER => "LC_LOAD_DYLINKER",
+		LC_ID_DYLINKER => "LC_ID_DYLINKER",
+		LC_PREBOUND_DYLIB => "LC_PREBOUND_DYLIB",
+		LC_ROUTINES => "LC_ROUTINES",
+		LC_SUB_FRAMEWORK => "LC_SUB_FRAMEWORK",
+		LC_SUB_UMBRELLA => "LC_SUB_UMBRELLA",
+		LC_SUB_CLIENT => "LC_SUB_CLIENT",
+		LC_SUB_LIBRARY => "LC_SUB_LIBRARY",
+		LC_TWOLEVEL_HINTS => "LC_TWOLEVEL_HINTS",
+		LC_PREBIND_CKSUM => "LC_PREBIND_CKSUM",
+		LC_LOAD_WEAK_DYLIB => "LC_LOAD_WEAK_DYLIB",
+		LC_SEGMENT_64 => "LC_SEGMENT_64",
+		LC_ROUTINES_64 => "LC_ROUTINES_64",
+		LC_UUID => "LC_UUID",
+		LC_RPATH => "LC_RPATH",
+		LC_CODE_SIGNATURE => "LC_CODE_SIGNATURE",
+		LC_SEGMENT_SPLIT_INFO => "LC_SEGMENT_SPLIT_INFO",
+		LC_REEXPORT_DYLIB => "LC_REEXPORT_DYLIB",
+		LC_LAZY_LOAD_DYLIB => "LC_LAZY_LOAD_DYLIB",
+		LC_ENCRYPTION_INFO => "LC_ENCRYPTION_INFO",
+		LC_DYLD_INFO => "LC_DYLD_INFO",
+		LC_DYLD_INFO_ONLY => "LC_DYLD_INFO_ONLY",
+		LC_LOAD_UPWARD_DYLIB => "LC_LOAD_UPWARD_DYLIB",
+		LC_VERSION_MIN_MACOSX => "LC_VERSION_MIN_MACOSX",
+		LC_VERSION_MIN_IPHONEOS => "LC_VERSION_MIN_IPHONEOS",
+		LC_FUNCTION_STARTS => "LC_FUNCTION_STARTS",
+		LC_DYLD_ENVIRONMENT => "LC_DYLD_ENVIRONMENT",
+		LC_MAIN => "LC_MAIN",
+		LC_DATA_IN_CODE => "LC_DATA_IN_CODE",
+		LC_SOURCE_VERSION => "LC_SOURCE_VERSION",
+		LC_DYLIB_CODE_SIGN_DRS => "LC_DYLIB_CODE_SIGN_DRS",
+		LC_ENCRYPTION_INFO_64 => "LC_ENCRYPTION_INFO_64",
+		LC_LINKER_OPTION => "LC_LINKER_OPTION",
+		LC_LINKER_OPTIMIZATION_HINT => "LC_LINKER_OPTIMIZATION_HINT"
+	}
+
+	class LCStr < CStruct
+		uint32 :offset
+	end
+
+	class Dylib
+		def initialize(name, timestamp, current_version, compatibility_version)
+			@name = name
+			@timestamp = timestamp
+			@current_version = current_version
+			@compatibility_version = compatibility_version
+		end
+	end
+
+	# does NOT inherit from CStruct
+	class DylibCommand
+		def initialize(cmd, cmdsize, dylib)
+			@cmd = cmd
+			@cmdsize = cmdsize
+			@dylib = dylib
+		end
+	end
+
 	# 32-bit Mach-O segment command structure
 	class SegmentCommand < CStruct
 		uint32 :cmd
@@ -230,10 +302,10 @@ module MachO
 		uint32 :cmd
 		uint32 :cmdsize
 		string :segname, 16
-		uint32 :vmaddr
-		uint32 :vmsize
-		uint32 :fileoff
-		uint32 :filesize
+		uint64 :vmaddr
+		uint64 :vmsize
+		uint64 :fileoff
+		uint64 :filesize
 		int32 :maxprot
 		int32 :initprot
 		uint32 :nsects

@@ -5,46 +5,56 @@ module MachO
 		def initialize(file)
 			@raw_data = open(file, "rb") { |f| f.read }
 			@header = get_mach_header
-			# @load_commands = get_load_commands
+			@load_commands = get_load_commands
 			# @segment_commands = get_segment_commands
 		end
 
+		# is the file executable?
 		def executable?
 			header[:filetype] == MH_EXECUTE
 		end
 
+		# is the file a dynamically bound shared object?
 		def dylib?
 			header[:filetype] == MH_DYLIB
 		end
 
+		# is the file a dynamically bound bundle?
 		def bundle?
 			header[:filetype] == MH_BUNDLE
 		end
 
+		# string representation of the header's magic bytes
 		def magic
 			MH_MAGICS[header[:magic]]
 		end
 
+		# string representation of the header's filetype field
 		def filetype
 			MH_FILETYPES[header[:filetype]]
 		end
 
+		# string representation of the header's cputype field
 		def cputype
 			CPU_TYPES[header[:cputype]]
 		end
 
+		# string representation of the header's cpusubtype field
 		def cpusubtype
 			CPU_SUBTYPES[header[:cpusubtype]]
 		end
 
+		# number of load commands in the header
 		def ncmds
 			header[:ncmds]
 		end
 
+		# size of each load command
 		def sizeofcmds
 			header[:sizeofcmds]
 		end
 
+		# various execution flags
 		def flags
 			header[:flags]
 		end
@@ -127,6 +137,19 @@ module MachO
 			flags = @raw_data[24..27].unpack("V").first
 
 			flags
+		end
+
+		def get_load_commands
+			offset = header.bytesize
+			load_commands = []
+
+			header[:ncmds].times do
+				cmd, cmdsize = @raw_data.slice(offset, 8).unpack("VV")
+				load_commands << LoadCommand.new(cmd, cmdsize)
+				offset += cmdsize
+			end
+
+			load_commands
 		end
 	end
 end

@@ -11,3 +11,11 @@ puts "CPU type: #{file.cputype}"
 puts "CPU subtype: #{file.cpusubtype}"
 puts "No. load commands: #{file.ncmds}"
 puts "Size of load commands: #{file.sizeofcmds}"
+puts "Flags: #{file.flags}"
+
+
+puts "\n==== LOAD COMMANDS ===="
+file.load_commands.each do |lc|
+	puts "#{MachO::LOAD_COMMANDS[lc[:cmd]]} (#{lc[:cmdsize]} bytes)"
+end
+puts "======================="
