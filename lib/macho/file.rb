@@ -60,9 +60,11 @@ module MachO
 		end
 
 		# get load commands by name
-		def [](name)
+		def command(name)
 			load_commands.select { |lc| lc.to_s == name }
 		end
+
+		alias :[] :command
 
 		# get the file's dylib id, if it is a dylib
 		def dylib_id

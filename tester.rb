@@ -20,23 +20,23 @@ file.load_commands.each do |lc|
 	puts "#{lc} (#{lc.class}) (offset: #{lc.offset}, size: #{lc.cmdsize})"
 end
 
-# puts "\nDYNAMIC LIBRARIES:"
+puts "\nDYNAMIC LIBRARIES:"
 
-# puts "dylib ID: #{file.dylib_id}" if file.dylib?
+puts "dylib ID: #{file.dylib_id}" if file.dylib?
 
-# puts file.linked_dylibs.join("\n")
+puts file.linked_dylibs.join("\n")
 
-# segments = file["LC_SEGMENT_64"]
+puts "\nSEGMENTS AND SECTIONS:"
 
-# segments.each do |seg|
-# 	puts seg.inspect
-# 	puts "\n"
-# end
+file['LC_SEGMENT_64'].each do |seg|
+	puts "SEGMENT: #{seg.segment_name}"
 
-# segment = file["LC_SEGMENT_64"][1]
+	file.sections(seg).each do |sect|
+		puts "\tSECTION: #{sect.section_name}"
+		puts "\t\tOFFSET: #{sect.offset}"
+	end
+end
 
-# sects = file.sections(segment)
-
-# sects.each { |e| puts e.inspect }
+puts file['LC_DYSYMTAB'].first.inspect
 
 #file.write("test.bin")

@@ -185,7 +185,7 @@ module MachO
 	LC_IDENT = 0x8
 	LC_FVMFILE = 0x9
 	LC_PREPAGE = 0xa
-	LC_DSYMTAB = 0xb
+	LC_DYSYMTAB = 0xb
 	LC_LOAD_DYLIB = 0xc
 	LC_ID_DYLIB = 0xd
 	LC_LOAD_DYLINKER = 0xe
@@ -234,7 +234,7 @@ module MachO
 		LC_IDENT => "LC_IDENT",
 		LC_FVMFILE => "LC_FVMFILE",
 		LC_PREPAGE => "LC_PREPAGE",
-		LC_DSYMTAB => "LC_DSYMTAB",
+		LC_DYSYMTAB => "LC_DYSYMTAB",
 		LC_LOAD_DYLIB => "LC_LOAD_DYLIB",
 		LC_ID_DYLIB => "LC_ID_DYLIB",
 		LC_LOAD_DYLINKER => "LC_LOAD_DYLINKER",
@@ -281,7 +281,7 @@ module MachO
 
 		def initialize(offset, cmd, cmdsize, uuid)
 			super(offset, cmd, cmdsize)
-			@uuid = uuid
+			@uuid = uuid.unpack("C16") # re-unpack for the actual UUID array
 		end
 	end
 
@@ -292,7 +292,8 @@ module MachO
 		@format = "VVa16VVVVVVVV"
 		@sizeof = 56
 
-		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
+		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
+				filesize, maxprot, initprot, nsects, flags)
 			super(offset, cmd, cmdsize)
 			@segname = segname
 			@vmaddr = vmaddr
@@ -303,6 +304,10 @@ module MachO
 			@initprot = initprot
 			@nsects = nsects
 			@flags = flags
+		end
+
+		def segment_name
+			@segname.delete("\x00")
 		end
 	end
 
@@ -313,7 +318,8 @@ module MachO
 		@format = "VVa16QQQQVVVV"
 		@sizeof = 72
 
-		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
+		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
+				filesize, maxprot, initprot, nsects, flags)
 			super(offset, cmd, cmdsize)
 			@segname = segname
 			@vmaddr = vmaddr
@@ -325,6 +331,10 @@ module MachO
 			@nsects = nsects
 			@flags = flags
 		end
+
+		def segment_name
+			@segname.delete("\x00")
+		end
 	end
 
 	# the lc_str and dylib structures have been collapsed
@@ -334,12 +344,188 @@ module MachO
 		@format = "VVVVVV"
 		@sizeof = 24
 
-		def initialize(offset, cmd, cmdsize, name, timestamp, current_version, compatibility_version)
+		def initialize(offset, cmd, cmdsize, name, timestamp, current_version,
+				compatibility_version)
 			super(offset, cmd, cmdsize)
 			@name = name
 			@timestamp = timestamp
 			@current_version = current_version
 			@compatibility_version = compatibility_version
+		end
+	end
+
+	class DylinkerCommand < LoadCommand
+		attr_reader :name
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, name)
+			super(offset, cmd, cmdsize)
+			@name = name
+		end
+	end
+
+	class PreboundDylibCommand < LoadCommand
+		attr_reader :name, :nmodules, :linked_modules
+
+		@format = "VVVVV"
+		@sizeof = 20
+
+		def initialize(offset, cmd, cmdsize, name, nmodules, linked_modules)
+			super(offset, cmd, cmdsize)
+			@name = name
+			@nmodules = nmodules
+			@linked_modules = linked_modules
+		end
+	end
+
+	# NOTE: cctools-870 has all fields of thread_command commented out
+	# except common ones (cmd, cmdsize)
+	class ThreadCommand < LoadCommand
+
+	end
+
+	class RoutinesCommand < LoadCommand
+		attr_reader :init_address, :init_module, :reserved1, :reserved2
+		attr_reader :reserved3, :reserved4, :reserved5, :reserved6
+
+		@format = "VVVVVVVVVV"
+		@sizeof = 40
+
+		def initialize(offset, cmd, cmdsize, init_address, init_module,
+				reserved1, reserved2, reserved3, reserved4, reserved5,
+				reserved6)
+			super(offset, cmd, cmdsize)
+			@init_address = init_address
+			@init_module = init_module
+			@reserved1 = reserved1
+			@reserved2 = reserved2
+			@reserved3 = reserved3
+			@reserved4 = reserved4
+			@reserved5 = reserved5
+			@reserved6 = reserved6
+		end
+	end
+
+	class RoutinesCommand64 < LoadCommand
+		attr_reader :init_address, :init_module, :reserved1, :reserved2
+		attr_reader :reserved3, :reserved4, :reserved5, :reserved6
+
+		@format = "VVQQQQQQQQ"
+		@sizeof = 72
+
+		def initialize(offset, cmd, cmdsize, init_address, init_module,
+				reserved1, reserved2, reserved3, reserved4, reserved5,
+				reserved6)
+			super(offset, cmd, cmdsize)
+			@init_address = init_address
+			@init_module = init_module
+			@reserved1 = reserved1
+			@reserved2 = reserved2
+			@reserved3 = reserved3
+			@reserved4 = reserved4
+			@reserved5 = reserved5
+			@reserved6 = reserved6
+		end
+	end
+
+	class SubFrameworkCommand < LoadCommand
+		attr_reader :umbrella
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, umbrella)
+			super(offset, cmd, cmdsize)
+			@umbrella = umbrella
+		end
+	end
+
+	class SubUmbrellaCommand < LoadCommand
+		attr_reader :sub_umbrella
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, sub_umbrella)
+			super(offset, cmd, cmdsize)
+			@sub_umbrella = sub_umbrella
+		end
+	end
+
+	class SubLibraryCommand < LoadCommand
+		attr_reader :sub_library
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, sub_library)
+			super(offset, cmd, cmdsize)
+			@sub_library = sub_library
+		end
+	end
+
+	class SubClientCommand < LoadCommand
+		attr_reader :sub_client
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, sub_client)
+			super(offset, cmd, cmdsize)
+			@sub_client = sub_client
+		end
+	end
+
+	class SymtabCommand < LoadCommand
+		attr_reader :symoff, :nsyms, :stroff, :strsize
+
+		@format = "VVVVVV"
+		@sizeof = 24
+
+		def initialize(offset, cmd, cmdsize, symoff, nsyms, stroff, strsize)
+			super(offset, cmd, cmdsize)
+			@symoff = symoff
+			@nsyms = nsyms
+			@stroff = stroff
+			@strsize = strsize
+		end
+	end
+
+	class DysymtabCommand < LoadCommand
+		attr_reader :ilocalsym, :nlocalsym, :iextdefsym, :nextdefsym
+		attr_reader :iundefsym, :nundefsym, :tocoff, :ntoc, :modtaboff
+		attr_reader :nmodtab, :extrefsymoff, :nextrefsyms, :indirectsymoff
+		attr_reader :nindirectsyms, :extreloff, :nextrel, :locreloff, :nlocrel
+
+		@format = "VVVVVVVVVVVVVVVVVVVV"
+		@sizeof = 80
+
+		# ugh
+		def initialize(offset, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
+				nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff,
+				nmodtab, extrefsymoff, nextrefsyms, indirectsymoff,
+				nindirectsyms, extreloff, nextrel, locreloff, nlocrel)
+			super(offset, cmd, cmdsize)
+			@ilocalsym = ilocalsym
+			@nlocalsym = nlocalsym
+			@iextdefsym = iextdefsym
+			@nextdefsym = nextdefsym
+			@iundefsym = iundefsym
+			@nundefsym = nundefsym
+			@tocoff = tocoff
+			@ntoc = ntoc
+			@modtaboff = modtaboff
+			@nmodtab = nmodtab
+			@extrefsymoff = extrefsymoff
+			@nextrefsyms = nextrefsyms
+			@indirectsymoff = indirectsymoff
+			@nindirectsyms = nindirectsyms
+			@extreloff = extreloff
+			@nextrel = nextrel
+			@locreloff = locreloff
+			@nlocrel = nlocrel
 		end
 	end
 
@@ -350,7 +536,8 @@ module MachO
 		@format = "a16a16VVVVVVVVV"
 		@sizeof = 68
 
-		def initialize(sectname, segname, addr, size, offset, align, reloff, nreloc, flags, reserved1, reserved2)
+		def initialize(sectname, segname, addr, size, offset, align, reloff,
+				nreloc, flags, reserved1, reserved2)
 			@sectname = sectname
 			@segname = segname
 			@addr = addr
@@ -363,6 +550,14 @@ module MachO
 			@reserved1 = reserved1
 			@reserved2 = reserved2
 		end
+
+		def section_name
+			@sectname.delete("\x00")
+		end
+
+		def segment_name
+			@segname.delete("\x00")
+		end
 	end
 
 	class Section64 < MachOStructure
@@ -372,7 +567,8 @@ module MachO
 		@format = "a16a16QQVVVVVVVV"
 		@sizeof = 80
 
-		def initialize(sectname, segname, addr, size, offset, align, reloff, nreloc, flags, reserved1, reserved2, reserved3)
+		def initialize(sectname, segname, addr, size, offset, align, reloff,
+				nreloc, flags, reserved1, reserved2, reserved3)
 			@sectname = sectname
 			@segname = segname
 			@addr = addr
@@ -386,11 +582,19 @@ module MachO
 			@reserved2 = reserved2
 			@reserved3 = reserved3
 		end
+
+		def section_name
+			@sectname.delete("\x00")
+		end
+
+		def segment_name
+			@segname.delete("\x00")
+		end
 	end
 
 	LC_STRUCTURES = {
-		LC_SEGMENT => LoadCommand,
-		LC_SYMTAB => LoadCommand,
+		LC_SEGMENT => SegmentCommand,
+		LC_SYMTAB => SymtabCommand,
 		LC_SYMSEC => LoadCommand,
 		LC_THREAD => LoadCommand,
 		LC_UNIXTHREAD => LoadCommand,
@@ -399,22 +603,22 @@ module MachO
 		LC_IDENT => LoadCommand,
 		LC_FVMFILE => LoadCommand,
 		LC_PREPAGE => LoadCommand,
-		LC_DSYMTAB => LoadCommand,
+		LC_DYSYMTAB => DysymtabCommand,
 		LC_LOAD_DYLIB => DylibCommand,
 		LC_ID_DYLIB => DylibCommand,
-		LC_LOAD_DYLINKER => LoadCommand,
-		LC_ID_DYLINKER => LoadCommand,
-		LC_PREBOUND_DYLIB => LoadCommand,
-		LC_ROUTINES => LoadCommand,
-		LC_SUB_FRAMEWORK => LoadCommand,
-		LC_SUB_UMBRELLA => LoadCommand,
-		LC_SUB_CLIENT => LoadCommand,
-		LC_SUB_LIBRARY => LoadCommand,
+		LC_LOAD_DYLINKER => DylinkerCommand,
+		LC_ID_DYLINKER => DylinkerCommand,
+		LC_PREBOUND_DYLIB => PreboundDylibCommand,
+		LC_ROUTINES => RoutinesCommand,
+		LC_SUB_FRAMEWORK => SubFrameworkCommand,
+		LC_SUB_UMBRELLA => SubUmbrellaCommand,
+		LC_SUB_CLIENT => SubClientCommand,
+		LC_SUB_LIBRARY => SubLibraryCommand,
 		LC_TWOLEVEL_HINTS => LoadCommand,
 		LC_PREBIND_CKSUM => LoadCommand,
 		LC_LOAD_WEAK_DYLIB => LoadCommand,
 		LC_SEGMENT_64 => SegmentCommand64,
-		LC_ROUTINES_64 => LoadCommand,
+		LC_ROUTINES_64 => RoutinesCommand64,
 		LC_UUID => UUIDCommand,
 		LC_RPATH => LoadCommand,
 		LC_CODE_SIGNATURE => LoadCommand,
