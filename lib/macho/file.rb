@@ -114,6 +114,33 @@ module MachO
 			dylibs
 		end
 
+		# get all sections in a segment by name
+		def sections(segment)
+			sections = []
+
+			if !segment.is_a?(SegmentCommand) && !segment.is_a?(SegmentCommand64)
+				raise ArgumentError.new("not a valid segment")
+			end
+
+			if segment.nsects.zero?
+				return sections
+			end
+
+			offset = segment.offset + segment.class.bytesize
+
+			segment.nsects.times do
+				if segment.is_a? SegmentCommand
+					sections << Section.new_from_bin(@raw_data.slice(offset, Section.bytesize))
+					offset += Section.bytesize
+				else
+					sections << Section64.new_from_bin(@raw_data.slice(offset, Section64.bytesize))
+					offset += Section64.bytesize
+				end
+			end
+
+			sections
+		end
+
 		def write(filename)
 			File.open(filename, "wb") { |f| f.write(@raw_data) }
 		end
@@ -222,7 +249,7 @@ module MachO
 				end
 
 				klass = LC_STRUCTURES[cmd]
-				command = klass.new_from_bin(@raw_data.slice(offset, klass.bytesize))
+				command = klass.new_from_bin(offset, @raw_data.slice(offset, klass.bytesize))
 
 				load_commands << command
 				offset += command.cmdsize

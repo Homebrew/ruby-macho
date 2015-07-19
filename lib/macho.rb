@@ -138,28 +138,24 @@ module MachO
 			@sizeof
 		end
 
-		def self.new_from_bin
+		def self.new_from_bin(bin)
 			self.new(*bin.unpack(@format))
 		end
 	end
 
 	# Mach-O load command structure
 	class LoadCommand < MachOStructure
-		attr_reader :cmd, :cmdsize
-		attr_reader :format, :sizeof
+		attr_reader :offset, :cmd, :cmdsize
 
 		@format = "VV"
 		@sizeof = 8
 
-		def self.bytesize
-			@sizeof
+		def self.new_from_bin(offset, bin)
+			self.new(offset, *bin.unpack(@format))
 		end
 
-		def self.new_from_bin(bin)
-			self.new(*bin.unpack(@format))
-		end
-
-		def initialize(cmd, cmdsize)
+		def initialize(offset, cmd, cmdsize)
+			@offset = offset
 			@cmd = cmd
 			@cmdsize = cmdsize
 		end
@@ -283,8 +279,8 @@ module MachO
 		@format = "VVa16"
 		@sizeof = 24
 
-		def initialize(cmd, cmdsize, uuid)
-			super(cmd, cmdsize)
+		def initialize(offset, cmd, cmdsize, uuid)
+			super(offset, cmd, cmdsize)
 			@uuid = uuid
 		end
 	end
@@ -296,8 +292,8 @@ module MachO
 		@format = "VVa16VVVVVVVV"
 		@sizeof = 56
 
-		def initialize(cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
-			super(cmd, cmdsize)
+		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
+			super(offset, cmd, cmdsize)
 			@segname = segname
 			@vmaddr = vmaddr
 			@vmsize = vmsize
@@ -317,8 +313,8 @@ module MachO
 		@format = "VVa16QQQQVVVV"
 		@sizeof = 72
 
-		def initialize(cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
-			super(cmd, cmdsize)
+		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
+			super(offset, cmd, cmdsize)
 			@segname = segname
 			@vmaddr = vmaddr
 			@vmsize = vmsize
@@ -331,6 +327,22 @@ module MachO
 		end
 	end
 
+	# the lc_str and dylib structures have been collapsed
+	class DylibCommand < LoadCommand
+		attr_reader :name, :timestamp, :current_version, :compatibility_version
+
+		@format = "VVVVVV"
+		@sizeof = 24
+
+		def initialize(offset, cmd, cmdsize, name, timestamp, current_version, compatibility_version)
+			super(offset, cmd, cmdsize)
+			@name = name
+			@timestamp = timestamp
+			@current_version = current_version
+			@compatibility_version = compatibility_version
+		end
+	end
+
 	class Section < MachOStructure
 		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
 		attr_reader :nreloc, :flags, :reserved1, :reserved2
@@ -338,11 +350,11 @@ module MachO
 		@format = "a16a16VVVVVVVVV"
 		@sizeof = 68
 
-		def initialize(sectname, segname, addr, sizeof, offset, align, reloff, nreloc, flags, reserved1, reserved2)
+		def initialize(sectname, segname, addr, size, offset, align, reloff, nreloc, flags, reserved1, reserved2)
 			@sectname = sectname
 			@segname = segname
 			@addr = addr
-			@sizeof = sizeof
+			@size = size
 			@offset = offset
 			@align = align
 			@reloff = reloff
@@ -360,11 +372,11 @@ module MachO
 		@format = "a16a16QQVVVVVVVV"
 		@sizeof = 80
 
-		def initialize(sectname, segname, addr, sizeof, offset, align, reloff, nreloc, flags, reserved1, reserved2)
+		def initialize(sectname, segname, addr, size, offset, align, reloff, nreloc, flags, reserved1, reserved2, reserved3)
 			@sectname = sectname
 			@segname = segname
 			@addr = addr
-			@sizeof = sizeof
+			@size = size
 			@offset = offset
 			@align = align
 			@reloff = reloff
@@ -373,22 +385,6 @@ module MachO
 			@reserved1 = reserved1
 			@reserved2 = reserved2
 			@reserved3 = reserved3
-		end
-	end
-
-	# the lc_str and dylib structures have been collapsed
-	class DylibCommand < LoadCommand
-		attr_reader :name, :timestamp, :current_version, :compatibility_version
-
-		@format = "VVVVVV"
-		@sizeof = 24
-
-		def initialize(cmd, cmdsize, name, timestamp, current_version, compatibility_version)
-			super(cmd, cmdsize)
-			@name = name
-			@timestamp = timestamp
-			@current_version = current_version
-			@compatibility_version = compatibility_version
 		end
 	end
 

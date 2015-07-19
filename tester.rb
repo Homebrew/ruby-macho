@@ -17,14 +17,14 @@ puts "Flags: #{file.flags}"
 
 puts "\nLOAD COMMANDS:"
 file.load_commands.each do |lc|
-	puts "#{lc} (#{lc.class}) (#{lc.cmdsize} bytes)"
+	puts "#{lc} (#{lc.class}) (offset: #{lc.offset}, size: #{lc.cmdsize})"
 end
 
-puts "\nDYNAMIC LIBRARIES:"
+# puts "\nDYNAMIC LIBRARIES:"
 
-puts "dylib ID: #{file.dylib_id}" if file.dylib?
+# puts "dylib ID: #{file.dylib_id}" if file.dylib?
 
-puts file.linked_dylibs.join("\n")
+# puts file.linked_dylibs.join("\n")
 
 # segments = file["LC_SEGMENT_64"]
 
@@ -32,5 +32,11 @@ puts file.linked_dylibs.join("\n")
 # 	puts seg.inspect
 # 	puts "\n"
 # end
+
+# segment = file["LC_SEGMENT_64"][1]
+
+# sects = file.sections(segment)
+
+# sects.each { |e| puts e.inspect }
 
 #file.write("test.bin")
