@@ -36,7 +36,3 @@ file['LC_SEGMENT_64'].each do |seg|
 		puts "\t\tOFFSET: #{sect.offset}"
 	end
 end
-
-puts file['LC_DYSYMTAB'].first.inspect
-
-#file.write("test.bin")

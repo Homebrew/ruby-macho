@@ -78,14 +78,47 @@ module MachO
 			offset = dylib_id_cmd.offset
 			stroffset = dylib_id_cmd.name
 
-			dylib_id = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
+			dylib_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
 
 			dylib_id
 		end
 
 		# TODO: unstub
 		def dylib_id=(new_id)
-			
+			if !new_id.is_a?(String)
+				raise ArgumentError.new("argument must be a String")
+			end
+
+			if !dylib?
+				return nil
+			end
+
+			dylib_id_cmd = command('LC_ID_DYLIB').first
+
+			cmdsize = dylib_id_cmd.cmdsize
+			offset = dylib_id_cmd.offset
+			stroffset = dylib_id_cmd.name
+
+			old_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
+
+			if old_id.size > new_id.size
+				delta = old_id.size - new_id.size
+				# steps:
+				# use delta to pad new_id with null bytes to preserve LC bounds
+				# > update delta to reflect new size!
+				# update name field to the new 'name' (really size)
+				# delete the old_id from @raw_data
+				# insert the new_id into @raw_data
+				# add any additional null bytes after header[:sizeofcmds]-delta
+				raise "unimplemented"
+			elsif old_id.size < new_id.size
+				# padding needs to be removed
+				raise "unimplemented"
+			else
+				# no padding. hooray!
+				@raw_data[offset + stroffset, old_id.size] = new_id
+				# sync fields
+			end
 		end
 
 		# get a list of dylib paths linked to this file
@@ -98,7 +131,7 @@ module MachO
 				offset = dylib_cmd.offset
 				stroffset = dylib_cmd.name
 
-				dylib = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
+				dylib = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
 
 				dylibs << dylib
 			end
