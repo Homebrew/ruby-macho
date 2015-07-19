@@ -59,6 +59,11 @@ module MachO
 			header[:flags]
 		end
 
+		# get load commands by name
+		def [](name)
+			load_commands.select { |lc| lc.to_s == name }
+		end
+
 		# get the file's dylib id, if it is a dylib
 		def dylib_id
 			if !dylib?
@@ -117,6 +122,7 @@ module MachO
 			File.open(@filename, "wb") { |f| f.write(@raw_data) }
 		end
 
+		#######
 		private
 
 		def get_mach_header
@@ -211,7 +217,7 @@ module MachO
 			header[:ncmds].times do
 				cmd = @raw_data.slice(offset, 4).unpack("V").first
 
-				if !LC_STRUCTURES.keys.include?(cmd)
+				if !LC_STRUCTURES.has_key?(cmd)
 					raise LoadCommandError.new(cmd)
 				end
 

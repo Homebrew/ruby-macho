@@ -129,8 +129,22 @@ module MachO
 
 	# TODO: declare values for flags in MachHeader/MachHeader64
 
+	# general purpose pseudo-structure
+	class MachOStructure
+		@format = nil
+		@sizeof = 0
+
+		def self.bytesize
+			@sizeof
+		end
+
+		def self.new_from_bin
+			self.new(*bin.unpack(@format))
+		end
+	end
+
 	# Mach-O load command structure
-	class LoadCommand
+	class LoadCommand < MachOStructure
 		attr_reader :cmd, :cmdsize
 		attr_reader :format, :sizeof
 
@@ -153,9 +167,6 @@ module MachO
 		def to_s
 			LOAD_COMMANDS[cmd]
 		end
-
-		private
-
 	end
 
 	# After MacOS X 10.1 when a new load command is added that is required to be
@@ -317,6 +328,51 @@ module MachO
 			@initprot = initprot
 			@nsects = nsects
 			@flags = flags
+		end
+	end
+
+	class Section < MachOStructure
+		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
+		attr_reader :nreloc, :flags, :reserved1, :reserved2
+
+		@format = "a16a16VVVVVVVVV"
+		@sizeof = 68
+
+		def initialize(sectname, segname, addr, sizeof, offset, align, reloff, nreloc, flags, reserved1, reserved2)
+			@sectname = sectname
+			@segname = segname
+			@addr = addr
+			@sizeof = sizeof
+			@offset = offset
+			@align = align
+			@reloff = reloff
+			@nreloc = nreloc
+			@flags = flags
+			@reserved1 = reserved1
+			@reserved2 = reserved2
+		end
+	end
+
+	class Section64 < MachOStructure
+		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
+		attr_reader :nreloc, :flags, :reserved1, :reserved2, :reserved3
+
+		@format = "a16a16QQVVVVVVVV"
+		@sizeof = 80
+
+		def initialize(sectname, segname, addr, sizeof, offset, align, reloff, nreloc, flags, reserved1, reserved2)
+			@sectname = sectname
+			@segname = segname
+			@addr = addr
+			@sizeof = sizeof
+			@offset = offset
+			@align = align
+			@reloff = reloff
+			@nreloc = nreloc
+			@flags = flags
+			@reserved1 = reserved1
+			@reserved2 = reserved2
+			@reserved3 = reserved3
 		end
 	end
 

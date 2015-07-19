@@ -15,15 +15,22 @@ puts "Size of load commands: #{file.sizeofcmds}"
 puts "Flags: #{file.flags}"
 
 
-puts "\nLOAD COMMANDS"
+puts "\nLOAD COMMANDS:"
 file.load_commands.each do |lc|
 	puts "#{lc} (#{lc.class}) (#{lc.cmdsize} bytes)"
 end
 
-puts "\nDYNAMIC LIBRARIES"
+puts "\nDYNAMIC LIBRARIES:"
 
 puts "dylib ID: #{file.dylib_id}" if file.dylib?
 
 puts file.linked_dylibs.join("\n")
+
+# segments = file["LC_SEGMENT_64"]
+
+# segments.each do |seg|
+# 	puts seg.inspect
+# 	puts "\n"
+# end
 
 #file.write("test.bin")
