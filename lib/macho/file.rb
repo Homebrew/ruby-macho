@@ -117,8 +117,10 @@ module MachO
 			else
 				# no padding. hooray!
 				@raw_data[offset + stroffset, old_id.size] = new_id
-				# sync fields
 			end
+
+			# load commands have to be reset, as we've changed their contents
+			@load_commands = get_load_commands
 		end
 
 		# get a list of dylib paths linked to this file
