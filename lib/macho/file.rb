@@ -68,8 +68,8 @@ module MachO
 			offset = header.bytesize
 
 			load_commands.each do |lc|
-				break if lc[:cmd] == LC_ID_DYLIB
-				offset += lc[:cmdsize]
+				break if lc.cmd == LC_ID_DYLIB
+				offset += lc.cmdsize
 			end
 
 			cmd, cmdsize = @raw_data.slice(offset, 8).unpack("VV")
@@ -95,7 +95,7 @@ module MachO
 			offset = header.bytesize
 
 			load_commands.each do |lc|
-				if lc[:cmd] == LC_LOAD_DYLIB
+				if lc.cmd == LC_LOAD_DYLIB
 					cmdsize = @raw_data.slice(offset + 4, 4).unpack("V").first
 					stroffset = @raw_data.slice(offset + 8, 4).unpack("V").first
 
@@ -103,7 +103,7 @@ module MachO
 					dylibs << dylib
 				end
 
-				offset += lc[:cmdsize]
+				offset += lc.cmdsize
 			end
 
 			dylibs
@@ -165,6 +165,7 @@ module MachO
 		def get_cpusubtype
 			cpusubtype = @raw_data[8..11].unpack("V").first
 
+			# this mask isn't documented!
 			cpusubtype &= ~CPU_SUBTYPE_LIB64
 
 			if !CPU_SUBTYPES.keys.include?(cpusubtype)
@@ -208,14 +209,17 @@ module MachO
 			load_commands = []
 
 			header[:ncmds].times do
-				cmd, cmdsize = @raw_data.slice(offset, 8).unpack("VV")
+				cmd = @raw_data.slice(offset, 4).unpack("V").first
 
-				if !LOAD_COMMANDS.keys.include?(cmd)
+				if !LC_STRUCTURES.keys.include?(cmd)
 					raise LoadCommandError.new(cmd)
 				end
 
-				load_commands << LoadCommand.new(cmd, cmdsize)
-				offset += cmdsize
+				klass = LC_STRUCTURES[cmd]
+				command = klass.new_from_bin(@raw_data.slice(offset, klass.bytesize))
+
+				load_commands << command
+				offset += command.cmdsize
 			end
 
 			load_commands

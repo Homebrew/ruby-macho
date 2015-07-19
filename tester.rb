@@ -17,7 +17,7 @@ puts "Flags: #{file.flags}"
 
 puts "\nLOAD COMMANDS"
 file.load_commands.each do |lc|
-	puts "#{MachO::LOAD_COMMANDS[lc[:cmd]]} (#{lc[:cmdsize]} bytes)"
+	puts "#{lc} (#{lc.class}) (#{lc.cmdsize} bytes)"
 end
 
 puts "\nDYNAMIC LIBRARIES"

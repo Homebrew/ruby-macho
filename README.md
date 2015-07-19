@@ -1,6 +1,19 @@
 ruby-macho-tools
 ================
 
+### What works?
+
+* Reading *some* data from x86/x86_64 Mach-O files
+
+### What might work?
+
+* Reading *some* data from PPC Mach-O files.
+
+### What doesn't work yet?
+
+* Reading data from Universal Mach-O files.
+* Reading data from any other architecure's Mach-O files (probably).
+
 Attribution:
 
 * `lib/macho/cstruct.rb` was taken from Sami Samhuri's

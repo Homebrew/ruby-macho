@@ -130,9 +130,32 @@ module MachO
 	# TODO: declare values for flags in MachHeader/MachHeader64
 
 	# Mach-O load command structure
-	class LoadCommand < CStruct
-		uint32 :cmd
-		uint32 :cmdsize
+	class LoadCommand
+		attr_reader :cmd, :cmdsize
+		attr_reader :format, :sizeof
+
+		@format = "VV"
+		@sizeof = 8
+
+		def self.bytesize
+			@sizeof
+		end
+
+		def self.new_from_bin(bin)
+			self.new(*bin.unpack(@format))
+		end
+
+		def initialize(cmd, cmdsize)
+			@cmd = cmd
+			@cmdsize = cmdsize
+		end
+
+		def to_s
+			LOAD_COMMANDS[cmd]
+		end
+
+		private
+
 	end
 
 	# After MacOS X 10.1 when a new load command is added that is required to be
@@ -241,6 +264,126 @@ module MachO
 		LC_ENCRYPTION_INFO_64 => "LC_ENCRYPTION_INFO_64",
 		LC_LINKER_OPTION => "LC_LINKER_OPTION",
 		LC_LINKER_OPTIMIZATION_HINT => "LC_LINKER_OPTIMIZATION_HINT"
+	}
+
+	class UUIDCommand < LoadCommand
+		attr_reader :uuid
+
+		@format = "VVa16"
+		@sizeof = 24
+
+		def initialize(cmd, cmdsize, uuid)
+			super(cmd, cmdsize)
+			@uuid = uuid
+		end
+	end
+
+	class SegmentCommand < LoadCommand
+		attr_reader :segname, :vmaddr, :vmsize, :fileoff, :filesize, :maxprot
+		attr_reader :initprot, :nsects, :flags
+
+		@format = "VVa16VVVVVVVV"
+		@sizeof = 56
+
+		def initialize(cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
+			super(cmd, cmdsize)
+			@segname = segname
+			@vmaddr = vmaddr
+			@vmsize = vmsize
+			@fileoff = fileoff
+			@filesize = filesize
+			@maxprot = maxprot
+			@initprot = initprot
+			@nsects = nsects
+			@flags = flags
+		end
+	end
+
+	class SegmentCommand64 < LoadCommand
+		attr_reader :segname, :vmaddr, :vmsize, :fileoff, :filesize, :maxprot
+		attr_reader :initprot, :nsects, :flags
+
+		@format = "VVa16QQQQVVVV"
+		@sizeof = 72
+
+		def initialize(cmd, cmdsize, segname, vmaddr, vmsize, fileoff, filesize, maxprot, initprot, nsects, flags)
+			super(cmd, cmdsize)
+			@segname = segname
+			@vmaddr = vmaddr
+			@vmsize = vmsize
+			@fileoff = fileoff
+			@filesize = filesize
+			@maxprot = maxprot
+			@initprot = initprot
+			@nsects = nsects
+			@flags = flags
+		end
+	end
+
+	# the lc_str and dylib structures have been collapsed
+	class DylibCommand < LoadCommand
+		attr_reader :name, :timestamp, :current_version, :compatibility_version
+
+		@format = "VVVVVV"
+		@sizeof = 24
+
+		def initialize(cmd, cmdsize, name, timestamp, current_version, compatibility_version)
+			super(cmd, cmdsize)
+			@name = name
+			@timestamp = timestamp
+			@current_version = current_version
+			@compatibility_version = compatibility_version
+		end
+	end
+
+	LC_STRUCTURES = {
+		LC_SEGMENT => LoadCommand,
+		LC_SYMTAB => LoadCommand,
+		LC_SYMSEC => LoadCommand,
+		LC_THREAD => LoadCommand,
+		LC_UNIXTHREAD => LoadCommand,
+		LC_LOADFVMLIB => LoadCommand,
+		LC_IDFVMLIB => LoadCommand,
+		LC_IDENT => LoadCommand,
+		LC_FVMFILE => LoadCommand,
+		LC_PREPAGE => LoadCommand,
+		LC_DSYMTAB => LoadCommand,
+		LC_LOAD_DYLIB => DylibCommand,
+		LC_ID_DYLIB => DylibCommand,
+		LC_LOAD_DYLINKER => LoadCommand,
+		LC_ID_DYLINKER => LoadCommand,
+		LC_PREBOUND_DYLIB => LoadCommand,
+		LC_ROUTINES => LoadCommand,
+		LC_SUB_FRAMEWORK => LoadCommand,
+		LC_SUB_UMBRELLA => LoadCommand,
+		LC_SUB_CLIENT => LoadCommand,
+		LC_SUB_LIBRARY => LoadCommand,
+		LC_TWOLEVEL_HINTS => LoadCommand,
+		LC_PREBIND_CKSUM => LoadCommand,
+		LC_LOAD_WEAK_DYLIB => LoadCommand,
+		LC_SEGMENT_64 => SegmentCommand64,
+		LC_ROUTINES_64 => LoadCommand,
+		LC_UUID => UUIDCommand,
+		LC_RPATH => LoadCommand,
+		LC_CODE_SIGNATURE => LoadCommand,
+		LC_SEGMENT_SPLIT_INFO => LoadCommand,
+		LC_REEXPORT_DYLIB => LoadCommand,
+		LC_LAZY_LOAD_DYLIB => LoadCommand,
+		LC_ENCRYPTION_INFO => LoadCommand,
+		LC_DYLD_INFO => LoadCommand,
+		LC_DYLD_INFO_ONLY => LoadCommand,
+		LC_LOAD_UPWARD_DYLIB => LoadCommand,
+		LC_VERSION_MIN_MACOSX => LoadCommand,
+		LC_VERSION_MIN_IPHONEOS => LoadCommand,
+		LC_FUNCTION_STARTS => LoadCommand,
+		LC_DYLD_ENVIRONMENT => LoadCommand,
+		LC_MAIN => LoadCommand,
+		LC_DATA_IN_CODE => LoadCommand,
+		LC_SOURCE_VERSION => LoadCommand,
+		LC_DYLIB_CODE_SIGN_DRS => LoadCommand,
+		LC_ENCRYPTION_INFO_64 => LoadCommand,
+		LC_LINKER_OPTION => LoadCommand,
+		LC_LINKER_OPTIMIZATION_HINT => LoadCommand
 	}
 
 	def self.magic?(num)
