@@ -20,9 +20,9 @@ file.load_commands.each do |lc|
 	puts "#{lc} (#{lc.class}) (offset: #{lc.offset}, size: #{lc.cmdsize})"
 end
 
-puts "\nDYNAMIC LIBRARIES:"
+puts "\nDYLIB ID: #{file.dylib_id}" if file.dylib?
 
-puts "dylib ID: #{file.dylib_id}" if file.dylib?
+puts "\nDYNAMIC LIBRARIES:"
 
 puts file.linked_dylibs.join("\n")
 

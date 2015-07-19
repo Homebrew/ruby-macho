@@ -72,20 +72,12 @@ module MachO
 				return nil
 			end
 
-			offset = header.bytesize
+			dylib_id_cmd = command('LC_ID_DYLIB').first
 
-			load_commands.each do |lc|
-				break if lc.cmd == LC_ID_DYLIB
-				offset += lc.cmdsize
-			end
+			cmdsize = dylib_id_cmd.cmdsize
+			offset = dylib_id_cmd.offset
+			stroffset = dylib_id_cmd.name
 
-			cmd, cmdsize = @raw_data.slice(offset, 8).unpack("VV")
-
-			if !cmd == LC_ID_DYLIB
-				return nil
-			end
-
-			stroffset = @raw_data.slice(offset + 8, 4).unpack("V").first
 			dylib_id = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
 
 			dylib_id
@@ -93,24 +85,22 @@ module MachO
 
 		# TODO: unstub
 		def dylib_id=(new_id)
-			0
+			
 		end
 
-		# get a list of dylibs linked to this file
+		# get a list of dylib paths linked to this file
 		def linked_dylibs
 			dylibs = []
-			offset = header.bytesize
+			dylib_cmds = command('LC_LOAD_DYLIB')
 
-			load_commands.each do |lc|
-				if lc.cmd == LC_LOAD_DYLIB
-					cmdsize = @raw_data.slice(offset + 4, 4).unpack("V").first
-					stroffset = @raw_data.slice(offset + 8, 4).unpack("V").first
+			dylib_cmds.each do |dylib_cmd|
+				cmdsize = dylib_cmd.cmdsize
+				offset = dylib_cmd.offset
+				stroffset = dylib_cmd.name
 
-					dylib = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
-					dylibs << dylib
-				end
+				dylib = @raw_data.slice(offset + stroffset, offset + cmdsize - 1).unpack("Z*").first
 
-				offset += lc.cmdsize
+				dylibs << dylib
 			end
 
 			dylibs
