@@ -126,18 +126,6 @@ module MachO
 			# offset = dylib_id_cmd.offset
 			# stroffset = dylib_id_cmd.name
 
-			# old_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
-
-			# # if magic32?
-			# # 	old_id_pad = 4 - (old_id.size % 4)
-			# # 	new_id_pad = 4 - (new_id.size % 4)
-			# # elsif magic64?
-			# # 	old_id_pad = 8 - (old_id.size % 8)
-			# # 	new_id_pad = 8 - (new_id.size % 8)
-			# # else
-			# # 	raise
-			# # end
-
 			# old_size = old_id.size
 			# new_size = new_id.size
 
