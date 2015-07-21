@@ -1,6 +1,7 @@
 require "./lib/cstruct.rb"
 require "./lib/macho/file"
 require "./lib/macho/exceptions"
+require "./lib/macho/utils"
 
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/loader.h
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/fat.h

@@ -9,6 +9,14 @@ module MachO
 			@load_commands = get_load_commands
 		end
 
+		def magic32?
+			MachO.magic32?(header[:magic])
+		end
+
+		def magic64?
+			MachO.magic64?(header[:magic])
+		end
+
 		# is the file executable?
 		def executable?
 			header[:filetype] == MH_EXECUTE
@@ -93,34 +101,102 @@ module MachO
 				return nil
 			end
 
-			dylib_id_cmd = command('LC_ID_DYLIB').first
-
-			cmdsize = dylib_id_cmd.cmdsize
-			offset = dylib_id_cmd.offset
-			stroffset = dylib_id_cmd.name
-
-			old_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
-
-			if old_id.size > new_id.size
-				delta = old_id.size - new_id.size
-				# steps:
-				# use delta to pad new_id with null bytes to preserve LC bounds
-				# > update delta to reflect new size!
-				# update name field to the new 'name' (really size)
-				# delete the old_id from @raw_data
-				# insert the new_id into @raw_data
-				# add any additional null bytes after header[:sizeofcmds]-delta
-				raise "unimplemented"
-			elsif old_id.size < new_id.size
-				# padding needs to be removed
-				raise "unimplemented"
+			if magic32?
+				cmd_round = 4
 			else
-				# no padding. hooray!
-				@raw_data[offset + stroffset, old_id.size] = new_id
+				cmd_round = 8
 			end
 
+			new_sizeofcmds = header[:sizeofcmds]
+			dylib_id_cmd = command('LC_ID_DYLIB').first
+			old_id = dylib_id
+
+			new_pad = Utils.round(new_id.size, cmd_round) - new_id.size
+			old_pad = Utils.round(old_id.size, cmd_round) - old_id.size
+
+			# pad the old and new IDs with null bytes to meet command bounds
+			old_id << "\x00" * old_pad
+			new_id << "\x00" * new_pad
+
+			# calculate the new size of the DylibCommand and sizeofcmds in MH
+			new_size = DylibCommand.bytesize + new_id.size
+			new_sizeofcmds += new_size - dylib_id_cmd.cmdsize
+
+			# cmdsize = dylib_id_cmd.cmdsize
+			# offset = dylib_id_cmd.offset
+			# stroffset = dylib_id_cmd.name
+
+			# old_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
+
+			# # if magic32?
+			# # 	old_id_pad = 4 - (old_id.size % 4)
+			# # 	new_id_pad = 4 - (new_id.size % 4)
+			# # elsif magic64?
+			# # 	old_id_pad = 8 - (old_id.size % 8)
+			# # 	new_id_pad = 8 - (new_id.size % 8)
+			# # else
+			# # 	raise
+			# # end
+
+			# old_size = old_id.size
+			# new_size = new_id.size
+
+			# if old_size > new_size
+			# 	delta = old_size - new_size
+
+			# 	if magic32?
+			# 		new_id_pad = 4 - (new_size % 4)
+			# 	elsif magic64?
+			# 		new_id_pad = 8 - (new_size % 8)
+			# 	else
+			# 		raise "oh god how did you get here"	
+			# 	end
+
+			# 	new_id_pad = 0 if new_id_pad == 8
+
+			# 	new_id << "\x00" * (new_id_pad + 6) # WHERE DOES 6 COME FROM
+			# 	puts "delta #{delta}"
+			# 	delta -= new_id_pad
+			# 	new_cmdsize = dylib_id_cmd.class.bytesize + new_id.size
+
+			# 	puts new_cmdsize
+			# 	puts new_id.inspect
+			# 	puts delta
+
+			# 	new_cmdsize = [new_cmdsize].pack("V")
+
+			# 	puts new_id_pad
+
+			# 	# update name
+			# 	@raw_data[offset + 4, 4] = new_cmdsize
+
+			# 	# delete old id
+			# 	@raw_data.slice!(offset + stroffset...offset + cmdsize)
+
+			# 	# insert new id
+			# 	@raw_data.insert(offset + stroffset, new_id)
+
+			# 	# insert padding
+			# 	@raw_data.insert(header[:sizeofcmds] + header.bytesize - delta, "\x00" * delta)
+
+			# 	# steps:
+			# 	# use delta to pad new_id with null bytes to preserve LC bounds
+			# 	# > update delta to reflect new size!
+			# 	# update name field to the new 'name' (really size)
+			# 	# delete the old_id from @raw_data
+			# 	# insert the new_id into @raw_data
+			# 	# add any additional null bytes after header[:sizeofcmds]-delta
+			# 	# raise "unimplemented"
+			# elsif old_size < new_size
+			# 	# padding needs to be removed
+			# 	raise "unimplemented"
+			# else
+			# 	# no padding. hooray!
+			# 	@raw_data[offset + stroffset, old_size] = new_id
+			# end
+
 			# load commands have to be reset, as we've changed their contents
-			@load_commands = get_load_commands
+			# @load_commands = get_load_commands
 		end
 
 		# get a list of dylib paths linked to this file
@@ -283,6 +359,10 @@ module MachO
 			end
 
 			load_commands
+		end
+
+		def sizeofcmds=(new_size)
+			raise
 		end
 	end
 end
