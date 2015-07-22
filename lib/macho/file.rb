@@ -100,7 +100,6 @@ module MachO
 			dylib_id
 		end
 
-		# TODO: unstub
 		def dylib_id=(new_id)
 			if !new_id.is_a?(String)
 				raise ArgumentError.new("argument must be a String")
@@ -131,12 +130,29 @@ module MachO
 			new_size = DylibCommand.bytesize + new_id.size
 			new_sizeofcmds += new_size - dylib_id_cmd.cmdsize
 
-			# STEPS
-			# 1. update sizeofcmds in mach_header
-			# 2. update name in the dylib_command
-			# 3. delete the old id
-			# 4. insert the new id
-			# 5. pad/unpad after new_sizeofcmds until offsets are corrected
+			# update sizeofcmds in mach_header
+			set_sizeofcmds(new_sizeofcmds)
+
+			# update cmdsize in the dylib_command
+			@raw_data[dylib_id_cmd.offset + 4, 4] = [new_size].pack("V")
+
+			# delete the old id
+			@raw_data.slice!(dylib_id_cmd.offset + dylib_id_cmd.name...dylib_id_cmd.offset + dylib_id_cmd.cmdsize)
+
+			# insert the new id
+			@raw_data.insert(dylib_id_cmd.offset + dylib_id_cmd.name, new_id)
+
+			# pad/unpad after new_sizeofcmds until offsets are corrected
+			null_pad = old_id.size - new_id.size
+
+			if null_pad < 0
+				@raw_data.slice!(new_sizeofcmds + header.bytesize, null_pad.abs)
+			else
+				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
+			end
+
+			# synchronize the load commands with the raw data
+			load_commands = get_load_commands
 		end
 
 		# get a list of dylib paths linked to this file
@@ -301,8 +317,9 @@ module MachO
 			load_commands
 		end
 
-		def sizeofcmds=(new_size)
-			raise
+		def set_sizeofcmds(size)
+			new_size = [size].pack("V")
+			@raw_data[20..23] = new_size
 		end
 	end
 end
