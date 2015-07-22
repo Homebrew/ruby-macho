@@ -42,4 +42,13 @@ module MachO
 			super "Unrecognized Mach-O load command: 0x#{"%02x" % num}"
 		end
 	end
+
+	# raised when load commands are too large to fit in the current file
+	class HeaderPadError < MachOError
+		def initialize(filename)
+			super "Updated load commands do not fit in the header of " +
+			"#{filename}. #{filename} needs to be relinked, possibly with " +
+			"-headerpad or -headerpad_max_install_names"
+		end
+	end
 end

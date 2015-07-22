@@ -559,6 +559,10 @@ module MachO
 		def segment_name
 			@segname.delete("\x00")
 		end
+
+		def flag?(flag)
+			flags & flag == flag
+		end
 	end
 
 	class Section64 < MachOStructure
@@ -590,6 +594,10 @@ module MachO
 
 		def segment_name
 			@segname.delete("\x00")
+		end
+
+		def flag?(flag)
+			flags & flag == flag
 		end
 	end
 

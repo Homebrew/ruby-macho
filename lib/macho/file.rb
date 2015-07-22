@@ -130,6 +130,24 @@ module MachO
 			new_size = DylibCommand.bytesize + new_id.size
 			new_sizeofcmds += new_size - dylib_id_cmd.cmdsize
 
+			# calculate the low file offset (offset to first section data)
+			low_fileoff = 2**64 # ULLONGMAX
+
+			segments.each do |seg|
+				sections(seg).each do |sect|
+					if sect.size != 0 && !sect.flag?(S_ZEROFILL) &&
+							!sect.flag?(S_THREAD_LOCAL_ZEROFILL) &&
+							sect.offset < low_fileoff
+
+						low_fileoff = sect.offset
+					end
+				end
+			end
+
+			if new_sizeofcmds + header.bytesize > low_fileoff
+				raise HeaderPadError.new(@filename)
+			end
+
 			# update sizeofcmds in mach_header
 			set_sizeofcmds(new_sizeofcmds)
 
