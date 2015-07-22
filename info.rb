@@ -28,7 +28,7 @@ puts file.linked_dylibs.join("\n")
 
 puts "\nSEGMENTS AND SECTIONS:"
 
-file['LC_SEGMENT_64'].each do |seg|
+file.segments.each do |seg|
 	puts "SEGMENT: #{seg.segment_name}"
 
 	file.sections(seg).each do |sect|
