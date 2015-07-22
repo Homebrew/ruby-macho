@@ -10,11 +10,11 @@ module MachO
 		end
 
 		def magic32?
-			MachO.magic32?(header[:magic])
+			Utils.magic32?(header[:magic])
 		end
 
 		def magic64?
-			MachO.magic64?(header[:magic])
+			Utils.magic64?(header[:magic])
 		end
 
 		# is the file executable?
@@ -221,7 +221,7 @@ module MachO
 			sizeofcmds = get_sizeofcmds
 			flags = get_flags
 			
-			if MachO.magic32?(magic)
+			if Utils.magic32?(magic)
 				header = MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
 			else
 				# the reserved field is reserved, so just fill it with 0
@@ -232,13 +232,12 @@ module MachO
 		def get_magic
 			magic = @raw_data[0..3].unpack("N").first
 
-			if !MachO.magic?(magic)
+			if !Utils.magic?(magic)
 				raise MagicError.new(magic)
 			end
-
 			
 			# TODO: support fat (universal) binaries
-			if MachO.fat_magic?(magic)
+			if Utils.fat_magic?(magic)
 				raise FatBinaryError.new(magic)
 			end
 

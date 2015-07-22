@@ -684,21 +684,4 @@ module MachO
 		LC_LINKER_OPTION => LoadCommand,
 		LC_LINKER_OPTIMIZATION_HINT => LoadCommand
 	}
-
-	def self.magic?(num)
-		num == FAT_MAGIC || num == FAT_CIGAM || num == MH_MAGIC ||
-		num == MH_CIGAM || num == MH_MAGIC_64 || num == MH_CIGAM_64
-	end
-
-	def self.fat_magic?(num)
-		num == FAT_MAGIC || num == FAT_CIGAM
-	end
-
-	def self.magic32?(num)
-		num == MH_MAGIC || num == MH_CIGAM
-	end
-
-	def self.magic64?(num)
-		num == MH_MAGIC_64 || num == MH_CIGAM_64
-	end
 end
