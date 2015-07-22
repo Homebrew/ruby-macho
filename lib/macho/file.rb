@@ -151,7 +151,8 @@ module MachO
 				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
 			end
 
-			# synchronize the load commands with the raw data
+			# synchronize fields with the raw data
+			header = get_mach_header
 			load_commands = get_load_commands
 		end
 
