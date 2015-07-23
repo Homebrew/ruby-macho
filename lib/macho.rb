@@ -1,7 +1,9 @@
-require "./lib/cstruct.rb"
-require "./lib/macho/file"
-require "./lib/macho/exceptions"
-require "./lib/macho/utils"
+$:.unshift File.dirname(__FILE__)
+
+require "cstruct"
+require "macho/file"
+require "macho/exceptions"
+require "macho/utils"
 
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/loader.h
 # http://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/fat.h
