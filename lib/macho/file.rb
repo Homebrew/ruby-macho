@@ -325,7 +325,9 @@ module MachO
 					raise LoadCommandError.new(cmd)
 				end
 
-				klass = LC_STRUCTURES[cmd]
+				# why do I do this? i don't like declaring constants below
+				# classes, and i need them to resolve...
+				klass = Object.const_get "MachO::#{LC_STRUCTURES[cmd]}"
 				command = klass.new_from_bin(offset, @raw_data.slice(offset, klass.bytesize))
 
 				load_commands << command
