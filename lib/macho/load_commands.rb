@@ -6,7 +6,7 @@ module MachO
 	# values for cmd in LoadCommand
 	LC_SEGMENT = 0x1
 	LC_SYMTAB = 0x2
-	LC_SYMSEC = 0x3
+	LC_SYMSEG = 0x3
 	LC_THREAD = 0x4
 	LC_UNIXTHREAD = 0x5
 	LC_LOADFVMLIB = 0x6
@@ -55,7 +55,7 @@ module MachO
 	LOAD_COMMANDS = {
 		LC_SEGMENT => "LC_SEGMENT",
 		LC_SYMTAB => "LC_SYMTAB",
-		LC_SYMSEC => "LC_SYMSEC",
+		LC_SYMSEG => "LC_SYMSEG",
 		LC_THREAD => "LC_THREAD",
 		LC_UNIXTHREAD => "LC_UNIXTHREAD",
 		LC_LOADFVMLIB => "LC_LOADFVMLIB",
@@ -105,14 +105,14 @@ module MachO
 	LC_STRUCTURES = {
 		LC_SEGMENT => "SegmentCommand",
 		LC_SYMTAB => "SymtabCommand",
-		LC_SYMSEC => "LoadCommand",
-		LC_THREAD => "LoadCommand",
-		LC_UNIXTHREAD => "LoadCommand",
-		LC_LOADFVMLIB => "LoadCommand",
-		LC_IDFVMLIB => "LoadCommand",
-		LC_IDENT => "LoadCommand",
-		LC_FVMFILE => "LoadCommand",
-		LC_PREPAGE => "LoadCommand",
+		LC_SYMSEG => "LoadCommand", # obsolete
+		LC_THREAD => "ThreadCommand",
+		LC_UNIXTHREAD => "ThreadCommand",
+		LC_LOADFVMLIB => "LoadCommand", # obsolete
+		LC_IDFVMLIB => "LoadCommand", # obsolete
+		LC_IDENT => "LoadCommand", # obsolete
+		LC_FVMFILE => "LoadCommand", # reserved for internal use only
+		LC_PREPAGE => "LoadCommand", # reserved for internal use only
 		LC_DYSYMTAB => "DysymtabCommand",
 		LC_LOAD_DYLIB => "DylibCommand",
 		LC_ID_DYLIB => "DylibCommand",
@@ -124,32 +124,32 @@ module MachO
 		LC_SUB_UMBRELLA => "SubUmbrellaCommand",
 		LC_SUB_CLIENT => "SubClientCommand",
 		LC_SUB_LIBRARY => "SubLibraryCommand",
-		LC_TWOLEVEL_HINTS => "LoadCommand",
-		LC_PREBIND_CKSUM => "LoadCommand",
-		LC_LOAD_WEAK_DYLIB => "LoadCommand",
+		LC_TWOLEVEL_HINTS => "TwolevelHintsCommand",
+		LC_PREBIND_CKSUM => "PrebindCksumCommand",
+		LC_LOAD_WEAK_DYLIB => "DylibCommand",
 		LC_SEGMENT_64 => "SegmentCommand64",
 		LC_ROUTINES_64 => "RoutinesCommand64",
 		LC_UUID => "UUIDCommand",
-		LC_RPATH => "LoadCommand",
-		LC_CODE_SIGNATURE => "LoadCommand",
-		LC_SEGMENT_SPLIT_INFO => "LoadCommand",
-		LC_REEXPORT_DYLIB => "LoadCommand",
-		LC_LAZY_LOAD_DYLIB => "LoadCommand",
-		LC_ENCRYPTION_INFO => "LoadCommand",
-		LC_DYLD_INFO => "LoadCommand",
-		LC_DYLD_INFO_ONLY => "LoadCommand",
-		LC_LOAD_UPWARD_DYLIB => "LoadCommand",
-		LC_VERSION_MIN_MACOSX => "LoadCommand",
-		LC_VERSION_MIN_IPHONEOS => "LoadCommand",
-		LC_FUNCTION_STARTS => "LoadCommand",
-		LC_DYLD_ENVIRONMENT => "LoadCommand",
-		LC_MAIN => "LoadCommand",
-		LC_DATA_IN_CODE => "LoadCommand",
-		LC_SOURCE_VERSION => "LoadCommand",
-		LC_DYLIB_CODE_SIGN_DRS => "LoadCommand",
-		LC_ENCRYPTION_INFO_64 => "LoadCommand",
-		LC_LINKER_OPTION => "LoadCommand",
-		LC_LINKER_OPTIMIZATION_HINT => "LoadCommand"
+		LC_RPATH => "RpathCommand",
+		LC_CODE_SIGNATURE => "LinkeditDataCommand",
+		LC_SEGMENT_SPLIT_INFO => "LinkeditDataCommand",
+		LC_REEXPORT_DYLIB => "DylibCommand",
+		LC_LAZY_LOAD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
+		LC_ENCRYPTION_INFO => "EncryptionInfoCommand",
+		LC_DYLD_INFO => "DyldInfoCommand",
+		LC_DYLD_INFO_ONLY => "DyldInfoCommand",
+		LC_LOAD_UPWARD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
+		LC_VERSION_MIN_MACOSX => "VersionMinCommand",
+		LC_VERSION_MIN_IPHONEOS => "VersionMinCommand",
+		LC_FUNCTION_STARTS => "LinkeditDataCommand",
+		LC_DYLD_ENVIRONMENT => "DylinkerCommand",
+		LC_MAIN => "EntryPointCommand",
+		LC_DATA_IN_CODE => "LinkeditDataCommand",
+		LC_SOURCE_VERSION => "SourceVersionCommand",
+		LC_DYLIB_CODE_SIGN_DRS => "LinkeditDataCommand",
+		LC_ENCRYPTION_INFO_64 => "EncryptionInfoCommand64",
+		LC_LINKER_OPTION => "LinkerOptionCommand",
+		LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
 	}
 
 	# Mach-O load command structure
@@ -241,7 +241,6 @@ module MachO
 		end
 	end
 
-	# the lc_str and dylib structures have been collapsed
 	class DylibCommand < LoadCommand
 		attr_reader :name, :timestamp, :current_version, :compatibility_version
 
@@ -430,6 +429,160 @@ module MachO
 			@nextrel = nextrel
 			@locreloff = locreloff
 			@nlocrel = nlocrel
+		end
+	end
+
+	class TwolevelHintsCommand < LoadCommand
+		attr_reader :htoffset, :nhints
+
+		@format = "VVVV"
+		@sizeof = 16
+
+		def initialize(offset, cmd, cmdsize, htoffset, nhints)
+			super(offset, cmd, cmdsize)
+			@htoffset = htoffset
+			@nhints = nhints
+		end
+	end
+
+	class PrebindCksumCommand < LoadCommand
+		attr_reader :cksum
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, cksum)
+			super(offset, cmd, cmdsize)
+			@cksum = cksum
+		end
+	end
+
+	class RpathCommand < LoadCommand
+		attr_reader :path
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, path)
+			super(offset, cmd, cmdsize)
+			@path = path
+		end
+	end
+
+	class LinkeditDataCommand < LoadCommand
+		attr_reader :dataoff, :datasize
+
+		@format = "VVVV"
+		@sizeof = 16
+
+		def initialize(offset, cmd, cmdsize, dataoff, datasize)
+			super(offset, cmd, cmdsize)
+			@dataoff = dataoff
+			@datasize = datasize
+		end
+	end
+
+	class EncryptionInfoCommand < LoadCommand
+		attr_reader :cryptoff, :cryptsize, :cryptid
+
+		@format = "VVVVV"
+		@sizeof = 20
+
+		def initialize(offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
+			super(offset, cmd, cmdsize)
+			@cryptoff = cryptoff
+			@cryptsize = cryptsize
+			@cryptid = cryptid
+		end
+	end
+
+	class EncryptionInfoCommand64 < LoadCommand
+		attr_reader :cryptoff, :cryptsize, :cryptid, :pad
+
+		@format = "VVVVVV"
+		@sizeof = 24
+
+		def initialize(offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
+			super(offset, cmd, cmdsize)
+			@cryptoff = cryptoff
+			@cryptsize = cryptsize
+			@cryptid = cryptid
+			@pad = pad
+		end
+	end
+
+	class VersionMinCommand < LoadCommand
+		attr_reader :version, :sdk
+
+		@format = "VVVV"
+		@sizeof = 16
+
+		def initialize(offset, cmd, cmdsize, version, sdk)
+			super(offset, cmd, cmdsize)
+			@version = version
+			@sdk = sdk
+		end
+	end
+
+	class DyldInfoCommand < LoadCommand
+		attr_reader :rebase_off, :rebase_size, :bind_off, :bind_size
+		attr_reader :weak_bind_off, :weak_bind_size, :lazy_bind_off
+		attr_reader :lazy_bind_size, :export_off, :export_size
+
+		@format = "VVVVVVVVVVVV"
+		@sizeof = 48
+
+		def initialize(offset, cmd, cmdsize, rebase_off, rebase_size, bind_off,
+				bind_size, weak_bind_off, weak_bind_size, lazy_bind_off,
+				lazy_bind_size, export_off, export_size)
+			super(offset, cmd, cmdsize)
+			@rebase_off = rebase_off
+			@rebase_size = rebase_size
+			@bind_off = bind_off
+			@bind_size = bind_size
+			@weak_bind_off = weak_bind_off
+			@weak_bind_size = weak_bind_size
+			@lazy_bind_off = lazy_bind_off
+			@lazy_bind_size = lazy_bind_size
+			@export_off = export_off
+			@export_size = export_size
+		end
+	end
+
+	class LinkerOptionCommand < LoadCommand
+		attr_reader :count
+
+		@format = "VVV"
+		@sizeof = 12
+
+		def initialize(offset, cmd, cmdsize, count)
+			super(offset, cmd, cmdsize)
+			@count = count
+		end
+	end
+
+	class EntryPointCommand < LoadCommand
+		attr_reader :entryoff, :stacksize
+
+		@format = "VVQQ"
+		@sizeof = 24
+
+		def initialize(offset, cmd, cmdsize, entryoff, stacksize)
+			super(offset, cmd, cmdsize)
+			@entryoff = entryoff
+			@stacksize = stacksize
+		end
+	end
+
+	class SourceVersionCommand < LoadCommand
+		attr_reader :version
+
+		@format = "VVQ"
+		@sizeof = 16
+
+		def initialize(offset, cmd, cmdsize, version)
+			super(offset, cmd, cmdsize)
+			@version = version
 		end
 	end
 end
