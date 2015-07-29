@@ -4,6 +4,7 @@ ruby-macho-tools
 ### What works?
 
 * Reading *some* data from x86/x86_64 Mach-O files
+* Changing the IDs of Mach-O dylibs
 
 ### What might work?
 
