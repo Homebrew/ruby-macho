@@ -1,4 +1,4 @@
-ruby-macho-tools
+ruby-macho
 ================
 
 ### What works?
