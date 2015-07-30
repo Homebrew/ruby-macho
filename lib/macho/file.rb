@@ -103,7 +103,7 @@ module MachO
 
 			dylib_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
 
-			dylib_id
+			dylib_id.delete("\x00")
 		end
 
 		def dylib_id=(new_id)
@@ -124,6 +124,7 @@ module MachO
 			new_sizeofcmds = header[:sizeofcmds]
 			dylib_id_cmd = command('LC_ID_DYLIB').first
 			old_id = dylib_id
+			new_id = new_id.dup
 
 			new_pad = Utils.round(new_id.size, cmd_round) - new_id.size
 			old_pad = Utils.round(old_id.size, cmd_round) - old_id.size
@@ -161,7 +162,7 @@ module MachO
 			@raw_data[dylib_id_cmd.offset + 4, 4] = [new_size].pack("V")
 
 			# delete the old id
-			@raw_data.slice!(dylib_id_cmd.offset + dylib_id_cmd.name...dylib_id_cmd.offset + dylib_id_cmd.cmdsize)
+			@raw_data.slice!(dylib_id_cmd.offset + dylib_id_cmd.name...dylib_id_cmd.offset + dylib_id_cmd.class.bytesize + old_id.size)
 
 			# insert the new id
 			@raw_data.insert(dylib_id_cmd.offset + dylib_id_cmd.name, new_id)
