@@ -3,6 +3,8 @@ module MachO
 		attr_reader :header, :load_commands
 
 		def initialize(filename)
+			raise ArgumentError.new("filename must be a String") unless filename.is_a? String
+
 			@filename = filename
 			@raw_data = open(@filename, "rb") { |f| f.read }
 			@header = get_mach_header
