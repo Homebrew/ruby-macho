@@ -32,8 +32,12 @@ module MachO
 			header[:filetype] == MH_BUNDLE
 		end
 
-		# string representation of the header's magic bytes
 		def magic
+			header[:magic]
+		end
+
+		# string representation of the header's magic bytes
+		def magic_string
 			MH_MAGICS[header[:magic]]
 		end
 

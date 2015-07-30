@@ -6,7 +6,7 @@ file = MachO::MachOFile.new(ARGV.shift)
 
 puts "FILE INFORMATION:"
 puts "Header type: #{file.header.class}"
-puts "Magic: #{file.magic}"
+puts "Magic: #{file.magic_string}"
 puts "Filetype: #{file.filetype}"
 puts "CPU type: #{file.cputype}"
 puts "CPU subtype: #{file.cpusubtype}"
