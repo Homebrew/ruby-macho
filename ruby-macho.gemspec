@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name = 'ruby-macho'
-	s.version = '0.0.2'
+	s.version = '0.0.3'
 	s.date = '2015-07-29'
 	s.summary = 'ruby-macho - Mach-O file analyzer.'
 	s.description = 'A library for viewing and manipulating Mach-O files in Ruby.'
