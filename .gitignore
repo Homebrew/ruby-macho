@@ -3,3 +3,4 @@
 *.a
 *.bin
 *.gem
+!test/bin/*
