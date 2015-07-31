@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name = 'ruby-macho'
-	s.version = '0.0.3'
+	s.version = '0.0.4'
 	s.date = '2015-07-29'
 	s.summary = 'ruby-macho - Mach-O file analyzer.'
 	s.description = 'A library for viewing and manipulating Mach-O files in Ruby.'
@@ -8,8 +8,6 @@ Gem::Specification.new do |s|
 	s.email = 'william@tuffbizz.com'
 	s.files = [
 		'lib/cstruct.rb',
-		'lib/int_helpers.rb',
-		'lib/otool_helpers.rb',
 		'lib/macho.rb',
 		'lib/macho/exceptions.rb',
 		'lib/macho/file.rb',
