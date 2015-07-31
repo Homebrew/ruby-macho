@@ -41,6 +41,21 @@ module MachO
 	S_ATTR_EXT_RELOC = 0x00000200
 	S_ATTR_LOC_RELOC = 0x00000100
 
+	# currently known section names
+	# we don't use these anywhere right now, but they're good to have
+	SECT_TEXT = "__text"
+	SECT_FVMLIB_INIT0 = "__fvmlib_init0"
+	SECT_FVMLIB_INIT1 = "__fvmlib_init1"
+	SECT_DATA = "__data"
+	SECT_BSS = "__bss"
+	SECT_COMMON = "__common"
+	SECT_OBJC_SYMBOLS = "__symbol_table"
+	SECT_OBJC_MODULES = "__module_info"
+	SECT_OBJC_STRINGS = "__selector_strs"
+	SECT_OBJC_REFS = "__selector_refs"
+	SECT_ICON_HEADER = "__header"
+	SECT_ICON_TIFF = "__tiff"
+
 	class Section < MachOStructure
 		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
 		attr_reader :nreloc, :flags, :reserved1, :reserved2

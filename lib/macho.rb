@@ -1,5 +1,3 @@
-$:.unshift File.dirname(__FILE__)
-
 require "cstruct"
 require "macho/headers"
 require "macho/structure"

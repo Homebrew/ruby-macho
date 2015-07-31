@@ -152,6 +152,17 @@ module MachO
 		LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
 	}
 
+	# currently known segment names
+	# we don't use these anywhere right now, but they're good to have
+	SEG_PAGEZERO = "__PAGEZERO"
+	SEG_TEXT = "__TEXT"
+	SEG_DATA = "__DATA"
+	SEG_OBJC = "__OBJC"
+	SEG_ICON = "__ICON"
+	SEG_LINKEDIT = "__LINKEDIT"
+	SEG_UNIXSTACK = "__UNIXSTACK"
+	SEG_IMPORT = "__IMPORT"
+
 	# Mach-O load command structure
 	# this is the most generic load command - only cmd ID and size are
 	# represented, and no actual data. used when a more specific class

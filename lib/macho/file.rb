@@ -314,7 +314,6 @@ module MachO
 			sizeofcmds
 		end
 
-		# TODO: parse flags, maybe?
 		def get_flags
 			flags = @raw_data[24..27].unpack("V").first
 
