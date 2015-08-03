@@ -234,7 +234,6 @@ module MachO
 			File.open(@filename, "wb") { |f| f.write(@raw_data) }
 		end
 
-		#######
 		private
 
 		def get_mach_header
@@ -247,10 +246,10 @@ module MachO
 			flags = get_flags
 			
 			if Utils.magic32?(magic)
-				header = MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
+				MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
 			else
-				# the reserved field is reserved, so just fill it with 0
-				header = MachHeader64.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags, 0)
+				# the reserved field is...reserved, so just fill it with 0
+				MachHeader64.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags, 0)
 			end
 		end
 
