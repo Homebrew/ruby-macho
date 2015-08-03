@@ -68,16 +68,16 @@ file.write! # dangerous: overwrites the original file!
 
 ### What works?
 
-* Reading *some* data from x86/x86_64 Mach-O files
+* Reading data from x86/x86_64 Mach-O files
 * Changing the IDs of Mach-O dylibs
 
 ### What might work?
 
 * Reading *some* data from PPC Mach-O files.
+* Reading data from Universal Mach-O files.
 
 ### What doesn't work yet?
 
-* Reading data from Universal Mach-O files.
 * Reading data from any other architecure's Mach-O files (probably).
 
 ### What needs to be done?
