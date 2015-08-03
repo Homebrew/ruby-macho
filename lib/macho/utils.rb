@@ -9,8 +9,7 @@ module MachO
 		end
 
 		def self.magic?(num)
-			num == FAT_MAGIC || num == FAT_CIGAM || num == MH_MAGIC ||
-			num == MH_CIGAM || num == MH_MAGIC_64 || num == MH_CIGAM_64
+			MH_MAGICS.has_key?(num)
 		end
 
 		def self.fat_magic?(num)

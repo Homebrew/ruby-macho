@@ -10,10 +10,15 @@ module MachO
 		end
 	end
 
-	# raised when a file's magic bytes are those of a fat binary
 	class FatBinaryError < MachOError
-		def initialize(num)
-			super "Unsupported fat binary (magic 0x#{"%02x" % num})"
+		def initialize
+			super "Fat binaries must be loaded with MachO::FatFile"
+		end
+	end
+
+	class MachOBinaryError < MachOError
+		def initialize
+			super "Normal binaries must be loaded with MachO::MachOFile"
 		end
 	end
 

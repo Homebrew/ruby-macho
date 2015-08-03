@@ -30,7 +30,7 @@ module MachO
 			end
 
 			if !Utils.fat_magic?(magic)
-				raise # need a new exception here
+				raise MachOBinaryError.new
 			end
 
 			FatHeader.new(magic, nfat_arch)
@@ -40,7 +40,8 @@ module MachO
 			archs = []
 
 			header[:nfat_arch].times do |i|
-				archs << FatArch.new(*@raw_data[8 + (FatArch.bytesize * i), FatArch.bytesize].unpack("N5"))
+				fields = @raw_data[8 + (FatArch.bytesize * i), FatArch.bytesize].unpack("N5")
+				archs << FatArch.new(*fields)
 			end
 
 			archs

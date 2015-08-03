@@ -278,9 +278,8 @@ module MachO
 				raise MagicError.new(magic)
 			end
 			
-			# TODO: support fat (universal) binaries
 			if Utils.fat_magic?(magic)
-				raise FatBinaryError.new(magic)
+				raise FatBinaryError.new
 			end
 
 			magic
@@ -289,7 +288,7 @@ module MachO
 		def get_cputype
 			cputype = @raw_data[4..7].unpack("V").first
 
-			if !CPU_TYPES.keys.include?(cputype)
+			if !CPU_TYPES.has_key?(cputype)
 				raise CPUTypeError.new(cputype)
 			end
 
@@ -302,7 +301,7 @@ module MachO
 			# this mask isn't documented!
 			cpusubtype &= ~CPU_SUBTYPE_LIB64
 
-			if !CPU_SUBTYPES.keys.include?(cpusubtype)
+			if !CPU_SUBTYPES.has_key?(cpusubtype)
 				raise CPUSubtypeError.new(cpusubtype)
 			end
 
@@ -312,7 +311,7 @@ module MachO
 		def get_filetype
 			filetype = @raw_data[12..15].unpack("V").first
 
-			if !MH_FILETYPES.keys.include?(filetype)
+			if !MH_FILETYPES.has_key?(filetype)
 				raise FiletypeError.new(filetype)
 			end
 
