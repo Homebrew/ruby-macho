@@ -2,11 +2,25 @@ module MachO
 	class MachOFile
 		attr_reader :header, :load_commands
 
+		def self.new_from_bin(bin)
+			instance = allocate
+			instance.initialize_from_bin(bin)
+
+			instance
+		end
+
 		def initialize(filename)
 			raise ArgumentError.new("filename must be a String") unless filename.is_a? String
 
 			@filename = filename
 			@raw_data = open(@filename, "rb") { |f| f.read }
+			@header = get_mach_header
+			@load_commands = get_load_commands
+		end
+
+		def initialize_from_bin(bin)
+			@filename = nil
+			@raw_data = bin
 			@header = get_mach_header
 			@load_commands = get_load_commands
 		end
@@ -231,7 +245,11 @@ module MachO
 		end
 
 		def write!
-			File.open(@filename, "wb") { |f| f.write(@raw_data) }
+			if @filename.nil?
+				raise MachOError.new("cannot write to a default file when initialized from a binary string")
+			else
+				File.open(@filename, "wb") { |f| f.write(@raw_data) }
+			end
 		end
 
 		private

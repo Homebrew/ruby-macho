@@ -9,7 +9,15 @@ module MachO
 			@raw_data = open(@filename, "rb") { |f| f.read }
 			@header = get_fat_header
 			@fat_archs = get_fat_archs
-			@machos = get_machos(@fat_archs)
+			@machos = get_machos
+		end
+
+		def write(filename)
+			File.open(filename, "wb") { |f| f.write(@raw_data) }
+		end
+
+		def write!
+			File.open(@filename, "wb") { |f| f.write(@raw_data) }
 		end
 
 		private
@@ -38,8 +46,14 @@ module MachO
 			archs
 		end
 
-		def get_machos(fat_archs)
-			[]
+		def get_machos
+			machos = []
+
+			fat_archs.each do |arch|
+				machos << MachOFile.new_from_bin(@raw_data[arch[:offset], arch[:size]])
+			end
+
+			machos
 		end
 	end
 end

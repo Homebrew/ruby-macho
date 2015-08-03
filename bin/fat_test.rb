@@ -4,6 +4,8 @@ require 'macho'
 
 file = MachO::FatFile.new(ARGV.shift)
 
-file.fat_archs.each do |arch|
-	puts arch.inspect
+puts "No. architectures: #{file.fat_archs.size}"
+
+file.machos.each do |macho|
+	puts macho.cputype
 end
