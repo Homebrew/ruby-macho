@@ -25,6 +25,10 @@ module MachO
 			@load_commands = get_load_commands
 		end
 
+		def serialize
+			@raw_data
+		end
+
 		def magic32?
 			Utils.magic32?(header[:magic])
 		end
