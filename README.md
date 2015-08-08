@@ -1,6 +1,8 @@
 ruby-macho
 ================
 
+[![Gem Version](https://badge.fury.io/rb/ruby-macho.svg)](http://badge.fury.io/rb/ruby-macho)
+
 A Ruby library for manipulating Mach-O files.
 
 ### What is a Mach-O file?
