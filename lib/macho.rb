@@ -1,13 +1,13 @@
-require "cstruct"
-require "macho/headers"
-require "macho/structure"
-require "macho/load_commands"
-require "macho/sections"
-require "macho/macho_file"
-require "macho/fat_file"
-require "macho/exceptions"
-require "macho/utils"
-require "macho/tools"
+require "#{File.dirname(__FILE__)}/cstruct"
+require "#{File.dirname(__FILE__)}/macho/headers"
+require "#{File.dirname(__FILE__)}/macho/structure"
+require "#{File.dirname(__FILE__)}/macho/load_commands"
+require "#{File.dirname(__FILE__)}/macho/sections"
+require "#{File.dirname(__FILE__)}/macho/macho_file"
+require "#{File.dirname(__FILE__)}/macho/fat_file"
+require "#{File.dirname(__FILE__)}/macho/exceptions"
+require "#{File.dirname(__FILE__)}/macho/utils"
+require "#{File.dirname(__FILE__)}/macho/tools"
 
 module MachO
 	# nothing to see here.
