@@ -30,11 +30,11 @@ module MachO
 		end
 
 		def magic32?
-			Utils.magic32?(header[:magic])
+			MachO.magic32?(header[:magic])
 		end
 
 		def magic64?
-			Utils.magic64?(header[:magic])
+			MachO.magic64?(header[:magic])
 		end
 
 		# is the file executable?
@@ -144,8 +144,8 @@ module MachO
 			old_id = dylib_id
 			new_id = new_id.dup
 
-			new_pad = Utils.round(new_id.size, cmd_round) - new_id.size
-			old_pad = Utils.round(old_id.size, cmd_round) - old_id.size
+			new_pad = MachO.round(new_id.size, cmd_round) - new_id.size
+			old_pad = MachO.round(old_id.size, cmd_round) - old_id.size
 
 			# pad the old and new IDs with null bytes to meet command bounds
 			old_id << "\x00" * old_pad
@@ -272,7 +272,7 @@ module MachO
 			sizeofcmds = get_sizeofcmds
 			flags = get_flags
 			
-			if Utils.magic32?(magic)
+			if MachO.magic32?(magic)
 				MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
 			else
 				# the reserved field is...reserved, so just fill it with 0
@@ -283,11 +283,11 @@ module MachO
 		def get_magic
 			magic = @raw_data[0..3].unpack("N").first
 
-			if !Utils.magic?(magic)
+			if !MachO.magic?(magic)
 				raise MagicError.new(magic)
 			end
 			
-			if Utils.fat_magic?(magic)
+			if MachO.fat_magic?(magic)
 				raise FatBinaryError.new
 			end
 
