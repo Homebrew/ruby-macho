@@ -10,5 +10,14 @@ require "#{File.dirname(__FILE__)}/macho/utils"
 require "#{File.dirname(__FILE__)}/macho/tools"
 
 module MachO
-	# nothing to see here.
+	def self.open(filename)
+		# open file and test magic instead of using exceptions for control?
+		begin
+			file = MachOFile.new(filename)
+		rescue FatBinaryError
+			file = FatFile.new(filename)
+		end
+
+		file
+	end
 end
