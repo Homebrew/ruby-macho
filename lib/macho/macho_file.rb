@@ -218,9 +218,11 @@ module MachO
 		end
 
 		# stub
-		def change_dylib!(old_path, new_path)
+		def change_dylib(old_path, new_path)
 			raise DylibUnknownError.new(old_path) unless linked_dylibs.include?(old_path)
 		end
+
+		alias :change_install_name, :change_dylib
 
 		# get all sections in a segment by name
 		def sections(segment)
