@@ -163,6 +163,12 @@ module MachO
 	SEG_UNIXSTACK = "__UNIXSTACK"
 	SEG_IMPORT = "__IMPORT"
 
+	# constant bits for flags in SegmentCommand, SegmentCommand64
+	SG_HIGHVM = 0x1
+	SG_FVMLIB = 0x2
+	SG_NORELOC = 0x4
+	SG_PROTECTED_VERSION_1 = 0x8
+
 	# Mach-O load command structure
 	# this is the most generic load command - only cmd ID and size are
 	# represented, and no actual data. used when a more specific class
