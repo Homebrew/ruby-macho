@@ -48,7 +48,7 @@ module MachO
 		end
 
 		def linked_dylibs
-			dylibs = machos.map(&:linked_dylibs)
+			dylibs = machos.map(&:linked_dylibs).flatten
 
 			# can machos inside fat binaries have different dylibs?
 			dylibs.uniq!
