@@ -54,6 +54,13 @@ module MachO
 			dylibs.uniq!
 		end
 
+		# stub
+		def change_dylib(old_path, new_path)
+			raise DylibUnknownError.new(old_path) unless linked_dylibs.include?(old_path)
+		end
+
+		alias :change_install_name :change_dylib
+
 		def write(filename)
 			File.open(filename, "wb") { |f| f.write(@raw_data) }
 		end
