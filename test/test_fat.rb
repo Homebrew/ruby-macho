@@ -11,9 +11,7 @@ class FatFileTest < Minitest::Test
 			assert macho.dylib?
 			assert !macho.bundle?
 
-			# these are going to vary by arch in the fat file
-			# assert_equal MachO::MH_CIGAM_64, macho.magic
-			# assert_equal "MH_CIGAM_64", macho.magic_string
+			assert MachO.magic?(macho.magic)
 
 			assert_equal "MH_DYLIB", macho.filetype
 			assert macho.cputype
