@@ -217,9 +217,70 @@ module MachO
 			dylibs
 		end
 
-		# stub
+		# TODO: genericize change_dylib and dylib_id= for DRYness
 		def change_dylib(old_path, new_path)
-			raise DylibUnknownError.new(old_path) unless linked_dylibs.include?(old_path)
+			idx = linked_dylibs.index(old_path)
+			raise DylibUnknownError.new(old_path) if idx.nil?
+
+			# this is a bit of a hack - since there is a 1-1 ordered association
+			# between linked_dylibs and command('LC_LOAD_DYLIB'), we can use
+			# their indices interchangeably to avoid having to loop.
+			dylib_cmd = command('LC_LOAD_DYLIB')[idx]
+
+			if magic32?
+				cmd_round = 4
+			else
+				cmd_round = 8
+			end
+
+			new_sizeofcmds = header[:sizeofcmds]
+			old_install_name = old_path.dup
+			new_install_name = new_path.dup
+
+			old_pad = MachO.round(old_install_name.size, cmd_round) - old_install_name.size
+			new_pad = MachO.round(new_install_name.size, cmd_round) - new_install_name.size
+
+			old_install_name << "\x00" * old_pad
+			new_install_name << "\x00" * new_pad
+
+			new_size = DylibCommand.bytesize + new_install_name.size
+			new_sizeofcmds += new_size - dylib_cmd.cmdsize
+
+			low_fileoff = 2**64
+
+			segments.each do |seg|
+				sections(seg).each do |sect|
+					if sect.size != 0 && !sect.flag?(S_ZEROFILL) &&
+							!sect.flag?(S_THREAD_LOCAL_ZEROFILL) &&
+							sect.offset < low_fileoff
+
+						low_fileoff = sect.offset
+					end
+				end
+			end
+
+			if new_sizeofcmds + header.bytesize > low_fileoff
+				raise HeaderPadError.new(@filename)
+			end
+
+			set_sizeofcmds(new_sizeofcmds)
+
+			@raw_data[dylib_cmd.offset + 4, 4] = [new_size].pack("V")
+
+			@raw_data.slice!(dylib_cmd.offset + dylib_cmd.name...dylib_cmd.offset + dylib_cmd.class.bytesize + old_install_name.size)
+
+			@raw_data.insert(dylib_cmd.offset + dylib_cmd.name, new_install_name)
+
+			null_pad = old_install_name.size - new_install_name.size
+
+			if null_pad < 0
+				@raw_data.slice!(new_sizeofcmds + header.bytesize, null_pad.abs)
+			else
+				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
+			end
+
+			header = get_mach_header
+			load_commands = get_load_commands
 		end
 
 		alias :change_install_name :change_dylib

@@ -56,7 +56,11 @@ module MachO
 
 		# stub
 		def change_dylib(old_path, new_path)
-			raise DylibUnknownError.new(old_path) unless linked_dylibs.include?(old_path)
+			machos.each do |macho|
+				macho.change_install_name(old_path, new_path)
+			end
+
+			synchronize_raw_data
 		end
 
 		alias :change_install_name :change_dylib
