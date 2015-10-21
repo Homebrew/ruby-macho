@@ -3,7 +3,7 @@ require 'macho'
 
 class MachOOpenTest < Minitest::Test
 	def test_open
-		file = MachO.open("test/bin/thin.dylib")
+		file = MachO.open("test/bin/libhello.dylib")
 
 		assert file.is_a? MachO::MachOFile
 

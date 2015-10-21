@@ -35,7 +35,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_dylib
-		file = MachO::MachOFile.new("test/bin/thin.dylib")
+		file = MachO::MachOFile.new("test/bin/libhello.dylib")
 
 		# a file can only be ONE of these
 		refute file.executable?
@@ -59,7 +59,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_bundle
-		file = MachO::MachOFile.new("test/bin/attr.so")
+		file = MachO::MachOFile.new("test/bin/hellobundle.so")
 
 		# a file can only be ONE of these
 		refute file.executable?
@@ -83,7 +83,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_change_dylib_id
-		file = MachO::MachOFile.new("test/bin/thin.dylib")
+		file = MachO::MachOFile.new("test/bin/libhello.dylib")
 
 		# changing the dylib id should work
 		old_id = file.dylib_id
@@ -97,14 +97,20 @@ class MachOFileTest < Minitest::Test
 		assert file.segments.size > 0
 		assert file.linked_dylibs.size > 0
 
-		really_big_id = "x" * 2048
+		really_big_id = "x" * 4096
 
 		# test failsafe for excessively large IDs (w/ no special linking)
 		assert_raises MachO::HeaderPadError do
 			file.dylib_id = really_big_id
 		end
 
-		# TODO: compare actual and expected file hashes
+		file.dylib_id = "test"
+
+		file.write("test/bin/libhello_actual.dylib")
+
+		assert equal_sha1_hashes("test/bin/libhello_actual.dylib", "test/bin/libhello_expected.dylib")
+	ensure
+		File.delete("test/bin/libhello_actual.dylib")
 	end
 
 	def test_change_install_name
