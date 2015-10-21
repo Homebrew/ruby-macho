@@ -7,7 +7,7 @@ class MachOOpenTest < Minitest::Test
 
 		assert file.is_a? MachO::MachOFile
 
-		file = MachO.open("test/bin/fat.dylib")
+		file = MachO.open("test/bin/libfathello.dylib")
 
 		assert file.is_a? MachO::FatFile
 	end
