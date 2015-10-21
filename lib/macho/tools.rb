@@ -18,7 +18,13 @@ module MachO
 		end
 
 		def self.change_install_name(filename, old_name, new_name)
-			raise MachOError.new("changing install names is incomplete")
+			file = MachO.open(filename)
+
+			if File.is_a? MachO::MachOFile
+				file.change_install_name(old_name, new_name)
+			else
+				raise MachOError.new("changing install names for fat binaries is incomplete")
+			end
 		end
 	end
 end
