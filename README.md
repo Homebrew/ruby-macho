@@ -73,19 +73,23 @@ file.write! # dangerous: overwrites the original file!
 
 * Reading data from x86/x86_64 Mach-O files
 * Changing the IDs of Mach-O dylibs
+* Changing install names in Mach-O files
 
 ### What might work?
 
 * Reading *some* data from PPC Mach-O files.
-* Reading data from Universal Mach-O files.
+* Reading data from "Fat" files.
 
 ### What doesn't work yet?
 
 * Reading data from any other architecure's Mach-O files (probably).
+* Changing anything in "Fat" files (at least not correctly).
 
 ### What needs to be done?
 
 * Documentation.
+* Rpath modification.
+* Many, many things.
 
 Attribution:
 
