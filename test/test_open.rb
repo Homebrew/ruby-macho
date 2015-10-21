@@ -5,10 +5,10 @@ class MachOOpenTest < Minitest::Test
 	def test_open
 		file = MachO.open("test/bin/libhello.dylib")
 
-		assert file.is_a? MachO::MachOFile
+		assert_kind_of MachO::MachOFile, file
 
 		file = MachO.open("test/bin/libfathello.dylib")
 
-		assert file.is_a? MachO::FatFile
+		assert_kind_of MachO::FatFile, file
 	end
 end
