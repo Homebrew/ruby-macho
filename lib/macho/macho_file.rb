@@ -1,7 +1,19 @@
 module MachO
+	# Represents a Mach-O file, which contains a header and load commands
+	# as well as binary executable instructions. Mach-O binaries are
+	# architecture specific.
+	# @see https://en.wikipedia.org/wiki/Mach-O
 	class MachOFile
-		attr_reader :header, :load_commands
+		# @return [MachO::MachHeader] if the Mach-O is 32-bit
+		# @return [MachO::MachHeader64] if the Mach-O is 64-bit
+		attr_reader :header
 
+		# @return [Array<MachO::LoadCommand>] an array of the file's load commands
+		attr_reader :load_commands
+
+		# Creates a new MachOFile instance from a binary string.
+		# @param bin [String] a binary string containing raw Mach-O data
+		# @return [MachO::MachOFile] a new MachOFile
 		def self.new_from_bin(bin)
 			instance = allocate
 			instance.initialize_from_bin(bin)
@@ -9,6 +21,9 @@ module MachO
 			instance
 		end
 
+		# Creates a new FatFile from the given filename.
+		# @param filename [String] the Mach-O file to load from
+		# @todo document all the exceptions propagated here
 		def initialize(filename)
 			raise ArgumentError.new("filename must be a String") unless filename.is_a? String
 
@@ -18,6 +33,7 @@ module MachO
 			@load_commands = get_load_commands
 		end
 
+		# @private
 		def initialize_from_bin(bin)
 			@filename = nil
 			@raw_data = bin
@@ -25,80 +41,91 @@ module MachO
 			@load_commands = get_load_commands
 		end
 
+		# The file's raw Mach-O data.
+		# @return [String] the raw Mach-O data
 		def serialize
 			@raw_data
 		end
 
+		# @return [Boolean] true if the Mach-O has 32-bit magic, false otherwise
 		def magic32?
 			MachO.magic32?(header[:magic])
 		end
 
+		# @return [Boolean] true if the Mach-O has 64-bit magic, false otherwise
 		def magic64?
 			MachO.magic64?(header[:magic])
 		end
 
-		# is the file executable?
+		# @return [Boolean] true if the Mach-O is of type `MH_EXECUTE`, false otherwise
 		def executable?
 			header[:filetype] == MH_EXECUTE
 		end
 
-		# is the file a dynamically bound shared object?
+		# @return [Boolean] true if the Mach-O is of type `MH_DYLIB`, false otherwise
 		def dylib?
 			header[:filetype] == MH_DYLIB
 		end
 
-		# is the file a dynamically bound bundle?
+		# @return [Boolean] true if the Mach-O is of type `MH_BUNDLE`, false otherwise
 		def bundle?
 			header[:filetype] == MH_BUNDLE
 		end
 
+		# @return [Fixnum] the Mach-O's magic number
 		def magic
 			header[:magic]
 		end
 
-		# string representation of the header's magic bytes
+		# @return [String] a string representation of the Mach-O's magic number
 		def magic_string
 			MH_MAGICS[header[:magic]]
 		end
 
-		# string representation of the header's filetype field
+		# @return [String] a string representation of the Mach-O's filetype
 		def filetype
 			MH_FILETYPES[header[:filetype]]
 		end
 
-		# string representation of the header's cputype field
+		# @return [String] a string representation of the Mach-O's CPU type
 		def cputype
 			CPU_TYPES[header[:cputype]]
 		end
 
-		# string representation of the header's cpusubtype field
+		# @return [String] a string representation of the Mach-O's CPU subtype
 		def cpusubtype
 			CPU_SUBTYPES[header[:cpusubtype]]
 		end
 
-		# number of load commands in the header
+		# @return [Fixnum] the number of load commands in the Mach-O's header
 		def ncmds
 			header[:ncmds]
 		end
 
-		# size of all load commands
+		# @return [Fixnum] the size of all load commands, in bytes
 		def sizeofcmds
 			header[:sizeofcmds]
 		end
 
-		# various execution flags
+		# @return [Fixnum] execution flags set by the linker
 		def flags
 			header[:flags]
 		end
 
-		# get load commands by name
+		# All load commands of a given name.
+		# @example
+		#  file.command("LC_LOAD_DYLIB")
+		#  file["LC_LOAD_DYLIB"]
+		# @return [Array<MachO::LoadCommand>] an array of LoadCommands corresponding to `name`
 		def command(name)
 			load_commands.select { |lc| lc.to_s == name }
 		end
 
 		alias :[] :command
 
-		# get all segment commands
+		# All segment load commands in the Mach-O.
+		# @return [Array<MachO::SegmentCommand>] if the Mach-O is 32-bit
+		# @return [Array<MachO::SegmentCommand64>] if the Mach-O is 64-bit
 		def segments
 			if magic32?
 				command("LC_SEGMENT")
@@ -107,7 +134,10 @@ module MachO
 			end
 		end
 
-		# get the file's dylib id, if it is a dylib
+		# The Mach-O's dylib ID, or `nil` if not a dylib.
+		# @example
+		#  file.dylib_id # => 'libBar.dylib'
+		# @return [String] the Mach-O's dylib ID
 		def dylib_id
 			if !dylib?
 				return nil
@@ -124,6 +154,11 @@ module MachO
 			dylib_id.delete("\x00")
 		end
 
+		# Changes the Mach-O's dylib ID to `new_id`. Does nothing if not a dylib.
+		# @example
+		#  file.dylib_id = "libFoo.dylib"
+		# @return [void]
+		# @todo refactor
 		def dylib_id=(new_id)
 			if !new_id.is_a?(String)
 				raise ArgumentError.new("argument must be a String")
@@ -199,7 +234,8 @@ module MachO
 			load_commands = get_load_commands
 		end
 
-		# get a list of dylib paths linked to this file
+		# All shared libraries linked to the Mach-O.
+		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
 			dylibs = []
 			dylib_cmds = command('LC_LOAD_DYLIB')
@@ -217,10 +253,11 @@ module MachO
 			dylibs
 		end
 
-		# TODO: genericize change_dylib and dylib_id= for DRYness
-		def change_dylib(old_path, new_path)
-			idx = linked_dylibs.index(old_path)
-			raise DylibUnknownError.new(old_path) if idx.nil?
+		# @return [void]
+		# @todo refactor
+		def change_install_name(old_name, new_name)
+			idx = linked_dylibs.index(old_name)
+			raise DylibUnknownError.new(old_name) if idx.nil?
 
 			# this is a bit of a hack - since there is a 1-1 ordered association
 			# between linked_dylibs and command('LC_LOAD_DYLIB'), we can use
@@ -234,8 +271,8 @@ module MachO
 			end
 
 			new_sizeofcmds = header[:sizeofcmds]
-			old_install_name = old_path.dup
-			new_install_name = new_path.dup
+			old_install_name = old_name.dup
+			new_install_name = new_name.dup
 
 			old_pad = MachO.round(old_install_name.size, cmd_round) - old_install_name.size
 			new_pad = MachO.round(new_install_name.size, cmd_round) - new_install_name.size
@@ -283,9 +320,11 @@ module MachO
 			load_commands = get_load_commands
 		end
 
-		alias :change_install_name :change_dylib
+		alias :change_dylib :change_install_name
 
-		# get all sections in a segment by name
+		# All sections of the segment `segment`.
+		# @return [Array<MachO::Section>] if the Mach-O is 32-bit
+		# @return [Array<MachO::Section64>] if the Mach-O is 64-bit
 		def sections(segment)
 			sections = []
 
@@ -312,10 +351,16 @@ module MachO
 			sections
 		end
 
+		# Write all Mach-O data to the given filename.
+		# @param filename [String] the file to write to
+		# @return [void]
 		def write(filename)
 			File.open(filename, "wb") { |f| f.write(@raw_data) }
 		end
 
+		# Write all Mach-O data to the file used to initialize the instance.
+		# @raise [MachOError] if the instance was created from a binary string
+		# @return [void]
 		def write!
 			if @filename.nil?
 				raise MachOError.new("cannot write to a default file when initialized from a binary string")

@@ -1,0 +1,1543 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>
+  Class: MachO::DysymtabCommand
+  
+    &mdash; Documentation by YARD 0.8.7.6
+  
+</title>
+
+  <link rel="stylesheet" href="../css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="../css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '../';
+  framesUrl = "../frames.html#!MachO/DysymtabCommand.html";
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="../_index.html">Index (D)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../MachO.html" title="MachO (module)">MachO</a></span></span>
+     &raquo; 
+    <span class="title">DysymtabCommand</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../class_list.html">
+      Class List
+    </a>
+  
+    <a class="full_list_link" id="method_list_link"
+        href="../method_list.html">
+      Method List
+    </a>
+  
+    <a class="full_list_link" id="file_list_link"
+        href="../file_list.html">
+      File List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content"><h1>Class: MachO::DysymtabCommand
+  
+  
+  
+</h1>
+
+<dl class="box">
+  
+    <dt class="r1">Inherits:</dt>
+    <dd class="r1">
+      <span class="inheritName"><span class='object_link'><a href="LoadCommand.html" title="MachO::LoadCommand (class)">LoadCommand</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next"><span class='object_link'><a href="MachOStructure.html" title="MachO::MachOStructure (class)">MachOStructure</a></span></li>
+          
+            <li class="next"><span class='object_link'><a href="LoadCommand.html" title="MachO::LoadCommand (class)">LoadCommand</a></span></li>
+          
+            <li class="next">MachO::DysymtabCommand</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+      </dd>
+    
+  
+  
+    
+  
+    
+  
+  
+  
+    <dt class="r2 last">Defined in:</dt>
+    <dd class="r2 last">lib/macho/load_commands.rb</dd>
+  
+</dl>
+<div class="clear"></div>
+
+
+
+
+
+  <h2>Instance Attribute Summary <small>(<a href="#" class="summary_toggle">collapse</a>)</small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#extrefsymoff-instance_method" title="#extrefsymoff (instance method)">- (Object) <strong>extrefsymoff</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute extrefsymoff.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#extreloff-instance_method" title="#extreloff (instance method)">- (Object) <strong>extreloff</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute extreloff.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#iextdefsym-instance_method" title="#iextdefsym (instance method)">- (Object) <strong>iextdefsym</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute iextdefsym.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#ilocalsym-instance_method" title="#ilocalsym (instance method)">- (Object) <strong>ilocalsym</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute ilocalsym.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#indirectsymoff-instance_method" title="#indirectsymoff (instance method)">- (Object) <strong>indirectsymoff</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute indirectsymoff.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#iundefsym-instance_method" title="#iundefsym (instance method)">- (Object) <strong>iundefsym</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute iundefsym.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#locreloff-instance_method" title="#locreloff (instance method)">- (Object) <strong>locreloff</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute locreloff.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#modtaboff-instance_method" title="#modtaboff (instance method)">- (Object) <strong>modtaboff</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute modtaboff.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nextdefsym-instance_method" title="#nextdefsym (instance method)">- (Object) <strong>nextdefsym</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nextdefsym.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nextrefsyms-instance_method" title="#nextrefsyms (instance method)">- (Object) <strong>nextrefsyms</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nextrefsyms.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nextrel-instance_method" title="#nextrel (instance method)">- (Object) <strong>nextrel</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nextrel.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nindirectsyms-instance_method" title="#nindirectsyms (instance method)">- (Object) <strong>nindirectsyms</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nindirectsyms.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nlocalsym-instance_method" title="#nlocalsym (instance method)">- (Object) <strong>nlocalsym</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nlocalsym.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nlocrel-instance_method" title="#nlocrel (instance method)">- (Object) <strong>nlocrel</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nlocrel.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nmodtab-instance_method" title="#nmodtab (instance method)">- (Object) <strong>nmodtab</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nmodtab.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#ntoc-instance_method" title="#ntoc (instance method)">- (Object) <strong>ntoc</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute ntoc.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nundefsym-instance_method" title="#nundefsym (instance method)">- (Object) <strong>nundefsym</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute nundefsym.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#tocoff-instance_method" title="#tocoff (instance method)">- (Object) <strong>tocoff</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute tocoff.</p>
+</div></span>
+  
+</li>
+
+    
+  </ul>
+
+
+
+  
+  
+  <h3 class="inherited">Attributes inherited from <span class='object_link'><a href="LoadCommand.html" title="MachO::LoadCommand (class)">LoadCommand</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="LoadCommand.html#cmd-instance_method" title="MachO::LoadCommand#cmd (method)">#cmd</a></span>, <span class='object_link'><a href="LoadCommand.html#cmdsize-instance_method" title="MachO::LoadCommand#cmdsize (method)">#cmdsize</a></span>, <span class='object_link'><a href="LoadCommand.html#offset-instance_method" title="MachO::LoadCommand#offset (method)">#offset</a></span></p>
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">- (DysymtabCommand) <strong>initialize</strong>(offset, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym, nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff, nmodtab, extrefsymoff, nextrefsyms, indirectsymoff, nindirectsyms, extreloff, nextrel, locreloff, nlocrel) </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>ugh.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="LoadCommand.html" title="MachO::LoadCommand (class)">LoadCommand</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="LoadCommand.html#new_from_bin-class_method" title="MachO::LoadCommand.new_from_bin (method)">new_from_bin</a></span>, <span class='object_link'><a href="LoadCommand.html#to_s-instance_method" title="MachO::LoadCommand#to_s (method)">#to_s</a></span></p>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="MachOStructure.html" title="MachO::MachOStructure (class)">MachOStructure</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="MachOStructure.html#bytesize-class_method" title="MachO::MachOStructure.bytesize (method)">bytesize</a></span>, <span class='object_link'><a href="MachOStructure.html#new_from_bin-class_method" title="MachO::MachOStructure.new_from_bin (method)">new_from_bin</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    - (<tt><span class='object_link'><a href="" title="MachO::DysymtabCommand (class)">DysymtabCommand</a></span></tt>) <strong>initialize</strong>(offset, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym, nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff, nmodtab, extrefsymoff, nextrefsyms, indirectsymoff, nindirectsyms, extreloff, nextrel, locreloff, nlocrel) 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>ugh</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 426</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span><span class='comma'>,</span> <span class='id identifier rubyid_ilocalsym'>ilocalsym</span><span class='comma'>,</span> <span class='id identifier rubyid_nlocalsym'>nlocalsym</span><span class='comma'>,</span> <span class='id identifier rubyid_iextdefsym'>iextdefsym</span><span class='comma'>,</span>
+		<span class='id identifier rubyid_nextdefsym'>nextdefsym</span><span class='comma'>,</span> <span class='id identifier rubyid_iundefsym'>iundefsym</span><span class='comma'>,</span> <span class='id identifier rubyid_nundefsym'>nundefsym</span><span class='comma'>,</span> <span class='id identifier rubyid_tocoff'>tocoff</span><span class='comma'>,</span> <span class='id identifier rubyid_ntoc'>ntoc</span><span class='comma'>,</span> <span class='id identifier rubyid_modtaboff'>modtaboff</span><span class='comma'>,</span>
+		<span class='id identifier rubyid_nmodtab'>nmodtab</span><span class='comma'>,</span> <span class='id identifier rubyid_extrefsymoff'>extrefsymoff</span><span class='comma'>,</span> <span class='id identifier rubyid_nextrefsyms'>nextrefsyms</span><span class='comma'>,</span> <span class='id identifier rubyid_indirectsymoff'>indirectsymoff</span><span class='comma'>,</span>
+		<span class='id identifier rubyid_nindirectsyms'>nindirectsyms</span><span class='comma'>,</span> <span class='id identifier rubyid_extreloff'>extreloff</span><span class='comma'>,</span> <span class='id identifier rubyid_nextrel'>nextrel</span><span class='comma'>,</span> <span class='id identifier rubyid_locreloff'>locreloff</span><span class='comma'>,</span> <span class='id identifier rubyid_nlocrel'>nlocrel</span><span class='rparen'>)</span>
+	<span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span><span class='rparen'>)</span>
+	<span class='ivar'>@ilocalsym</span> <span class='op'>=</span> <span class='id identifier rubyid_ilocalsym'>ilocalsym</span>
+	<span class='ivar'>@nlocalsym</span> <span class='op'>=</span> <span class='id identifier rubyid_nlocalsym'>nlocalsym</span>
+	<span class='ivar'>@iextdefsym</span> <span class='op'>=</span> <span class='id identifier rubyid_iextdefsym'>iextdefsym</span>
+	<span class='ivar'>@nextdefsym</span> <span class='op'>=</span> <span class='id identifier rubyid_nextdefsym'>nextdefsym</span>
+	<span class='ivar'>@iundefsym</span> <span class='op'>=</span> <span class='id identifier rubyid_iundefsym'>iundefsym</span>
+	<span class='ivar'>@nundefsym</span> <span class='op'>=</span> <span class='id identifier rubyid_nundefsym'>nundefsym</span>
+	<span class='ivar'>@tocoff</span> <span class='op'>=</span> <span class='id identifier rubyid_tocoff'>tocoff</span>
+	<span class='ivar'>@ntoc</span> <span class='op'>=</span> <span class='id identifier rubyid_ntoc'>ntoc</span>
+	<span class='ivar'>@modtaboff</span> <span class='op'>=</span> <span class='id identifier rubyid_modtaboff'>modtaboff</span>
+	<span class='ivar'>@nmodtab</span> <span class='op'>=</span> <span class='id identifier rubyid_nmodtab'>nmodtab</span>
+	<span class='ivar'>@extrefsymoff</span> <span class='op'>=</span> <span class='id identifier rubyid_extrefsymoff'>extrefsymoff</span>
+	<span class='ivar'>@nextrefsyms</span> <span class='op'>=</span> <span class='id identifier rubyid_nextrefsyms'>nextrefsyms</span>
+	<span class='ivar'>@indirectsymoff</span> <span class='op'>=</span> <span class='id identifier rubyid_indirectsymoff'>indirectsymoff</span>
+	<span class='ivar'>@nindirectsyms</span> <span class='op'>=</span> <span class='id identifier rubyid_nindirectsyms'>nindirectsyms</span>
+	<span class='ivar'>@extreloff</span> <span class='op'>=</span> <span class='id identifier rubyid_extreloff'>extreloff</span>
+	<span class='ivar'>@nextrel</span> <span class='op'>=</span> <span class='id identifier rubyid_nextrel'>nextrel</span>
+	<span class='ivar'>@locreloff</span> <span class='op'>=</span> <span class='id identifier rubyid_locreloff'>locreloff</span>
+	<span class='ivar'>@nlocrel</span> <span class='op'>=</span> <span class='id identifier rubyid_nlocrel'>nlocrel</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="extrefsymoff-instance_method">
+  
+    - (<tt>Object</tt>) <strong>extrefsymoff</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute extrefsymoff</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+419
+420
+421</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 419</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_extrefsymoff'>extrefsymoff</span>
+  <span class='ivar'>@extrefsymoff</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="extreloff-instance_method">
+  
+    - (<tt>Object</tt>) <strong>extreloff</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute extreloff</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+420
+421
+422</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 420</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_extreloff'>extreloff</span>
+  <span class='ivar'>@extreloff</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="iextdefsym-instance_method">
+  
+    - (<tt>Object</tt>) <strong>iextdefsym</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute iextdefsym</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+417
+418
+419</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 417</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_iextdefsym'>iextdefsym</span>
+  <span class='ivar'>@iextdefsym</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="ilocalsym-instance_method">
+  
+    - (<tt>Object</tt>) <strong>ilocalsym</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute ilocalsym</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+417
+418
+419</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 417</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_ilocalsym'>ilocalsym</span>
+  <span class='ivar'>@ilocalsym</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="indirectsymoff-instance_method">
+  
+    - (<tt>Object</tt>) <strong>indirectsymoff</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute indirectsymoff</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+419
+420
+421</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 419</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_indirectsymoff'>indirectsymoff</span>
+  <span class='ivar'>@indirectsymoff</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="iundefsym-instance_method">
+  
+    - (<tt>Object</tt>) <strong>iundefsym</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute iundefsym</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+418
+419
+420</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 418</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_iundefsym'>iundefsym</span>
+  <span class='ivar'>@iundefsym</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="locreloff-instance_method">
+  
+    - (<tt>Object</tt>) <strong>locreloff</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute locreloff</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+420
+421
+422</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 420</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_locreloff'>locreloff</span>
+  <span class='ivar'>@locreloff</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="modtaboff-instance_method">
+  
+    - (<tt>Object</tt>) <strong>modtaboff</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute modtaboff</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+418
+419
+420</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 418</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_modtaboff'>modtaboff</span>
+  <span class='ivar'>@modtaboff</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nextdefsym-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nextdefsym</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nextdefsym</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+417
+418
+419</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 417</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nextdefsym'>nextdefsym</span>
+  <span class='ivar'>@nextdefsym</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nextrefsyms-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nextrefsyms</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nextrefsyms</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+419
+420
+421</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 419</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nextrefsyms'>nextrefsyms</span>
+  <span class='ivar'>@nextrefsyms</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nextrel-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nextrel</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nextrel</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+420
+421
+422</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 420</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nextrel'>nextrel</span>
+  <span class='ivar'>@nextrel</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nindirectsyms-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nindirectsyms</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nindirectsyms</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+420
+421
+422</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 420</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nindirectsyms'>nindirectsyms</span>
+  <span class='ivar'>@nindirectsyms</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nlocalsym-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nlocalsym</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nlocalsym</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+417
+418
+419</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 417</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nlocalsym'>nlocalsym</span>
+  <span class='ivar'>@nlocalsym</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nlocrel-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nlocrel</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nlocrel</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+420
+421
+422</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 420</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nlocrel'>nlocrel</span>
+  <span class='ivar'>@nlocrel</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nmodtab-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nmodtab</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nmodtab</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+419
+420
+421</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 419</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nmodtab'>nmodtab</span>
+  <span class='ivar'>@nmodtab</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="ntoc-instance_method">
+  
+    - (<tt>Object</tt>) <strong>ntoc</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute ntoc</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+418
+419
+420</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 418</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_ntoc'>ntoc</span>
+  <span class='ivar'>@ntoc</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="nundefsym-instance_method">
+  
+    - (<tt>Object</tt>) <strong>nundefsym</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute nundefsym</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+418
+419
+420</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 418</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nundefsym'>nundefsym</span>
+  <span class='ivar'>@nundefsym</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="tocoff-instance_method">
+  
+    - (<tt>Object</tt>) <strong>tocoff</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the value of attribute tocoff</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+418
+419
+420</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 418</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_tocoff'>tocoff</span>
+  <span class='ivar'>@tocoff</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+
+</div>
+
+    <div id="footer">
+  Generated on Fri Oct 23 01:37:25 2015 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.7.6 (ruby-2.2.3).
+</div>
+
+  </body>
+</html>
