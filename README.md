@@ -14,6 +14,8 @@ executables, dynamic libraries, and so forth.
 
 ### Slapped together documentation
 
+More complete documentation is available [here!](http://www.rubydoc.info/gems/ruby-macho/)
+
 Reading a file:
 
 ```ruby
