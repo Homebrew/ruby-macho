@@ -2,10 +2,10 @@ lib/macho.rb 09102240cd80cbd7ffa8f9aa197d74444325dec7
 lib/cstruct.rb c7f0a813001776ad07bf147457c64a88e26135a7
 lib/macho/utils.rb dbddfc581ff7d21ae468cfe04c719a1c66700526
 lib/macho/tools.rb 941de2f3415746f659fc4c1ae5ede7d64f5f869f
-lib/macho/headers.rb b6fe229d26489266533b9084bbebd184718c1de6
+lib/macho/headers.rb 876d4d7ee52b7eb1ddad50192de9287a332211bf
 lib/macho/sections.rb 7492e18893245bff7e0f8f936478e119cad83e21
 lib/macho/fat_file.rb d62fbf541afbd419df0449772bde8b4c51eee24e
 lib/macho/structure.rb 6e73493add0485620709e9e63d38bb9abb7ff8e7
 lib/macho/macho_file.rb b6daef0d8fa0d2dda62b212d4846b1e2f7650100
 lib/macho/exceptions.rb c1e5570546d9d8b140dcc3085f14359272bbe382
-lib/macho/load_commands.rb eb453d86c72c508824ce4d4661af531b90a4a02d
+lib/macho/load_commands.rb 80f2a7f4c867b603f82e978c74ec659206a929ab

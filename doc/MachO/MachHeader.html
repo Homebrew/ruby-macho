@@ -157,7 +157,8 @@
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>True if <code>flag</code> is present in the header&#39;s flag section.</p>
+</div></span>
   
 </li>
 
@@ -199,12 +200,40 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p>Returns true if <code>flag</code> is present in the header&#39;s flag section</p>
+
 
   </div>
 </div>
 <div class="tags">
   
+  <div class="examples">
+    <p class="tag_title">Examples:</p>
+    
+      
+      <pre class="example code"><code><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>this mach-o has position-independent execution</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_header'>header</span><span class='period'>.</span><span class='id identifier rubyid_flag?'>flag?</span><span class='lparen'>(</span><span class='const'>MH_PIE</span><span class='rparen'>)</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>flag</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>a mach header flag constant</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -214,6 +243,10 @@
         <span class='type'>(<tt>Boolean</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>true if <code>flag</code> is present in the header&#39;s flag section</p>
+</div>
       
     </li>
   
@@ -225,12 +258,12 @@
       <pre class="lines">
 
 
-262
-263
-264</pre>
+265
+266
+267</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/headers.rb', line 262</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/headers.rb', line 265</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_flag?'>flag?</span><span class='lparen'>(</span><span class='id identifier rubyid_flag'>flag</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_flags'>flags</span> <span class='op'>&amp;</span> <span class='id identifier rubyid_flag'>flag</span> <span class='op'>==</span> <span class='id identifier rubyid_flag'>flag</span>
@@ -245,7 +278,7 @@
 </div>
 
     <div id="footer">
-  Generated on Fri Oct 23 13:11:06 2015 by
+  Generated on Fri Oct 23 13:43:21 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.3).
 </div>

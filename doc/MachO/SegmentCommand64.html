@@ -103,7 +103,18 @@
 </dl>
 <div class="clear"></div>
 
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A load command indicating that part of this file is to be mapped into
+the task&#39;s address space. Corresponds to LC_SEGMENT_64.</p>
 
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
 
 
 
@@ -422,7 +433,8 @@
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>The segment&#39;s name, with any trailing NULL characters removed.</p>
+</div></span>
   
 </li>
 
@@ -480,22 +492,22 @@
       <pre class="lines">
 
 
-242
-243
-244
-245
-246
-247
-248
-249
-250
-251
-252
-253
-254</pre>
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 242</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 265</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span><span class='comma'>,</span> <span class='id identifier rubyid_segname'>segname</span><span class='comma'>,</span> <span class='id identifier rubyid_vmaddr'>vmaddr</span><span class='comma'>,</span> <span class='id identifier rubyid_vmsize'>vmsize</span><span class='comma'>,</span> <span class='id identifier rubyid_fileoff'>fileoff</span><span class='comma'>,</span>
 		<span class='id identifier rubyid_filesize'>filesize</span><span class='comma'>,</span> <span class='id identifier rubyid_maxprot'>maxprot</span><span class='comma'>,</span> <span class='id identifier rubyid_initprot'>initprot</span><span class='comma'>,</span> <span class='id identifier rubyid_nsects'>nsects</span><span class='comma'>,</span> <span class='id identifier rubyid_flags'>flags</span><span class='rparen'>)</span>
@@ -547,12 +559,12 @@
       <pre class="lines">
 
 
-236
-237
-238</pre>
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fileoff'>fileoff</span>
   <span class='ivar'>@fileoff</span>
@@ -589,12 +601,12 @@
       <pre class="lines">
 
 
-236
-237
-238</pre>
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_filesize'>filesize</span>
   <span class='ivar'>@filesize</span>
@@ -631,12 +643,12 @@
       <pre class="lines">
 
 
-237
-238
-239</pre>
+260
+261
+262</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 237</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 260</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_flags'>flags</span>
   <span class='ivar'>@flags</span>
@@ -673,12 +685,12 @@
       <pre class="lines">
 
 
-237
-238
-239</pre>
+260
+261
+262</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 237</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 260</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initprot'>initprot</span>
   <span class='ivar'>@initprot</span>
@@ -715,12 +727,12 @@
       <pre class="lines">
 
 
-236
-237
-238</pre>
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_maxprot'>maxprot</span>
   <span class='ivar'>@maxprot</span>
@@ -757,12 +769,12 @@
       <pre class="lines">
 
 
-237
-238
-239</pre>
+260
+261
+262</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 237</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 260</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_nsects'>nsects</span>
   <span class='ivar'>@nsects</span>
@@ -799,12 +811,12 @@
       <pre class="lines">
 
 
-236
-237
-238</pre>
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_segname'>segname</span>
   <span class='ivar'>@segname</span>
@@ -841,12 +853,12 @@
       <pre class="lines">
 
 
-236
-237
-238</pre>
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_vmaddr'>vmaddr</span>
   <span class='ivar'>@vmaddr</span>
@@ -883,12 +895,12 @@
       <pre class="lines">
 
 
-236
-237
-238</pre>
+259
+260
+261</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 236</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 259</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_vmsize'>vmsize</span>
   <span class='ivar'>@vmsize</span>
@@ -914,18 +926,45 @@
   
 
   
-</h3><table class="source_code">
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the segment&#39;s name, with any trailing NULL characters removed</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        
+        <div class='inline'><p>the segment&#39;s name, with any trailing NULL characters removed</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
   <tr>
     <td>
       <pre class="lines">
 
 
-256
-257
-258</pre>
+280
+281
+282</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 256</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 280</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_segment_name'>segment_name</span>
 	<span class='ivar'>@segname</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>\x00</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
@@ -940,7 +979,7 @@
 </div>
 
     <div id="footer">
-  Generated on Fri Oct 23 13:11:07 2015 by
+  Generated on Fri Oct 23 13:43:22 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.3).
 </div>

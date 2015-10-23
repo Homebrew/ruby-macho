@@ -103,7 +103,18 @@
 </dl>
 <div class="clear"></div>
 
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>A load command containing a single 128-bit unique random number identifying
+an object produced by static link editor. Corresponds to LC_UUID.</p>
 
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
 
 
 
@@ -113,7 +124,7 @@
       <li class="public ">
   <span class="summary_signature">
     
-      <a href="#uuid-instance_method" title="#uuid (instance method)">- (Object) <strong>uuid</strong> </a>
+      <a href="#uuid-instance_method" title="#uuid (instance method)">- (Array&lt;Fixnum&gt;) <strong>uuid</strong> </a>
     
 
     
@@ -132,7 +143,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute uuid.</p>
+    <span class="summary_desc"><div class='inline'><p>The UUID.</p>
 </div></span>
   
 </li>
@@ -234,13 +245,13 @@
       <pre class="lines">
 
 
-203
-204
-205
-206</pre>
+221
+222
+223
+224</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 203</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 221</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span><span class='comma'>,</span> <span class='id identifier rubyid_uuid'>uuid</span><span class='rparen'>)</span>
 	<span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span><span class='rparen'>)</span>
@@ -261,7 +272,7 @@
       <div class="method_details first">
   <h3 class="signature first" id="uuid-instance_method">
   
-    - (<tt>Object</tt>) <strong>uuid</strong>  <span class="extras">(readonly)</span>
+    - (<tt>Array&lt;Fixnum&gt;</tt>) <strong>uuid</strong>  <span class="extras">(readonly)</span>
   
 
   
@@ -269,13 +280,30 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns the value of attribute uuid</p>
+    <p>Returns the UUID</p>
 
 
   </div>
 </div>
 <div class="tags">
   
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array&lt;Fixnum&gt;</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the UUID</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -283,12 +311,12 @@
       <pre class="lines">
 
 
-198
-199
-200</pre>
+216
+217
+218</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 198</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 216</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_uuid'>uuid</span>
   <span class='ivar'>@uuid</span>
@@ -304,7 +332,7 @@
 </div>
 
     <div id="footer">
-  Generated on Fri Oct 23 13:11:07 2015 by
+  Generated on Fri Oct 23 13:43:22 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.3).
 </div>

@@ -233,7 +233,6 @@ module MachO
 		MH_APP_EXTENSION_SAFE => "MH_APP_EXTENSION_SAFE"
 	}
 
-	# 'Fat' binaries envelop Mach-O binaries so include them for completeness,
 	# Fat binary header structure
 	class FatHeader < CStruct
 		uint32 :magic
@@ -259,6 +258,10 @@ module MachO
 		uint32 :sizeofcmds
 		uint32 :flags
 
+		# @example
+		#  puts "this mach-o has position-independent execution" if header.flag?(MH_PIE)
+		# @param flag [Fixnum] a mach header flag constant
+		# @return [Boolean] true if `flag` is present in the header's flag section
 		def flag?(flag)
 			flags & flag == flag
 		end
@@ -275,6 +278,10 @@ module MachO
 		uint32 :flags
 		uint32 :reserved
 
+		# @example
+		#  puts "this mach-o has position-independent execution" if header.flag?(MH_PIE)
+		# @param flag [Fixnum] a mach header flag constant
+		# @return [Boolean] true if `flag` is present in the header's flag section
 		def flag?(flag)
 			flags & flag == flag
 		end

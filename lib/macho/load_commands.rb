@@ -170,31 +170,49 @@ module MachO
 	SG_PROTECTED_VERSION_1 = 0x8
 
 	# Mach-O load command structure
-	# this is the most generic load command - only cmd ID and size are
-	# represented, and no actual data. used when a more specific class
-	# isn't available/implemented
+	# This is the most generic load command - only cmd ID and size are
+	# represented, and no actual data. Used when a more specific class
+	# isn't available/implemented.
 	class LoadCommand < MachOStructure
-		attr_reader :offset, :cmd, :cmdsize
+		# @return [Fixnum] the offset in the file the command was created from
+		attr_reader :offset
+
+		# @return [Fixnum] the load command's identifying number
+		attr_reader :cmd
+
+		# @return [Fixnum] the size of the load command, in bytes
+		attr_reader :cmdsize
 
 		@format = "VV"
 		@sizeof = 8
 
+		# Creates a new LoadCommand given an offset and binary string
+		# @param offset [Fixnum] the offset to initialize with
+		# @param bin [String] the binary string to initialize with
+		# @return [MachO::LoadCommand] the new load command
 		def self.new_from_bin(offset, bin)
 			self.new(offset, *bin.unpack(@format))
 		end
 
+		# @param offset [Fixnum] the offset to initialize iwth
+		# @param cmd [Fixnum] the load command's identifying number
+		# @param cmdsize [Fixnum] the size of the load command in bytes
 		def initialize(offset, cmd, cmdsize)
 			@offset = offset
 			@cmd = cmd
 			@cmdsize = cmdsize
 		end
 
+		# @return [String] a string representation of the load command's identifying number
 		def to_s
 			LOAD_COMMANDS[cmd]
 		end
 	end
 
+	# A load command containing a single 128-bit unique random number identifying
+	# an object produced by static link editor. Corresponds to LC_UUID.
 	class UUIDCommand < LoadCommand
+		# @return [Array<Fixnum>] the UUID
 		attr_reader :uuid
 
 		@format = "VVa16"
@@ -206,6 +224,8 @@ module MachO
 		end
 	end
 
+	# A load command indicating that part of this file is to be mapped into
+	# the task's address space. Corresponds to LC_SEGMENT.
 	class SegmentCommand < LoadCommand
 		attr_reader :segname, :vmaddr, :vmsize, :fileoff, :filesize, :maxprot
 		attr_reader :initprot, :nsects, :flags
@@ -227,11 +247,14 @@ module MachO
 			@flags = flags
 		end
 
+		# @return the segment's name, with any trailing NULL characters removed
 		def segment_name
 			@segname.delete("\x00")
 		end
 	end
 
+	# A load command indicating that part of this file is to be mapped into
+	# the task's address space. Corresponds to LC_SEGMENT_64.
 	class SegmentCommand64 < LoadCommand
 		attr_reader :segname, :vmaddr, :vmsize, :fileoff, :filesize, :maxprot
 		attr_reader :initprot, :nsects, :flags
@@ -253,11 +276,15 @@ module MachO
 			@flags = flags
 		end
 
+		# @return the segment's name, with any trailing NULL characters removed
 		def segment_name
 			@segname.delete("\x00")
 		end
 	end
 
+	# A load command representing some aspect of shared libraries, depending
+	# on filetype. Corresponds to LC_ID_DYLIB, LC_LOAD_DYLIB, LC_LOAD_WEAK_DYLIB,
+	# and LC_REEXPORT_DYLIB.
 	class DylibCommand < LoadCommand
 		attr_reader :name, :timestamp, :current_version, :compatibility_version
 
@@ -274,6 +301,9 @@ module MachO
 		end
 	end
 
+	# A load command representing some aspect of the dynamic linker, depending
+	# on filetype. Corresponds to LC_ID_DYLINKER, LC_LOAD_DYLINKER, and
+	# LC_DYLD_ENVIRONMENT.
 	class DylinkerCommand < LoadCommand
 		attr_reader :name
 
@@ -286,6 +316,8 @@ module MachO
 		end
 	end
 
+	# A load command used to indicate dynamic libraries used in prebinding.
+	# Corresponds to LC_PREBOUND_DYLIB.
 	class PreboundDylibCommand < LoadCommand
 		attr_reader :name, :nmodules, :linked_modules
 
@@ -300,8 +332,7 @@ module MachO
 		end
 	end
 
-	# NOTE: cctools-870 has all fields of thread_command commented out
-	# except common ones (cmd, cmdsize)
+	# @note cctools-870 has all fields of thread_command commented out except common ones (cmd, cmdsize)
 	class ThreadCommand < LoadCommand
 
 	end

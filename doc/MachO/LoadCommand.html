@@ -104,9 +104,9 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     <p>Mach-O load command structure
-this is the most generic load command - only cmd ID and size are
-represented, and no actual data. used when a more specific class
-isn&#39;t available/implemented</p>
+This is the most generic load command - only cmd ID and size are
+represented, and no actual data. Used when a more specific class
+isn&#39;t available/implemented.</p>
 
 
   </div>
@@ -128,7 +128,7 @@ isn&#39;t available/implemented</p>
       <li class="public ">
   <span class="summary_signature">
     
-      <a href="#cmd-instance_method" title="#cmd (instance method)">- (Object) <strong>cmd</strong> </a>
+      <a href="#cmd-instance_method" title="#cmd (instance method)">- (Fixnum) <strong>cmd</strong> </a>
     
 
     
@@ -147,7 +147,7 @@ isn&#39;t available/implemented</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute cmd.</p>
+    <span class="summary_desc"><div class='inline'><p>The load command&#39;s identifying number.</p>
 </div></span>
   
 </li>
@@ -156,7 +156,7 @@ isn&#39;t available/implemented</p>
       <li class="public ">
   <span class="summary_signature">
     
-      <a href="#cmdsize-instance_method" title="#cmdsize (instance method)">- (Object) <strong>cmdsize</strong> </a>
+      <a href="#cmdsize-instance_method" title="#cmdsize (instance method)">- (Fixnum) <strong>cmdsize</strong> </a>
     
 
     
@@ -175,7 +175,7 @@ isn&#39;t available/implemented</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute cmdsize.</p>
+    <span class="summary_desc"><div class='inline'><p>The size of the load command, in bytes.</p>
 </div></span>
   
 </li>
@@ -184,7 +184,7 @@ isn&#39;t available/implemented</p>
       <li class="public ">
   <span class="summary_signature">
     
-      <a href="#offset-instance_method" title="#offset (instance method)">- (Object) <strong>offset</strong> </a>
+      <a href="#offset-instance_method" title="#offset (instance method)">- (Fixnum) <strong>offset</strong> </a>
     
 
     
@@ -203,7 +203,7 @@ isn&#39;t available/implemented</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Returns the value of attribute offset.</p>
+    <span class="summary_desc"><div class='inline'><p>The offset in the file the command was created from.</p>
 </div></span>
   
 </li>
@@ -225,7 +225,7 @@ isn&#39;t available/implemented</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#new_from_bin-class_method" title="new_from_bin (class method)">+ (Object) <strong>new_from_bin</strong>(offset, bin) </a>
+      <a href="#new_from_bin-class_method" title="new_from_bin (class method)">+ (MachO::LoadCommand) <strong>new_from_bin</strong>(offset, bin) </a>
     
 
     
@@ -239,7 +239,8 @@ isn&#39;t available/implemented</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>Creates a new LoadCommand given an offset and binary string.</p>
+</div></span>
   
 </li>
 
@@ -281,7 +282,7 @@ isn&#39;t available/implemented</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#to_s-instance_method" title="#to_s (instance method)">- (Object) <strong>to_s</strong> </a>
+      <a href="#to_s-instance_method" title="#to_s (instance method)">- (String) <strong>to_s</strong> </a>
     
 
     
@@ -295,7 +296,8 @@ isn&#39;t available/implemented</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>A string representation of the load command&#39;s identifying number.</p>
+</div></span>
   
 </li>
 
@@ -334,7 +336,56 @@ isn&#39;t available/implemented</p>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>offset</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the offset to initialize iwth</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>cmd</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the load command&#39;s identifying number</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>cmdsize</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the size of the load command in bytes</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 
 </div><table class="source_code">
   <tr>
@@ -342,14 +393,14 @@ isn&#39;t available/implemented</p>
       <pre class="lines">
 
 
-186
-187
-188
-189
-190</pre>
+200
+201
+202
+203
+204</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 186</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 200</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_cmd'>cmd</span><span class='comma'>,</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span><span class='rparen'>)</span>
 	<span class='ivar'>@offset</span> <span class='op'>=</span> <span class='id identifier rubyid_offset'>offset</span>
@@ -371,7 +422,7 @@ isn&#39;t available/implemented</p>
       <div class="method_details first">
   <h3 class="signature first" id="cmd-instance_method">
   
-    - (<tt>Object</tt>) <strong>cmd</strong>  <span class="extras">(readonly)</span>
+    - (<tt>Fixnum</tt>) <strong>cmd</strong>  <span class="extras">(readonly)</span>
   
 
   
@@ -379,13 +430,30 @@ isn&#39;t available/implemented</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns the value of attribute cmd</p>
+    <p>Returns the load command&#39;s identifying number</p>
 
 
   </div>
 </div>
 <div class="tags">
   
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the load command&#39;s identifying number</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -393,12 +461,12 @@ isn&#39;t available/implemented</p>
       <pre class="lines">
 
 
-177
-178
-179</pre>
+181
+182
+183</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 177</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 181</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_cmd'>cmd</span>
   <span class='ivar'>@cmd</span>
@@ -413,7 +481,7 @@ isn&#39;t available/implemented</p>
       <div class="method_details ">
   <h3 class="signature " id="cmdsize-instance_method">
   
-    - (<tt>Object</tt>) <strong>cmdsize</strong>  <span class="extras">(readonly)</span>
+    - (<tt>Fixnum</tt>) <strong>cmdsize</strong>  <span class="extras">(readonly)</span>
   
 
   
@@ -421,13 +489,30 @@ isn&#39;t available/implemented</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns the value of attribute cmdsize</p>
+    <p>Returns the size of the load command, in bytes</p>
 
 
   </div>
 </div>
 <div class="tags">
   
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the size of the load command, in bytes</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -435,12 +520,12 @@ isn&#39;t available/implemented</p>
       <pre class="lines">
 
 
-177
-178
-179</pre>
+184
+185
+186</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 177</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 184</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_cmdsize'>cmdsize</span>
   <span class='ivar'>@cmdsize</span>
@@ -455,7 +540,7 @@ isn&#39;t available/implemented</p>
       <div class="method_details ">
   <h3 class="signature " id="offset-instance_method">
   
-    - (<tt>Object</tt>) <strong>offset</strong>  <span class="extras">(readonly)</span>
+    - (<tt>Fixnum</tt>) <strong>offset</strong>  <span class="extras">(readonly)</span>
   
 
   
@@ -463,13 +548,30 @@ isn&#39;t available/implemented</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Returns the value of attribute offset</p>
+    <p>Returns the offset in the file the command was created from</p>
 
 
   </div>
 </div>
 <div class="tags">
   
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the offset in the file the command was created from</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -477,12 +579,12 @@ isn&#39;t available/implemented</p>
       <pre class="lines">
 
 
-177
 178
-179</pre>
+179
+180</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 177</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 178</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_offset'>offset</span>
   <span class='ivar'>@offset</span>
@@ -502,24 +604,85 @@ isn&#39;t available/implemented</p>
       <div class="method_details first">
   <h3 class="signature first" id="new_from_bin-class_method">
   
-    + (<tt>Object</tt>) <strong>new_from_bin</strong>(offset, bin) 
+    + (<tt><span class='object_link'><a href="" title="MachO::LoadCommand (class)">MachO::LoadCommand</a></span></tt>) <strong>new_from_bin</strong>(offset, bin) 
   
 
   
 
   
-</h3><table class="source_code">
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Creates a new LoadCommand given an offset and binary string</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>offset</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the offset to initialize with</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>bin</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the binary string to initialize with</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="MachO::LoadCommand (class)">MachO::LoadCommand</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the new load command</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
   <tr>
     <td>
       <pre class="lines">
 
 
-182
-183
-184</pre>
+193
+194
+195</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 182</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 193</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new_from_bin'>new_from_bin</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='id identifier rubyid_bin'>bin</span><span class='rparen'>)</span>
 	<span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_offset'>offset</span><span class='comma'>,</span> <span class='op'>*</span><span class='id identifier rubyid_bin'>bin</span><span class='period'>.</span><span class='id identifier rubyid_unpack'>unpack</span><span class='lparen'>(</span><span class='ivar'>@format</span><span class='rparen'>)</span><span class='rparen'>)</span>
@@ -538,24 +701,51 @@ isn&#39;t available/implemented</p>
       <div class="method_details first">
   <h3 class="signature first" id="to_s-instance_method">
   
-    - (<tt>Object</tt>) <strong>to_s</strong> 
+    - (<tt>String</tt>) <strong>to_s</strong> 
   
 
   
 
   
-</h3><table class="source_code">
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns a string representation of the load command&#39;s identifying number</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>a string representation of the load command&#39;s identifying number</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
   <tr>
     <td>
       <pre class="lines">
 
 
-192
-193
-194</pre>
+207
+208
+209</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 192</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/load_commands.rb', line 207</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_to_s'>to_s</span>
 	<span class='const'>LOAD_COMMANDS</span><span class='lbracket'>[</span><span class='id identifier rubyid_cmd'>cmd</span><span class='rbracket'>]</span>
@@ -570,7 +760,7 @@ isn&#39;t available/implemented</p>
 </div>
 
     <div id="footer">
-  Generated on Fri Oct 23 13:11:07 2015 by
+  Generated on Fri Oct 23 13:43:22 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.3).
 </div>
