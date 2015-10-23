@@ -1493,7 +1493,8 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>True if <code>num</code> is a valid Fat magic number, false otherwise.</p>
+</div></span>
   
 </li>
 
@@ -1515,7 +1516,8 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>True if <code>num</code> is a valid 32-bit magic number, false otherwise.</p>
+</div></span>
   
 </li>
 
@@ -1537,7 +1539,8 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>True if <code>num</code> is a valid 64-bit magic number, false otherwise.</p>
+</div></span>
   
 </li>
 
@@ -1559,7 +1562,8 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'><p>True if <code>num</code> is a valid Mach-O magic number, false otherwise.</p>
+</div></span>
   
 </li>
 
@@ -1590,7 +1594,7 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#round-class_method" title="round (class method)">+ (Object) <strong>round</strong>(value, round) </a>
+      <a href="#round-class_method" title="round (class method)">+ (Fixnum) <strong>round</strong>(value, round) </a>
     
 
     
@@ -1604,7 +1608,7 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 
   
-    <span class="summary_desc"><div class='inline'><p><a href="http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c">http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c</a>.</p>
+    <span class="summary_desc"><div class='inline'><p>The next number &gt;= <code>value</code> such that <code>round</code> is its divisor.</p>
 </div></span>
   
 </li>
@@ -1630,12 +1634,32 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p>Returns true if <code>num</code> is a valid Fat magic number, false otherwise</p>
+
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>num</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the number being checked</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1645,6 +1669,10 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
         <span class='type'>(<tt>Boolean</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>true if <code>num</code> is a valid Fat magic number, false otherwise</p>
+</div>
       
     </li>
   
@@ -1656,12 +1684,12 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
       <pre class="lines">
 
 
-14
-15
-16</pre>
+21
+22
+23</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 14</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 21</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_fat_magic?'>fat_magic?</span><span class='lparen'>(</span><span class='id identifier rubyid_num'>num</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_num'>num</span> <span class='op'>==</span> <span class='const'>FAT_MAGIC</span> <span class='op'>||</span> <span class='id identifier rubyid_num'>num</span> <span class='op'>==</span> <span class='const'>FAT_CIGAM</span>
@@ -1682,12 +1710,32 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p>Returns true if <code>num</code> is a valid 32-bit magic number, false otherwise</p>
+
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>num</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the number being checked</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1697,6 +1745,10 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
         <span class='type'>(<tt>Boolean</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>true if <code>num</code> is a valid 32-bit magic number, false otherwise</p>
+</div>
       
     </li>
   
@@ -1708,12 +1760,12 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
       <pre class="lines">
 
 
-18
-19
-20</pre>
+27
+28
+29</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 18</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 27</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_magic32?'>magic32?</span><span class='lparen'>(</span><span class='id identifier rubyid_num'>num</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_num'>num</span> <span class='op'>==</span> <span class='const'>MH_MAGIC</span> <span class='op'>||</span> <span class='id identifier rubyid_num'>num</span> <span class='op'>==</span> <span class='const'>MH_CIGAM</span>
@@ -1734,12 +1786,32 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p>Returns true if <code>num</code> is a valid 64-bit magic number, false otherwise</p>
+
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>num</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the number being checked</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1749,6 +1821,10 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
         <span class='type'>(<tt>Boolean</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>true if <code>num</code> is a valid 64-bit magic number, false otherwise</p>
+</div>
       
     </li>
   
@@ -1760,12 +1836,12 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
       <pre class="lines">
 
 
-22
-23
-24</pre>
+33
+34
+35</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 22</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 33</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_magic64?'>magic64?</span><span class='lparen'>(</span><span class='id identifier rubyid_num'>num</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_num'>num</span> <span class='op'>==</span> <span class='const'>MH_MAGIC_64</span> <span class='op'>||</span> <span class='id identifier rubyid_num'>num</span> <span class='op'>==</span> <span class='const'>MH_CIGAM_64</span>
@@ -1786,12 +1862,32 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p>Returns true if <code>num</code> is a valid Mach-O magic number, false otherwise</p>
+
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>num</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the number being checked</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -1801,6 +1897,10 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
         <span class='type'>(<tt>Boolean</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>true if <code>num</code> is a valid Mach-O magic number, false otherwise</p>
+</div>
       
     </li>
   
@@ -1812,12 +1912,12 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
       <pre class="lines">
 
 
-10
-11
-12</pre>
+15
+16
+17</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 10</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 15</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_magic?'>magic?</span><span class='lparen'>(</span><span class='id identifier rubyid_num'>num</span><span class='rparen'>)</span>
 	<span class='const'>MH_MAGICS</span><span class='period'>.</span><span class='id identifier rubyid_has_key?'>has_key?</span><span class='lparen'>(</span><span class='id identifier rubyid_num'>num</span><span class='rparen'>)</span>
@@ -1933,7 +2033,7 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
       <div class="method_details ">
   <h3 class="signature " id="round-class_method">
   
-    + (<tt>Object</tt>) <strong>round</strong>(value, round) 
+    + (<tt>Fixnum</tt>) <strong>round</strong>(value, round) 
   
 
   
@@ -1941,13 +2041,71 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p><a href="http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c">http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c</a></p>
+    <p>Returns the next number &gt;= <code>value</code> such that <code>round</code> is its divisor</p>
 
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the number being rounded</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>round</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the number being rounded with</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the next number &gt;= <code>value</code> such that <code>round</code> is its divisor</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><a href="http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c" target="_parent" title="http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c">http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c</a></li>
+    
+  </ul>
 
 </div><table class="source_code">
   <tr>
@@ -1955,15 +2113,15 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
       <pre class="lines">
 
 
-3
-4
-5
 6
 7
-8</pre>
+8
+9
+10
+11</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 3</span>
+      <pre class="code"><span class="info file"># File 'lib/macho/utils.rb', line 6</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_round'>round</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_round'>round</span><span class='rparen'>)</span>
 	<span class='id identifier rubyid_round'>round</span> <span class='op'>-=</span> <span class='int'>1</span>
@@ -1981,7 +2139,7 @@ we don&#39;t use these anywhere right now, but they&#39;re good to have</p>
 </div>
 
     <div id="footer">
-  Generated on Fri Oct 23 01:43:06 2015 by
+  Generated on Fri Oct 23 01:50:56 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.3).
 </div>
