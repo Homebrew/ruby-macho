@@ -1,4 +1,5 @@
 doc/
+.yardoc/
 *.dylib
 *.so
 *.a

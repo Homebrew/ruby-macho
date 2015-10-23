@@ -361,6 +361,7 @@ module MachO
 		# Write all Mach-O data to the file used to initialize the instance.
 		# @raise [MachOError] if the instance was created from a binary string
 		# @return [void]
+		# @note Overwrites all data in the file!
 		def write!
 			if @filename.nil?
 				raise MachOError.new("cannot write to a default file when initialized from a binary string")

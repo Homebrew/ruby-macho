@@ -105,7 +105,7 @@ module MachO
 		end
 
 		# Write all (fat) data to the file used to initialize the instance.
-		# IMPORTANT: Overwrites all data in the file!
+		# @note Overwrites all data in the file!
 		def write!
 			File.open(@filename, "wb") { |f| f.write(@raw_data) }
 		end
@@ -158,6 +158,7 @@ module MachO
 
 		# @todo this needs to be redesigned. arch[:offset] and arch[:size] are
 		# already out-of-date, and the header needs to be synchronized as well.
+		# @private
 		def synchronize_raw_data
 			machos.each_with_index do |macho, i|
 				arch = fat_archs[i]
