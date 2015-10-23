@@ -2,7 +2,7 @@ lib/macho.rb 09102240cd80cbd7ffa8f9aa197d74444325dec7
 lib/cstruct.rb c7f0a813001776ad07bf147457c64a88e26135a7
 lib/macho/utils.rb dbddfc581ff7d21ae468cfe04c719a1c66700526
 lib/macho/tools.rb 941de2f3415746f659fc4c1ae5ede7d64f5f869f
-lib/macho/headers.rb c38f71b1dfc1ced8cbfe119a4bdaf2cd3fd3db32
+lib/macho/headers.rb b6fe229d26489266533b9084bbebd184718c1de6
 lib/macho/sections.rb 7492e18893245bff7e0f8f936478e119cad83e21
 lib/macho/fat_file.rb d62fbf541afbd419df0449772bde8b4c51eee24e
 lib/macho/structure.rb 6e73493add0485620709e9e63d38bb9abb7ff8e7
