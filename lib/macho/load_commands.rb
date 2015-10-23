@@ -246,21 +246,40 @@ module MachO
 		LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
 	}
 
-	# currently known segment names
-	# we don't use these anywhere right now, but they're good to have
+	# pagezero segment name
 	SEG_PAGEZERO = "__PAGEZERO"
+
+	# text segment name
 	SEG_TEXT = "__TEXT"
+
+	# data segment name
 	SEG_DATA = "__DATA"
+
+	# objective-c runtime segment
 	SEG_OBJC = "__OBJC"
+
+	# icon segment
 	SEG_ICON = "__ICON"
+
+	# link editor structures segment
 	SEG_LINKEDIT = "__LINKEDIT"
+
+	# unix stack segment
 	SEG_UNIXSTACK = "__UNIXSTACK"
+
+	# segment for self-modifying code with RWX permissions
 	SEG_IMPORT = "__IMPORT"
 
-	# constant bits for flags in SegmentCommand, SegmentCommand64
+	# the file contents for this segment is for the high part of the VM space, the low part is zero filled (for stacks in core files)
 	SG_HIGHVM = 0x1
+
+	# this segment is the VM that is allocated by a fixed VM library, for overlap checking in the link editor
 	SG_FVMLIB = 0x2
+
+	# this segment has nothing that was relocated in it and nothing relocated to it, that is it maybe safely replaced without relocation
 	SG_NORELOC = 0x4
+
+	# this segment is protected.  if the segment starts at file offset 0, the first page of the segment is not protected.  all other pages of the segment are protected.
 	SG_PROTECTED_VERSION_1 = 0x8
 
 	# Mach-O load command structure
@@ -284,6 +303,7 @@ module MachO
 		# @param offset [Fixnum] the offset to initialize with
 		# @param bin [String] the binary string to initialize with
 		# @return [MachO::LoadCommand] the new load command
+		# @private
 		def self.new_from_bin(offset, bin)
 			self.new(offset, *bin.unpack(@format))
 		end
@@ -291,6 +311,7 @@ module MachO
 		# @param offset [Fixnum] the offset to initialize iwth
 		# @param cmd [Fixnum] the load command's identifying number
 		# @param cmdsize [Fixnum] the size of the load command in bytes
+		# @private
 		def initialize(offset, cmd, cmdsize)
 			@offset = offset
 			@cmd = cmd
@@ -312,6 +333,7 @@ module MachO
 		@format = "VVa16"
 		@sizeof = 24
 
+		# @private
 		def initialize(offset, cmd, cmdsize, uuid)
 			super(offset, cmd, cmdsize)
 			@uuid = uuid.unpack("C16") # re-unpack for the actual UUID array
@@ -327,6 +349,7 @@ module MachO
 		@format = "VVa16VVVVVVVV"
 		@sizeof = 56
 
+		# @private
 		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
 				filesize, maxprot, initprot, nsects, flags)
 			super(offset, cmd, cmdsize)
@@ -341,7 +364,7 @@ module MachO
 			@flags = flags
 		end
 
-		# @return the segment's name, with any trailing NULL characters removed
+		# @return [String] the segment's name, with any trailing NULL characters removed
 		def segment_name
 			@segname.delete("\x00")
 		end
@@ -356,6 +379,7 @@ module MachO
 		@format = "VVa16QQQQVVVV"
 		@sizeof = 72
 
+		# @private
 		def initialize(offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
 				filesize, maxprot, initprot, nsects, flags)
 			super(offset, cmd, cmdsize)
@@ -370,7 +394,7 @@ module MachO
 			@flags = flags
 		end
 
-		# @return the segment's name, with any trailing NULL characters removed
+		# @return [String] the segment's name, with any trailing NULL characters removed
 		def segment_name
 			@segname.delete("\x00")
 		end
@@ -385,6 +409,7 @@ module MachO
 		@format = "VVVVVV"
 		@sizeof = 24
 
+		# @private
 		def initialize(offset, cmd, cmdsize, name, timestamp, current_version,
 				compatibility_version)
 			super(offset, cmd, cmdsize)
@@ -404,6 +429,7 @@ module MachO
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, name)
 			super(offset, cmd, cmdsize)
 			@name = name
@@ -418,6 +444,7 @@ module MachO
 		@format = "VVVVV"
 		@sizeof = 20
 
+		# @private
 		def initialize(offset, cmd, cmdsize, name, nmodules, linked_modules)
 			super(offset, cmd, cmdsize)
 			@name = name
@@ -426,6 +453,7 @@ module MachO
 		end
 	end
 
+	# A load command used to represent threads.
 	# @note cctools-870 has all fields of thread_command commented out except common ones (cmd, cmdsize)
 	class ThreadCommand < LoadCommand
 
@@ -441,6 +469,7 @@ module MachO
 		@format = "VVVVVVVVVV"
 		@sizeof = 40
 
+		# @private
 		def initialize(offset, cmd, cmdsize, init_address, init_module,
 				reserved1, reserved2, reserved3, reserved4, reserved5,
 				reserved6)
@@ -466,6 +495,7 @@ module MachO
 		@format = "VVQQQQQQQQ"
 		@sizeof = 72
 
+		# @private
 		def initialize(offset, cmd, cmdsize, init_address, init_module,
 				reserved1, reserved2, reserved3, reserved4, reserved5,
 				reserved6)
@@ -489,6 +519,7 @@ module MachO
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, umbrella)
 			super(offset, cmd, cmdsize)
 			@umbrella = umbrella
@@ -503,6 +534,7 @@ module MachO
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, sub_umbrella)
 			super(offset, cmd, cmdsize)
 			@sub_umbrella = sub_umbrella
@@ -517,30 +549,47 @@ module MachO
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, sub_library)
 			super(offset, cmd, cmdsize)
 			@sub_library = sub_library
 		end
 	end
 
+	# A load command signifying a shared library that is a subframework of
+	# an umbrella framework. Corresponds to LC_SUB_CLIENT.
 	class SubClientCommand < LoadCommand
 		attr_reader :sub_client
 
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, sub_client)
 			super(offset, cmd, cmdsize)
 			@sub_client = sub_client
 		end
 	end
 
+	# A load command containing the offsets and sizes of the link-edit 4.3BSD
+	# "stab" style symbol table information. Corresponds to LC_SYMTAB.
 	class SymtabCommand < LoadCommand
-		attr_reader :symoff, :nsyms, :stroff, :strsize
+		# @return [Fixnum] the symbol table's offset
+		attr_reader :symoff
+
+		# @return [Fixnum] the number of symbol table entries
+		attr_reader :nsyms
+
+		# @return the string table's offset
+		attr_reader :stroff
+
+		# @return the string table size in bytes
+		attr_reader :strsize
 
 		@format = "VVVVVV"
 		@sizeof = 24
 
+		# @private
 		def initialize(offset, cmd, cmdsize, symoff, nsyms, stroff, strsize)
 			super(offset, cmd, cmdsize)
 			@symoff = symoff
@@ -550,16 +599,51 @@ module MachO
 		end
 	end
 
+	# A load command containing symbolic information needed to support data
+	# structures used by the dynamic link editor. Corresponds to LC_DYSYMTAB.
 	class DysymtabCommand < LoadCommand
-		attr_reader :ilocalsym, :nlocalsym, :iextdefsym, :nextdefsym
-		attr_reader :iundefsym, :nundefsym, :tocoff, :ntoc, :modtaboff
-		attr_reader :nmodtab, :extrefsymoff, :nextrefsyms, :indirectsymoff
-		attr_reader :nindirectsyms, :extreloff, :nextrel, :locreloff, :nlocrel
+		attr_reader :ilocalsym
+
+		attr_reader :nlocalsym
+
+		attr_reader :iextdefsym
+
+		attr_reader :nextdefsym
+
+		attr_reader :iundefsym
+
+		attr_reader :nundefsym
+
+		attr_reader :tocoff
+
+		attr_reader :ntoc
+
+		attr_reader :modtaboff
+
+		attr_reader :nmodtab
+
+		attr_reader :extrefsymoff
+
+		attr_reader :nextrefsyms
+
+		attr_reader :indirectsymoff
+
+		attr_reader :nindirectsyms
+
+		attr_reader :extreloff
+
+		attr_reader :nextrel
+
+		attr_reader :locreloff
+
+		attr_reader :nlocrel
+
 
 		@format = "VVVVVVVVVVVVVVVVVVVV"
 		@sizeof = 80
 
 		# ugh
+		# @private
 		def initialize(offset, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
 				nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff,
 				nmodtab, extrefsymoff, nextrefsyms, indirectsymoff,
@@ -586,12 +670,19 @@ module MachO
 		end
 	end
 
+	# A load command containing the offset and number of hints in the two-level
+	# namespace lookup hints table. Corresponds to LC_TWOLEVEL_HINTS.
 	class TwolevelHintsCommand < LoadCommand
-		attr_reader :htoffset, :nhints
+		# @return [Fixnum] the offset to the hint table
+		attr_reader :htoffset
+
+		# @return [Fixnum] the number of hints in the hint table
+		attr_reader :nhints
 
 		@format = "VVVV"
 		@sizeof = 16
 
+		# @private
 		def initialize(offset, cmd, cmdsize, htoffset, nhints)
 			super(offset, cmd, cmdsize)
 			@htoffset = htoffset
@@ -599,36 +690,52 @@ module MachO
 		end
 	end
 
+	# A load command containing the value of the original checksum for prebound
+	# files, or zero. Corresponds to LC_PREBIND_CKSUM.
 	class PrebindCksumCommand < LoadCommand
+		# @return [Fixnum] the checksum or 0
 		attr_reader :cksum
 
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, cksum)
 			super(offset, cmd, cmdsize)
 			@cksum = cksum
 		end
 	end
 
+	# A load command representing an rpath, which specifies a path that should
+	# be added to the current run path used to find @rpath prefixed dylibs.
+	# Corresponds to LC_RPATH.
 	class RpathCommand < LoadCommand
 		attr_reader :path
 
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, path)
 			super(offset, cmd, cmdsize)
 			@path = path
 		end
 	end
 
+	# A load command representing the offsets and sizes of a blob of data in
+	# the __LINKEDIT segment. Corresponds to LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
+	# LC_FUNCTION_STARTS, LC_DATA_IN_CODE, LC_DYLIB_CODE_SIGN_DRS, and LC_LINKER_OPTIMIZATION_HINT.
 	class LinkeditDataCommand < LoadCommand
-		attr_reader :dataoff, :datasize
+		# @return [Fixnum] offset to the data in the __LINKEDIT segment
+		attr_reader :dataoff
+
+		# @return [Fixnum] size of the data in the __LINKEDIT segment
+		attr_reader :datasize
 
 		@format = "VVVV"
 		@sizeof = 16
 
+		# @private
 		def initialize(offset, cmd, cmdsize, dataoff, datasize)
 			super(offset, cmd, cmdsize)
 			@dataoff = dataoff
@@ -636,12 +743,22 @@ module MachO
 		end
 	end
 
+	# A load command representing the offset to and size of an encrypted
+	# segment. Corresponds to LC_ENCRYPTION_INFO.
 	class EncryptionInfoCommand < LoadCommand
-		attr_reader :cryptoff, :cryptsize, :cryptid
+		# @return [Fixnum] the offset to the encrypted segment
+		attr_reader :cryptoff
+
+		# @return [Fixnum] the size of the encrypted segment
+		attr_reader :cryptsize
+
+		# @return [Fixnum] the encryption system, or 0 if not encrypted yet
+		attr_reader :cryptid
 
 		@format = "VVVVV"
 		@sizeof = 20
 
+		# @private
 		def initialize(offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
 			super(offset, cmd, cmdsize)
 			@cryptoff = cryptoff
@@ -650,12 +767,25 @@ module MachO
 		end
 	end
 
+	# A load command representing the offset to and size of an encrypted
+	# segment. Corresponds to LC_ENCRYPTION_INFO_64.
 	class EncryptionInfoCommand64 < LoadCommand
-		attr_reader :cryptoff, :cryptsize, :cryptid, :pad
+		# @return [Fixnum] the offset to the encrypted segment
+		attr_reader :cryptoff
+
+		# @return [Fixnum] the size of the encrypted segment
+		attr_reader :cryptsize
+
+		# @return [Fixnum] the encryption system, or 0 if not encrypted yet
+		attr_reader :cryptid
+
+		# @return [Fixnum] 64-bit padding value
+		attr_reader :pad
 
 		@format = "VVVVVV"
 		@sizeof = 24
 
+		# @private
 		def initialize(offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
 			super(offset, cmd, cmdsize)
 			@cryptoff = cryptoff
@@ -665,12 +795,19 @@ module MachO
 		end
 	end
 
+	# A load command containing the minimum OS version on which the binary
+	# was built to run. Corresponds to LC_VERSION_MIN_MACOSX and LC_VERSION_MIN_IPHONEOS.
 	class VersionMinCommand < LoadCommand
-		attr_reader :version, :sdk
+		# @return [Fixnum] the version X.Y.Z packed as x16.y8.z8
+		attr_reader :version
+
+		# @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
+		attr_reader :sdk
 
 		@format = "VVVV"
 		@sizeof = 16
 
+		# @private
 		def initialize(offset, cmd, cmdsize, version, sdk)
 			super(offset, cmd, cmdsize)
 			@version = version
@@ -678,6 +815,9 @@ module MachO
 		end
 	end
 
+	# A load command containing the file offsets and sizes of the new
+	# compressed form of the information dyld needs to load the image.
+	# Corresponds to LC_DYLD_INFO and LC_DYLD_INFO_ONLY.
 	class DyldInfoCommand < LoadCommand
 		attr_reader :rebase_off, :rebase_size, :bind_off, :bind_size
 		attr_reader :weak_bind_off, :weak_bind_size, :lazy_bind_off
@@ -686,6 +826,7 @@ module MachO
 		@format = "VVVVVVVVVVVV"
 		@sizeof = 48
 
+		# @private
 		def initialize(offset, cmd, cmdsize, rebase_off, rebase_size, bind_off,
 				bind_size, weak_bind_off, weak_bind_size, lazy_bind_off,
 				lazy_bind_size, export_off, export_size)
@@ -703,24 +844,34 @@ module MachO
 		end
 	end
 
+	# A load command containing linker options embedded in object files.
+	# Corresponds to LC_LINKER_OPTION.
 	class LinkerOptionCommand < LoadCommand
+		# @return [Fixnum] the number of strings
 		attr_reader :count
 
 		@format = "VVV"
 		@sizeof = 12
 
+		# @private
 		def initialize(offset, cmd, cmdsize, count)
 			super(offset, cmd, cmdsize)
 			@count = count
 		end
 	end
 
+	# A load command specifying the offset of main(). Corresponds to LC_MAIN.
 	class EntryPointCommand < LoadCommand
-		attr_reader :entryoff, :stacksize
+		# @return [Fixnum] the file (__TEXT) offset of main()
+		attr_reader :entryoff
+
+		# @return [Fixnum] if not 0, the initial stack size.
+		attr_reader :stacksize
 
 		@format = "VVQQ"
 		@sizeof = 24
 
+		# @private
 		def initialize(offset, cmd, cmdsize, entryoff, stacksize)
 			super(offset, cmd, cmdsize)
 			@entryoff = entryoff
@@ -728,12 +879,16 @@ module MachO
 		end
 	end
 
+	# A load command specifying the version of the sources used to build the
+	# binary. Corresponds to LC_SOURCE_VERSION.
 	class SourceVersionCommand < LoadCommand
+		# @return [Fixnum] the version packed as a24.b10.c10.d10.e10
 		attr_reader :version
 
 		@format = "VVQ"
 		@sizeof = 16
 
+		# @private
 		def initialize(offset, cmd, cmdsize, version)
 			super(offset, cmd, cmdsize)
 			@version = version

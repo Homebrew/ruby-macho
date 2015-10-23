@@ -56,6 +56,7 @@ module MachO
 	SECT_ICON_HEADER = "__header"
 	SECT_ICON_TIFF = "__tiff"
 
+	# Represents a section of a segment for 32-bit architectures.
 	class Section < MachOStructure
 		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
 		attr_reader :nreloc, :flags, :reserved1, :reserved2
@@ -63,6 +64,7 @@ module MachO
 		@format = "a16a16VVVVVVVVV"
 		@sizeof = 68
 
+		# @private
 		def initialize(sectname, segname, addr, size, offset, align, reloff,
 				nreloc, flags, reserved1, reserved2)
 			@sectname = sectname
@@ -78,19 +80,26 @@ module MachO
 			@reserved2 = reserved2
 		end
 
+		# @return [String] the section's name, with any trailing NULL characters removed
 		def section_name
 			@sectname.delete("\x00")
 		end
 
+		# @return [String] the parent segment's name, with any trailing NULL characters removed
 		def segment_name
 			@segname.delete("\x00")
 		end
 
+		# @example
+		#  puts "this section is regular" if sect.flag?(S_REGULAR)
+		# @param flag [Fixnum] a section flag constant
+		# @return [Boolean] true if `flag` is present in the sections's flag field
 		def flag?(flag)
 			flags & flag == flag
 		end
 	end
 
+	# Represents a section of a segment for 64-bit architectures.
 	class Section64 < MachOStructure
 		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
 		attr_reader :nreloc, :flags, :reserved1, :reserved2, :reserved3
@@ -98,6 +107,7 @@ module MachO
 		@format = "a16a16QQVVVVVVVV"
 		@sizeof = 80
 
+		# @private
 		def initialize(sectname, segname, addr, size, offset, align, reloff,
 				nreloc, flags, reserved1, reserved2, reserved3)
 			@sectname = sectname
@@ -114,14 +124,20 @@ module MachO
 			@reserved3 = reserved3
 		end
 
+		# @return [String] the section's name, with any trailing NULL characters removed
 		def section_name
 			@sectname.delete("\x00")
 		end
 
+		# @return [String] the parent segment's name, with any trailing NULL characters removed
 		def segment_name
 			@segname.delete("\x00")
 		end
 
+		# @example
+		#  puts "this section is regular" if sect.flag?(S_REGULAR)
+		# @param flag [Fixnum] a section flag constant
+		# @return [Boolean] true if `flag` is present in the sections's flag field
 		def flag?(flag)
 			flags & flag == flag
 		end

@@ -9,6 +9,7 @@ require "#{File.dirname(__FILE__)}/macho/exceptions"
 require "#{File.dirname(__FILE__)}/macho/utils"
 require "#{File.dirname(__FILE__)}/macho/tools"
 
+# The primary namespace for ruby-macho.
 module MachO
 	# Opens the given filename as a MachOFile or FatFile, depending on its magic.
 	# @param filename [String] the file being opened
