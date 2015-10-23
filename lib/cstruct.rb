@@ -316,31 +316,3 @@ class CStruct
   # The last expression is returned, so return self instead of junk.
   self  
 end
-
-
-# a small test
-if $0 == __FILE__
-  class MachHeader < CStruct
-    uint :magic
-    int  :cputype
-    int  :cpusubtype
-    string :segname, 16
-  end
-  puts MachHeader::Members.inspect
-  puts MachHeader::MemberIndex.inspect
-  puts MachHeader::MemberSizes.inspect
-  puts "# of MachHeader members: " + MachHeader.size.to_s + ", size in bytes: " + MachHeader.bytesize.to_s
-  mh = MachHeader.new(0xfeedface, 7, 3, "foobar")
-  %w[magic cputype cpusubtype segname].each do |field|
-    puts "#{field}(#{MachHeader.sizeof(field.to_sym)}):      #{mh[field.to_sym].inspect}"
-  end
-  puts mh.pack_pattern.inspect
-  binstr = mh.serialize
-  puts "values: " + mh.values.inspect
-  newmh = MachHeader.new_from_bin(binstr)
-  puts "new values: " + newmh.values.inspect
-  newbinstr = newmh.serialize
-  puts "serialized:   " + binstr.inspect
-  puts "unserialized: " + newbinstr.inspect
-  puts "new == old ? " + (newbinstr == binstr).to_s
-end
