@@ -3,55 +3,148 @@ module MachO
 	# LC_REQ_DYLD to be recognized by the dynamic linder (dyld)
 	LC_REQ_DYLD = 0x80000000
 
-	# values for cmd in LoadCommand
+	# segment of this file to be mapped
 	LC_SEGMENT = 0x1
+
+	# link-edit stab symbol table info
 	LC_SYMTAB = 0x2
+
+	# link-edit gdb symbol table info (obsolete)
 	LC_SYMSEG = 0x3
+
+	# thread
 	LC_THREAD = 0x4
+
+	# unix thread (includes a stack)
 	LC_UNIXTHREAD = 0x5
+
+	# load a specified fixed VM shared library
 	LC_LOADFVMLIB = 0x6
+
+	# fixed VM shared library identification
 	LC_IDFVMLIB = 0x7
+
+	# object identification info (obsolete)
 	LC_IDENT = 0x8
+
+	# fixed VM file inclusion (internal use)
 	LC_FVMFILE = 0x9
+
+	# prepage command (internal use) 
 	LC_PREPAGE = 0xa
+
+	# dynamic link-edit symbol table info
 	LC_DYSYMTAB = 0xb
+
+	# load a dynamically linked shared library
 	LC_LOAD_DYLIB = 0xc
+
+	# dynamically linked shared lib ident
 	LC_ID_DYLIB = 0xd
+
+	# load a dynamic linker
 	LC_LOAD_DYLINKER = 0xe
+
+	# dynamic linker identification
 	LC_ID_DYLINKER = 0xf
+
+	# modules prebound for a dynamically linked shared library
 	LC_PREBOUND_DYLIB = 0x10
+
+	# image routines
 	LC_ROUTINES = 0x11
+
+	# sub framework
 	LC_SUB_FRAMEWORK = 0x12
+
+	# sub umbrella
 	LC_SUB_UMBRELLA = 0x13
+
+	# sub umbrella
 	LC_SUB_CLIENT = 0x14
+
+	# sub umbrella
 	LC_SUB_LIBRARY = 0x15
+
+	# two-level namespace lookup hints
 	LC_TWOLEVEL_HINTS = 0x16
+
+	# prebind checksum 
 	LC_PREBIND_CKSUM = 0x17
+
+	# load a dynamically linked shared library that is allowed to be missing (all symbols are weak imported).
 	LC_LOAD_WEAK_DYLIB = (0x18 | LC_REQ_DYLD)
+
+	# 64-bit segment of this file to be mapped
 	LC_SEGMENT_64 = 0x19
+
+	# 64-bit image routines
 	LC_ROUTINES_64 = 0x1a
+
+	# the uuid
 	LC_UUID = 0x1b
+
+	# runpath additions
 	LC_RPATH = (0x1c | LC_REQ_DYLD)
+
+	# local of code signature
 	LC_CODE_SIGNATURE = 0x1d
+
+	# local of info to split segments
 	LC_SEGMENT_SPLIT_INFO = 0x1e
+
+	# load and re-export dylib
 	LC_REEXPORT_DYLIB = (0x1f | LC_REQ_DYLD)
+
+	# delay load of dylib until first use
 	LC_LAZY_LOAD_DYLIB = 0x20
+
+	# encrypted segment information
 	LC_ENCRYPTION_INFO = 0x21
+
+	# compressed dyld information
 	LC_DYLD_INFO = 0x22
+
+	# compressed dyld information only
 	LC_DYLD_INFO_ONLY = (0x22 | LC_REQ_DYLD)
+
+	# load upward dylib
 	LC_LOAD_UPWARD_DYLIB = (0x23 | LC_REQ_DYLD)
+
+	# build for MacOSX min OS version
 	LC_VERSION_MIN_MACOSX = 0x24
+
+	# build for iPhoneOS min OS version
 	LC_VERSION_MIN_IPHONEOS = 0x25
+
+	# compressed table of function start addresses
 	LC_FUNCTION_STARTS = 0x26
+
+	# string for dyld to treat like environment variable
 	LC_DYLD_ENVIRONMENT = 0x27
+
+	# replacement for LC_UNIXTHREAD
 	LC_MAIN = (0x28 | LC_REQ_DYLD)
+
+	# table of non-instructions in __text
 	LC_DATA_IN_CODE = 0x29
+
+	# source version used to build binary
 	LC_SOURCE_VERSION = 0x2a
+
+	# Code signing DRs copied from linked dylibs
 	LC_DYLIB_CODE_SIGN_DRS = 0x2b
+
+	# 64-bit encrypted segment information
 	LC_ENCRYPTION_INFO_64 = 0x2c
+
+	# linker options in MH_OBJECT files
 	LC_LINKER_OPTION = 0x2d
+
+	# linker options in MH_OBJECT files
 	LC_LINKER_OPTIMIZATION_HINT = 0x2e
 
+	# association of load commands to string representations
 	LOAD_COMMANDS = {
 		LC_SEGMENT => "LC_SEGMENT",
 		LC_SYMTAB => "LC_SYMTAB",
@@ -102,6 +195,7 @@ module MachO
 		LC_LINKER_OPTIMIZATION_HINT => "LC_LINKER_OPTIMIZATION_HINT"
 	}
 
+	# association of load commands to string representations of class names
 	LC_STRUCTURES = {
 		LC_SEGMENT => "SegmentCommand",
 		LC_SYMTAB => "SymtabCommand",
@@ -337,6 +431,9 @@ module MachO
 
 	end
 
+	# A load command containing the address of the dynamic shared library
+	# initialization routine and an index into the module table for the module
+	# that defines the routine. Corresponds to LC_ROUTINES.
 	class RoutinesCommand < LoadCommand
 		attr_reader :init_address, :init_module, :reserved1, :reserved2
 		attr_reader :reserved3, :reserved4, :reserved5, :reserved6
@@ -359,6 +456,9 @@ module MachO
 		end
 	end
 
+	# A load command containing the address of the dynamic shared library
+	# initialization routine and an index into the module table for the module
+	# that defines the routine. Corresponds to LC_ROUTINES_64.
 	class RoutinesCommand64 < LoadCommand
 		attr_reader :init_address, :init_module, :reserved1, :reserved2
 		attr_reader :reserved3, :reserved4, :reserved5, :reserved6
@@ -381,6 +481,8 @@ module MachO
 		end
 	end
 
+	# A load command signifying membership of a subframework containing the name
+	# of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
 	class SubFrameworkCommand < LoadCommand
 		attr_reader :umbrella
 
@@ -393,6 +495,8 @@ module MachO
 		end
 	end
 
+	# A load command signifying membership of a subumbrella containing the name
+	# of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
 	class SubUmbrellaCommand < LoadCommand
 		attr_reader :sub_umbrella
 
@@ -405,6 +509,8 @@ module MachO
 		end
 	end
 
+	# A load command signifying a sublibrary of a shared library. Corresponds
+	# to LC_SUB_LIBRARY.
 	class SubLibraryCommand < LoadCommand
 		attr_reader :sub_library
 

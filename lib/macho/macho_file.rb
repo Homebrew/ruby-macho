@@ -3,6 +3,7 @@ module MachO
 	# as well as binary executable instructions. Mach-O binaries are
 	# architecture specific.
 	# @see https://en.wikipedia.org/wiki/Mach-O
+	# @see MachO::FatFile
 	class MachOFile
 		# @return [MachO::MachHeader] if the Mach-O is 32-bit
 		# @return [MachO::MachHeader64] if the Mach-O is 64-bit
@@ -372,6 +373,10 @@ module MachO
 
 		private
 
+		# The file's Mach-O header structure.
+		# @return [MachO::MachHeader] if the Mach-O is 32-bit
+		# @return [MachO::MachHeader64] if the Mach-O is 64-bit
+		# @private
 		def get_mach_header
 			magic = get_magic
 			cputype = get_cputype
@@ -389,6 +394,11 @@ module MachO
 			end
 		end
 
+		# The file's magic number.
+		# @return [Fixnum] the magic
+		# @raise [MachO::MagicError] if the magic is not valid Mach-O magic
+		# @raise [MachO::FatBinaryError] if the magic is for a Fat file
+		# @private
 		def get_magic
 			magic = @raw_data[0..3].unpack("N").first
 
@@ -403,6 +413,10 @@ module MachO
 			magic
 		end
 
+		# The file's CPU type.
+		# @return [Fixnum] the CPU type
+		# @raise [MachO::CPUTypeError] if the CPU type is unknown
+		# @private
 		def get_cputype
 			cputype = @raw_data[4..7].unpack("V").first
 
@@ -413,6 +427,10 @@ module MachO
 			cputype
 		end
 
+		# The file's CPU subtype.
+		# @return [Fixnum] the CPU subtype
+		# @raise [MachO::CPUSubtypeError] if the CPU subtype is unknown
+		# @private
 		def get_cpusubtype
 			cpusubtype = @raw_data[8..11].unpack("V").first
 
@@ -426,6 +444,10 @@ module MachO
 			cpusubtype
 		end
 
+		# The file's type.
+		# @return [Fixnum] the file type
+		# @raise [MachO::FiletypeError] if the file type is unknown
+		# @private
 		def get_filetype
 			filetype = @raw_data[12..15].unpack("V").first
 
@@ -436,24 +458,37 @@ module MachO
 			filetype
 		end
 
+		# The number of load commands in the file.
+		# @return [Fixnum] the number of load commands
+		# @private
 		def get_ncmds
 			ncmds = @raw_data[16..19].unpack("V").first
 
 			ncmds
 		end
 
+		# The size of all load commands, in bytes.
+		# return [Fixnum] the size of all load commands
+		# @private
 		def get_sizeofcmds
 			sizeofcmds = @raw_data[20..23].unpack("V").first
 
 			sizeofcmds
 		end
 
+		# The Mach-O header's flags.
+		# @return [Fixnum] the flags
+		# @private
 		def get_flags
 			flags = @raw_data[24..27].unpack("V").first
 
 			flags
 		end
 
+		# All load commands in the file.
+		# @return [Array<MachO::LoadCommand>] an array of load commands
+		# @raise [MachO::LoadCommandError] if an unknown load command is encountered
+		# @private
 		def get_load_commands
 			offset = header.bytesize
 			load_commands = []
@@ -477,6 +512,10 @@ module MachO
 			load_commands
 		end
 
+		# Updates the size of all load commands in the raw data.
+		# @param size [Fixnum] the new size, in bytes
+		# @return [void]
+		# @private
 		def set_sizeofcmds(size)
 			new_size = [size].pack("V")
 			@raw_data[20..23] = new_size

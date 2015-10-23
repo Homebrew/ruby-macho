@@ -5,6 +5,7 @@ module MachO
 
 	# Raised when a file's magic bytes are not valid Mach-O magic.
 	class MagicError < MachOError
+		# @param num [Fixnum] the unknown number
 		def initialize(num)
 			super "Unrecognized Mach-O magic: 0x#{"%02x" % num}"
 		end
@@ -26,6 +27,7 @@ module MachO
 
 	# Raised when the CPU type is unknown.
 	class CPUTypeError < MachOError
+		# @param num [Fixnum] the unknown number
 		def initialize(num)
 			super "Unrecognized CPU type: 0x#{"%02x" % num}"
 		end
@@ -33,6 +35,7 @@ module MachO
 
 	# Raised when the CPU subtype is unknown.
 	class CPUSubtypeError < MachOError
+		# @param num [Fixnum] the unknown number
 		def initialize(num)
 			super "Unrecognized CPU sub-type: 0x#{"%02x" % num}"
 		end
@@ -40,6 +43,7 @@ module MachO
 
 	# Raised when a mach-o file's filetype field is unknown.
 	class FiletypeError < MachOError
+		# @param num [Fixnum] the unknown number
 		def initialize(num)
 			super "Unrecognized Mach-O filetype code: 0x#{"%02x" % num}"
 		end
@@ -47,6 +51,7 @@ module MachO
 
 	# Raised when an unknown load command is encountered.
 	class LoadCommandError < MachOError
+		# @param num [Fixnum] the unknown number
 		def initialize(num)
 			super "Unrecognized Mach-O load command: 0x#{"%02x" % num}"
 		end
@@ -54,6 +59,7 @@ module MachO
 
 	# Raised when load commands are too large to fit in the current file.
 	class HeaderPadError < MachOError
+		# @param filename [String] the filename
 		def initialize(filename)
 			super "Updated load commands do not fit in the header of " +
 			"#{filename}. #{filename} needs to be relinked, possibly with " +
@@ -63,6 +69,7 @@ module MachO
 
 	# Raised when attempting to change a dylib name that doesn't exist.
 	class DylibUnknownError < MachOError
+		# @param dylib [String] the unknown shared library name
 		def initialize(dylib)
 			super "No such dylib name: #{dylib}"
 		end
