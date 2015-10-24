@@ -1,5 +1,6 @@
 module MachO
-	# A general purpose pseudo-structure. 
+	# A general purpose pseudo-structure.
+	# @abstract
 	class MachOStructure
 		# Subclasses should fill these in manually.
 		@format = ""

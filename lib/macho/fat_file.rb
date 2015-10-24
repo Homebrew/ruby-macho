@@ -98,6 +98,15 @@ module MachO
 
 		alias :change_dylib :change_install_name
 
+		# Extract a Mach-O with the given CPU type from the file.
+		# @example
+		#  file.extract("CPU_TYPE_I386") # => MachO::MachOFile
+		# @param cputype [String] the CPU type of the Mach-O being extracted
+		# @return [MachO::MachOFile, nil] the extracted Mach-O or nil if no Mach-O has the given CPU type
+		def extract(cputype)
+			machos.select { |macho| macho.cputype == cputype }.first
+		end
+
 		# Write all (fat) data to the given filename.
 		# @param filename [String] the file to write to
 		def write(filename)

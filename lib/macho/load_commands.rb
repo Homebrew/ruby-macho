@@ -338,13 +338,39 @@ module MachO
 			super(offset, cmd, cmdsize)
 			@uuid = uuid.unpack("C16") # re-unpack for the actual UUID array
 		end
+
+		# @return [String] a string representation of the UUID
+		def uuid_string
+			hexes = uuid.map { |e| "%02x" % e }
+			segs = [
+				hexes[0..3].join, hexes[4..5].join,	hexes[6..7].join,
+				hexes[8..9].join, hexes[10..15].join
+			]
+
+			segs.join("-")
+		end
 	end
 
 	# A load command indicating that part of this file is to be mapped into
 	# the task's address space. Corresponds to LC_SEGMENT.
 	class SegmentCommand < LoadCommand
-		attr_reader :segname, :vmaddr, :vmsize, :fileoff, :filesize, :maxprot
-		attr_reader :initprot, :nsects, :flags
+		attr_reader :segname
+
+		attr_reader :vmaddr
+
+		attr_reader :vmsize
+
+		attr_reader :fileoff
+
+		attr_reader :filesize
+
+		attr_reader :maxprot
+
+		attr_reader :initprot
+
+		attr_reader :nsects
+
+		attr_reader :flags
 
 		@format = "VVa16VVVVVVVV"
 		@sizeof = 56
@@ -373,8 +399,23 @@ module MachO
 	# A load command indicating that part of this file is to be mapped into
 	# the task's address space. Corresponds to LC_SEGMENT_64.
 	class SegmentCommand64 < LoadCommand
-		attr_reader :segname, :vmaddr, :vmsize, :fileoff, :filesize, :maxprot
-		attr_reader :initprot, :nsects, :flags
+		attr_reader :segname
+
+		attr_reader :vmaddr
+
+		attr_reader :vmsize
+
+		attr_reader :fileoff
+
+		attr_reader :filesize
+
+		attr_reader :maxprot
+
+		attr_reader :initprot
+
+		attr_reader :nsects
+
+		attr_reader :flags
 
 		@format = "VVa16QQQQVVVV"
 		@sizeof = 72
@@ -463,8 +504,21 @@ module MachO
 	# initialization routine and an index into the module table for the module
 	# that defines the routine. Corresponds to LC_ROUTINES.
 	class RoutinesCommand < LoadCommand
-		attr_reader :init_address, :init_module, :reserved1, :reserved2
-		attr_reader :reserved3, :reserved4, :reserved5, :reserved6
+		attr_reader :init_address
+
+		attr_reader :init_module
+
+		attr_reader :reserved1
+
+		attr_reader :reserved2
+
+		attr_reader :reserved3
+
+		attr_reader :reserved4
+
+		attr_reader :reserved5
+
+		attr_reader :reserved6
 
 		@format = "VVVVVVVVVV"
 		@sizeof = 40
@@ -489,8 +543,27 @@ module MachO
 	# initialization routine and an index into the module table for the module
 	# that defines the routine. Corresponds to LC_ROUTINES_64.
 	class RoutinesCommand64 < LoadCommand
-		attr_reader :init_address, :init_module, :reserved1, :reserved2
-		attr_reader :reserved3, :reserved4, :reserved5, :reserved6
+		attr_reader :init_address
+
+		attr_reader :init_module
+
+		# @return [void]
+		attr_reader :reserved1
+
+		# @return [void]
+		attr_reader :reserved2
+
+		# @return [void]
+		attr_reader :reserved3
+
+		# @return [void]
+		attr_reader :reserved4
+
+		# @return [void]
+		attr_reader :reserved5
+
+		# @return [void]
+		attr_reader :reserved6
 
 		@format = "VVQQQQQQQQ"
 		@sizeof = 72
@@ -804,7 +877,7 @@ module MachO
 		# @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
 		attr_reader :sdk
 
-		@format = "VVVV"
+		@format = "VVNN"
 		@sizeof = 16
 
 		# @private
@@ -819,9 +892,25 @@ module MachO
 	# compressed form of the information dyld needs to load the image.
 	# Corresponds to LC_DYLD_INFO and LC_DYLD_INFO_ONLY.
 	class DyldInfoCommand < LoadCommand
-		attr_reader :rebase_off, :rebase_size, :bind_off, :bind_size
-		attr_reader :weak_bind_off, :weak_bind_size, :lazy_bind_off
-		attr_reader :lazy_bind_size, :export_off, :export_size
+		attr_reader :rebase_off
+
+		attr_reader :rebase_size
+
+		attr_reader :bind_off
+
+		attr_reader :bind_size
+
+		attr_reader :weak_bind_off
+
+		attr_reader :weak_bind_size
+
+		attr_reader :lazy_bind_off
+
+		attr_reader :lazy_bind_size
+
+		attr_reader :export_off
+
+		attr_reader :export_size
 
 		@format = "VVVVVVVVVVVV"
 		@sizeof = 48
