@@ -946,7 +946,7 @@ module MachO
 		# @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
 		attr_reader :sdk
 
-		@format = "VVNN"
+		@format = "VVVV"
 		@sizeof = 16
 
 		# @private
@@ -954,6 +954,28 @@ module MachO
 			super(offset, cmd, cmdsize)
 			@version = version
 			@sdk = sdk
+		end
+
+		# A string representation of the binary's minimum OS version.
+		# @return [String] a string representing the minimum OS version.
+		def version_string
+			binary = "%032b" % version
+			segs = [
+				binary[0..15], binary[16..23], binary[24..31]
+			].map { |s| s.to_i(2) }
+
+			segs.join(".")
+		end
+
+		# A string representation of the binary's SDK version.
+		# @return [String] a string representing the SDK version.
+		def sdk_string
+			binary = "%032b" % sdk
+			segs = [
+				binary[0..15], binary[16..23], binary[24..31]
+			].map { |s| s.to_i(2) }
+
+			segs.join(".")
 		end
 	end
 
@@ -1060,6 +1082,18 @@ module MachO
 		def initialize(offset, cmd, cmdsize, version)
 			super(offset, cmd, cmdsize)
 			@version = version
+		end
+
+		# A string representation of the sources used to build the binary.
+		# @return [String] a string representation of the version
+		def version_string
+			binary = "%064b" % version
+			segs = [
+				binary[0..23], binary[24..33], binary[34..43], binary[44..53],
+				binary[54..63]
+			].map { |s| s.to_i(2) }
+
+			segs.join(".")
 		end
 	end
 end
