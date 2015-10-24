@@ -354,22 +354,31 @@ module MachO
 	# A load command indicating that part of this file is to be mapped into
 	# the task's address space. Corresponds to LC_SEGMENT.
 	class SegmentCommand < LoadCommand
+		# @return [String] the name of the segment, including null padding bytes
 		attr_reader :segname
 
+		# @return [Fixnum] the memory address of the segment
 		attr_reader :vmaddr
 
+		# @return [Fixnum] the memory size of the segment
 		attr_reader :vmsize
 
+		# @return [Fixnum] the file offset of the segment
 		attr_reader :fileoff
 
+		# @return [Fixnum] the amount to map from the file
 		attr_reader :filesize
 
+		# @return [Fixnum] the maximum VM protection
 		attr_reader :maxprot
 
+		# @return [Fixnum] the initial VM protection
 		attr_reader :initprot
 
+		# @return [Fixnum] the number of sections in the segment
 		attr_reader :nsects
 
+		# @return [Fixnum] any flags associated with the segment
 		attr_reader :flags
 
 		@format = "VVa16VVVVVVVV"
@@ -399,22 +408,31 @@ module MachO
 	# A load command indicating that part of this file is to be mapped into
 	# the task's address space. Corresponds to LC_SEGMENT_64.
 	class SegmentCommand64 < LoadCommand
+		# @return [String] the name of the segment, including null padding bytes
 		attr_reader :segname
 
+		# @return [Fixnum] the memory address of the segment
 		attr_reader :vmaddr
 
+		# @return [Fixnum] the memory size of the segment
 		attr_reader :vmsize
 
+		# @return [Fixnum] the file offset of the segment
 		attr_reader :fileoff
 
+		# @return [Fixnum] the amount to map from the file
 		attr_reader :filesize
 
+		# @return [Fixnum] the maximum VM protection
 		attr_reader :maxprot
 
+		# @return [Fixnum] the initial VM protection
 		attr_reader :initprot
 
+		# @return [Fixnum] the number of sections in the segment
 		attr_reader :nsects
 
+		# @return [Fixnum] any flags associated with the segment
 		attr_reader :flags
 
 		@format = "VVa16QQQQVVVV"
@@ -445,7 +463,17 @@ module MachO
 	# on filetype. Corresponds to LC_ID_DYLIB, LC_LOAD_DYLIB, LC_LOAD_WEAK_DYLIB,
 	# and LC_REEXPORT_DYLIB.
 	class DylibCommand < LoadCommand
-		attr_reader :name, :timestamp, :current_version, :compatibility_version
+		# @return [Fixnum] the library's path name (lc_str)
+		attr_reader :name
+
+		# @return [Fixnum] the library's build time stamp
+		attr_reader :timestamp
+
+		# @return [Fixnum] the library's current version number
+		attr_reader :current_version
+
+		# @return [Fixnum] the library's compatibility version number
+		attr_reader :compatibility_version
 
 		@format = "VVVVVV"
 		@sizeof = 24
@@ -465,6 +493,7 @@ module MachO
 	# on filetype. Corresponds to LC_ID_DYLINKER, LC_LOAD_DYLINKER, and
 	# LC_DYLD_ENVIRONMENT.
 	class DylinkerCommand < LoadCommand
+		# @return [Fixnum] the dynamic linker's path name (lc_str)
 		attr_reader :name
 
 		@format = "VVV"
@@ -480,7 +509,14 @@ module MachO
 	# A load command used to indicate dynamic libraries used in prebinding.
 	# Corresponds to LC_PREBOUND_DYLIB.
 	class PreboundDylibCommand < LoadCommand
-		attr_reader :name, :nmodules, :linked_modules
+		# @return [Fixnum] the library's path name (lc_str)
+		attr_reader :name
+
+		# @return [Fixnum] the number of modules in the library
+		attr_reader :nmodules
+
+		# @return [Fixnum] a bit vector of linked modules
+		attr_reader :linked_modules
 
 		@format = "VVVVV"
 		@sizeof = 20
@@ -504,20 +540,28 @@ module MachO
 	# initialization routine and an index into the module table for the module
 	# that defines the routine. Corresponds to LC_ROUTINES.
 	class RoutinesCommand < LoadCommand
+		# @return [Fixnum] the address of the initialization routine
 		attr_reader :init_address
 
+		# @return [Fixnum] the index into the module table that the init routine is defined in
 		attr_reader :init_module
 
+		# @return [void]
 		attr_reader :reserved1
 
+		# @return [void]
 		attr_reader :reserved2
 
+		# @return [void]
 		attr_reader :reserved3
 
+		# @return [void]
 		attr_reader :reserved4
 
+		# @return [void]
 		attr_reader :reserved5
 
+		# @return [void]
 		attr_reader :reserved6
 
 		@format = "VVVVVVVVVV"
@@ -543,8 +587,10 @@ module MachO
 	# initialization routine and an index into the module table for the module
 	# that defines the routine. Corresponds to LC_ROUTINES_64.
 	class RoutinesCommand64 < LoadCommand
+		# @return [Fixnum] the address of the initialization routine
 		attr_reader :init_address
 
+		# @return [Fixnum] the index into the module table that the init routine is defined in
 		attr_reader :init_module
 
 		# @return [void]
@@ -587,6 +633,7 @@ module MachO
 	# A load command signifying membership of a subframework containing the name
 	# of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
 	class SubFrameworkCommand < LoadCommand
+		# @return [Fixnum] the umbrella framework name (lc_str)
 		attr_reader :umbrella
 
 		@format = "VVV"
@@ -602,6 +649,7 @@ module MachO
 	# A load command signifying membership of a subumbrella containing the name
 	# of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
 	class SubUmbrellaCommand < LoadCommand
+		# @return [Fixnum] the subumbrella framework name (lc_str)
 		attr_reader :sub_umbrella
 
 		@format = "VVV"
@@ -617,6 +665,7 @@ module MachO
 	# A load command signifying a sublibrary of a shared library. Corresponds
 	# to LC_SUB_LIBRARY.
 	class SubLibraryCommand < LoadCommand
+		# @return [Fixnum] the sublibrary name (lc_str)
 		attr_reader :sub_library
 
 		@format = "VVV"
@@ -632,6 +681,7 @@ module MachO
 	# A load command signifying a shared library that is a subframework of
 	# an umbrella framework. Corresponds to LC_SUB_CLIENT.
 	class SubClientCommand < LoadCommand
+		# @return [Fixnum] the subclient name (lc_str)
 		attr_reader :sub_client
 
 		@format = "VVV"
@@ -675,40 +725,58 @@ module MachO
 	# A load command containing symbolic information needed to support data
 	# structures used by the dynamic link editor. Corresponds to LC_DYSYMTAB.
 	class DysymtabCommand < LoadCommand
+		# @return [Fixnum] the index to local symbols
 		attr_reader :ilocalsym
 
+		# @return [Fixnum] the number of local symbols
 		attr_reader :nlocalsym
 
+		# @return [Fixnum] the index to externally defined symbols
 		attr_reader :iextdefsym
 
+		# @return [Fixnum] the number of externally defined symbols
 		attr_reader :nextdefsym
 
+		# @return [Fixnum] the index to undefined symbols
 		attr_reader :iundefsym
 
+		# @return [Fixnum] the number of undefined symbols
 		attr_reader :nundefsym
 
+		# @return [Fixnum] the file offset to the table of contents
 		attr_reader :tocoff
 
+		# @return [Fixnum] the number of entries in the table of contents
 		attr_reader :ntoc
 
+		# @return [Fixnum] the file offset to the module table
 		attr_reader :modtaboff
 
+		# @return [Fixnum] the number of entries in the module table
 		attr_reader :nmodtab
 
+		# @return [Fixnum] the file offset to the referenced symbol table
 		attr_reader :extrefsymoff
 
+		# @return [Fixnum] the number of entries in the referenced symbol table
 		attr_reader :nextrefsyms
 
+		# @return [Fixnum] the file offset to the indirect symbol table
 		attr_reader :indirectsymoff
 
+		# @return [Fixnum] the number of entries in the indirect symbol table
 		attr_reader :nindirectsyms
 
+		# @return [Fixnum] the file offset to the external relocation entries
 		attr_reader :extreloff
 
+		# @return [Fixnum] the number of external relocation entries
 		attr_reader :nextrel
 
+		# @return [Fixnum] the file offset to the local relocation entries
 		attr_reader :locreloff
 
+		# @return [Fixnum] the number of local relocation entries
 		attr_reader :nlocrel
 
 
@@ -783,6 +851,7 @@ module MachO
 	# be added to the current run path used to find @rpath prefixed dylibs.
 	# Corresponds to LC_RPATH.
 	class RpathCommand < LoadCommand
+		# @return [Fixnum] the oath to add to the run path (lc_str)
 		attr_reader :path
 
 		@format = "VVV"
@@ -892,24 +961,34 @@ module MachO
 	# compressed form of the information dyld needs to load the image.
 	# Corresponds to LC_DYLD_INFO and LC_DYLD_INFO_ONLY.
 	class DyldInfoCommand < LoadCommand
+		# @return [Fixnum] the file offset to the rebase information
 		attr_reader :rebase_off
 
+		# @return [Fixnum] the size of the rebase information
 		attr_reader :rebase_size
 
+		# @return [Fixnum] the file offset to the binding information
 		attr_reader :bind_off
 
+		# @return [Fixnum] the size of the binding information
 		attr_reader :bind_size
 
+		# @return [Fixnum] the file offset to the weak binding information
 		attr_reader :weak_bind_off
 
+		# @return [Fixnum] the size of the weak binding information
 		attr_reader :weak_bind_size
 
+		# @return [Fixnum] the file offset to the lazy binding information
 		attr_reader :lazy_bind_off
 
+		# @return [Fixnum] the size of the lazy binding information
 		attr_reader :lazy_bind_size
 
+		# @return [Fixnum] the file offset to the export information
 		attr_reader :export_off
 
+		# @return [Fixnum] the size of the export information
 		attr_reader :export_size
 
 		@format = "VVVVVVVVVVVV"
