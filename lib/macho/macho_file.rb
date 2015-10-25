@@ -158,8 +158,8 @@ module MachO
 		# Changes the Mach-O's dylib ID to `new_id`. Does nothing if not a dylib.
 		# @example
 		#  file.dylib_id = "libFoo.dylib"
+		# @param new_id [String] the dylib's new ID
 		# @return [void]
-		# @todo refactor
 		def dylib_id=(new_id)
 			if !new_id.is_a?(String)
 				raise ArgumentError.new("argument must be a String")
@@ -169,70 +169,10 @@ module MachO
 				return nil
 			end
 
-			if magic32?
-				cmd_round = 4
-			else
-				cmd_round = 8
-			end
-
-			new_sizeofcmds = header[:sizeofcmds]
-			dylib_id_cmd = command('LC_ID_DYLIB').first
+			dylib_cmd = command('LC_ID_DYLIB').first
 			old_id = dylib_id
-			new_id = new_id.dup
 
-			new_pad = MachO.round(new_id.size, cmd_round) - new_id.size
-			old_pad = MachO.round(old_id.size, cmd_round) - old_id.size
-
-			# pad the old and new IDs with null bytes to meet command bounds
-			old_id << "\x00" * old_pad
-			new_id << "\x00" * new_pad
-
-			# calculate the new size of the DylibCommand and sizeofcmds in MH
-			new_size = DylibCommand.bytesize + new_id.size
-			new_sizeofcmds += new_size - dylib_id_cmd.cmdsize
-
-			# calculate the low file offset (offset to first section data)
-			low_fileoff = 2**64 # ULLONGMAX
-
-			segments.each do |seg|
-				sections(seg).each do |sect|
-					if sect.size != 0 && !sect.flag?(S_ZEROFILL) &&
-							!sect.flag?(S_THREAD_LOCAL_ZEROFILL) &&
-							sect.offset < low_fileoff
-
-						low_fileoff = sect.offset
-					end
-				end
-			end
-
-			if new_sizeofcmds + header.bytesize > low_fileoff
-				raise HeaderPadError.new(@filename)
-			end
-
-			# update sizeofcmds in mach_header
-			set_sizeofcmds(new_sizeofcmds)
-
-			# update cmdsize in the dylib_command
-			@raw_data[dylib_id_cmd.offset + 4, 4] = [new_size].pack("V")
-
-			# delete the old id
-			@raw_data.slice!(dylib_id_cmd.offset + dylib_id_cmd.name...dylib_id_cmd.offset + dylib_id_cmd.class.bytesize + old_id.size)
-
-			# insert the new id
-			@raw_data.insert(dylib_id_cmd.offset + dylib_id_cmd.name, new_id)
-
-			# pad/unpad after new_sizeofcmds until offsets are corrected
-			null_pad = old_id.size - new_id.size
-
-			if null_pad < 0
-				@raw_data.slice!(new_sizeofcmds + header.bytesize, null_pad.abs)
-			else
-				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
-			end
-
-			# synchronize fields with the raw data
-			header = get_mach_header
-			load_commands = get_load_commands
+			set_name_in_dylib(dylib_cmd, old_id, new_id)
 		end
 
 		# All shared libraries linked to the Mach-O.
@@ -254,8 +194,12 @@ module MachO
 			dylibs
 		end
 
+		# Changes the shared library `old_name` to `new_name`
+		# @example
+		#  file.change_install_name("/usr/lib/libWhatever.dylib", "/usr/local/lib/libWhatever2.dylib")
+		# @param old_name [String] the shared library's old name
+		# @param new_name [String] the shared library's new name
 		# @return [void]
-		# @todo refactor
 		def change_install_name(old_name, new_name)
 			idx = linked_dylibs.index(old_name)
 			raise DylibUnknownError.new(old_name) if idx.nil?
@@ -265,60 +209,7 @@ module MachO
 			# their indices interchangeably to avoid having to loop.
 			dylib_cmd = command('LC_LOAD_DYLIB')[idx]
 
-			if magic32?
-				cmd_round = 4
-			else
-				cmd_round = 8
-			end
-
-			new_sizeofcmds = header[:sizeofcmds]
-			old_install_name = old_name.dup
-			new_install_name = new_name.dup
-
-			old_pad = MachO.round(old_install_name.size, cmd_round) - old_install_name.size
-			new_pad = MachO.round(new_install_name.size, cmd_round) - new_install_name.size
-
-			old_install_name << "\x00" * old_pad
-			new_install_name << "\x00" * new_pad
-
-			new_size = DylibCommand.bytesize + new_install_name.size
-			new_sizeofcmds += new_size - dylib_cmd.cmdsize
-
-			low_fileoff = 2**64
-
-			segments.each do |seg|
-				sections(seg).each do |sect|
-					if sect.size != 0 && !sect.flag?(S_ZEROFILL) &&
-							!sect.flag?(S_THREAD_LOCAL_ZEROFILL) &&
-							sect.offset < low_fileoff
-
-						low_fileoff = sect.offset
-					end
-				end
-			end
-
-			if new_sizeofcmds + header.bytesize > low_fileoff
-				raise HeaderPadError.new(@filename)
-			end
-
-			set_sizeofcmds(new_sizeofcmds)
-
-			@raw_data[dylib_cmd.offset + 4, 4] = [new_size].pack("V")
-
-			@raw_data.slice!(dylib_cmd.offset + dylib_cmd.name...dylib_cmd.offset + dylib_cmd.class.bytesize + old_install_name.size)
-
-			@raw_data.insert(dylib_cmd.offset + dylib_cmd.name, new_install_name)
-
-			null_pad = old_install_name.size - new_install_name.size
-
-			if null_pad < 0
-				@raw_data.slice!(new_sizeofcmds + header.bytesize, null_pad.abs)
-			else
-				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
-			end
-
-			header = get_mach_header
-			load_commands = get_load_commands
+			set_name_in_dylib(dylib_cmd, old_name, new_name)
 		end
 
 		alias :change_dylib :change_install_name
@@ -519,6 +410,78 @@ module MachO
 		def set_sizeofcmds(size)
 			new_size = [size].pack("V")
 			@raw_data[20..23] = new_size
+		end
+
+		# Updates the `name` field in a DylibCommand, regardless of load command type
+		# @param dylib_cmd [MachO::DylibCommand] the dylib command
+		# @param old_name [String] the old dylib name
+		# @param new_name [String] the new dylib name
+		# @return [void]
+		# @private
+		def set_name_in_dylib(dylib_cmd, old_name, new_name)
+			if magic32?
+				cmd_round = 4
+			else
+				cmd_round = 8
+			end
+
+			new_sizeofcmds = header[:sizeofcmds]
+			old_name = old_name.dup
+			new_name = new_name.dup
+
+			old_pad = MachO.round(old_name.size, cmd_round) - old_name.size
+			new_pad = MachO.round(new_name.size, cmd_round) - new_name.size
+
+			# pad the old and new IDs with null bytes to meet command bounds
+			old_name << "\x00" * old_pad
+			new_name << "\x00" * new_pad
+
+			# calculate the new size of the DylibCommand and sizeofcmds in MH
+			new_size = DylibCommand.bytesize + new_name.size
+			new_sizeofcmds += new_size - dylib_cmd.cmdsize
+
+			low_fileoff = 2**64 # ULLONGMAX
+
+			# calculate the low file offset (offset to first section data)
+			segments.each do |seg|
+				sections(seg).each do |sect|
+					if sect.size != 0 && !sect.flag?(S_ZEROFILL) &&
+							!sect.flag?(S_THREAD_LOCAL_ZEROFILL) &&
+							sect.offset < low_fileoff
+
+						low_fileoff = sect.offset
+					end
+				end
+			end
+
+			if new_sizeofcmds + header.bytesize > low_fileoff
+				raise HeaderPadError.new(@filename)
+			end
+
+			# update sizeofcmds in mach_header
+			set_sizeofcmds(new_sizeofcmds)
+
+			# update cmdsize in the dylib_command
+			@raw_data[dylib_cmd.offset + 4, 4] = [new_size].pack("V")
+
+			# delete the old name
+			@raw_data.slice!(dylib_cmd.offset + dylib_cmd.name...dylib_cmd.offset + dylib_cmd.class.bytesize + old_name.size)
+
+			# insert the new id
+			@raw_data.insert(dylib_cmd.offset + dylib_cmd.name, new_name)
+
+			# pad/unpad after new_sizeofcmds until offsets are corrected
+			null_pad = old_name.size - new_name.size
+
+			if null_pad < 0
+				@raw_data.slice!(new_sizeofcmds + header.bytesize, null_pad.abs)
+			else
+				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
+			end
+
+			# synchronize fields with the raw data
+			@header = get_mach_header
+			@load_commands = get_load_commands
 		end
 	end
 end
