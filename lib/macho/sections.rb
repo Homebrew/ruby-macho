@@ -58,8 +58,38 @@ module MachO
 
 	# Represents a section of a segment for 32-bit architectures.
 	class Section < MachOStructure
-		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
-		attr_reader :nreloc, :flags, :reserved1, :reserved2
+		# @return [String] the name of the section, including null pad bytes
+		attr_reader :sectname
+
+		# @return [String] the name of the segment's section, including null pad bytes
+		attr_reader :segname
+
+		# @return [Fixnum] the memory address of the section
+		attr_reader :addr
+
+		# @return [Fixnum] the size, in bytes, of the section
+		attr_reader :size
+
+		# @return [Fixnum] the file offset of the section
+		attr_reader :offset
+
+		# @return [Fixnum] the section alignment (power of 2) of the section
+		attr_reader :align
+
+		# @return [Fixnum] the file offset of the section's relocation entries
+		attr_reader :reloff
+
+		# @return [Fixnum] the number of relocation entries
+		attr_reader :nreloc
+
+		# @return [Fixnum] flags for type and addrributes of the section
+		attr_reader :flags
+
+		# @return [void] reserved (for offset or index)
+		attr_reader :reserved1
+
+		# @return [void] reserved (for count or sizeof)
+		attr_reader :reserved2
 
 		@format = "a16a16VVVVVVVVV"
 		@sizeof = 68
@@ -101,8 +131,41 @@ module MachO
 
 	# Represents a section of a segment for 64-bit architectures.
 	class Section64 < MachOStructure
-		attr_reader :sectname, :segname, :addr, :size, :offset, :align, :reloff
-		attr_reader :nreloc, :flags, :reserved1, :reserved2, :reserved3
+		# @return [String] the name of the section, including null pad bytes
+		attr_reader :sectname
+
+		# @return [String] the name of the segment's section, including null pad bytes
+		attr_reader :segname
+
+		# @return [Fixnum] the memory address of the section
+		attr_reader :addr
+
+		# @return [Fixnum] the size, in bytes, of the section
+		attr_reader :size
+
+		# @return [Fixnum] the file offset of the section
+		attr_reader :offset
+
+		# @return [Fixnum] the section alignment (power of 2) of the section
+		attr_reader :align
+
+		# @return [Fixnum] the file offset of the section's relocation entries
+		attr_reader :reloff
+
+		# @return [Fixnum] the number of relocation entries
+		attr_reader :nreloc
+
+		# @return [Fixnum] flags for type and addrributes of the section
+		attr_reader :flags
+
+		# @return [void] reserved (for offset or index)
+		attr_reader :reserved1
+
+		# @return [void] reserved (for count or sizeof)
+		attr_reader :reserved2
+
+		# @return [void] reserved
+		attr_reader :reserved3
 
 		@format = "a16a16QQVVVVVVVV"
 		@sizeof = 80
