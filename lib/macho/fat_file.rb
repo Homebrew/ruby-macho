@@ -15,10 +15,9 @@ module MachO
 
 		# Creates a new FatFile from the given filename.
 		# @param filename [String] the fat file to load from
-		# @raise [MachO::MagicError] if the file does not have a Mach-O magic number.
-		# @raise [MachO::MachOBinaryError] if the file is not a fat binary.
+		# @raise [ArgumentError] if the given filename does not exist
 		def initialize(filename)
-			raise ArgumentError.new("filename must be a String") unless filename.is_a? String
+			raise ArgumentError.new("#{filetype}: no such file") unless File.exist?(filename)
 
 			@filename = filename
 			@raw_data = open(@filename, "rb") { |f| f.read }
@@ -33,29 +32,26 @@ module MachO
 			@raw_data
 		end
 
+		# The file's type. Assumed to be the same for every Mach-O within.
+		# @return [String] the filetype
+		def filetype
+			machos.first.filetype
+		end
+
 		# The file's dylib ID. If the file is not a dylib, returns `nil`.
 		# @example
 		#  file.dylib_id # => 'libBar.dylib'
-		# @return [String] the file's dylib ID
+		# @return [String, nil] the file's dylib ID
 		def dylib_id
-			if !machos.all?(&:dylib?)
-				return nil
-			end
-
-			ids = machos.map(&:dylib_id)
-
-			# this should never be the case, but let's be defensive
-			if !ids.uniq!.size == 1
-				return nil
-			end
-
-			ids.first
+			machos.first.dylib_id
 		end
 
 		# Changes the file's dylib ID to `new_id`. If the file is not a dylib, does nothing.
 		# @example
 		#  file.dylib_id = 'libFoo.dylib'
 		# @param new_id [String] the new dylib ID
+		# @return [void]
+		# @raise [ArgumentError] if `new_id` is not a String
 		def dylib_id=(new_id)
 			if !new_id.is_a?(String)
 				raise ArgumentError.new("argument must be a String")

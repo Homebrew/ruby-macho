@@ -24,9 +24,9 @@ module MachO
 
 		# Creates a new FatFile from the given filename.
 		# @param filename [String] the Mach-O file to load from
-		# @todo document all the exceptions propagated here
+		# @raise [ArgumentError] if the given filename does not exist
 		def initialize(filename)
-			raise ArgumentError.new("filename must be a String") unless filename.is_a? String
+			raise ArgumentError.new("#{filetype}: no such file") unless File.exist?(filename)
 
 			@filename = filename
 			@raw_data = open(@filename, "rb") { |f| f.read }
@@ -138,13 +138,13 @@ module MachO
 		# The Mach-O's dylib ID, or `nil` if not a dylib.
 		# @example
 		#  file.dylib_id # => 'libBar.dylib'
-		# @return [String] the Mach-O's dylib ID
+		# @return [String, nil] the Mach-O's dylib ID
 		def dylib_id
 			if !dylib?
 				return nil
 			end
 
-			dylib_id_cmd = command('LC_ID_DYLIB').first
+			dylib_id_cmd = command("LC_ID_DYLIB").first
 
 			cmdsize = dylib_id_cmd.cmdsize
 			offset = dylib_id_cmd.offset
@@ -160,6 +160,7 @@ module MachO
 		#  file.dylib_id = "libFoo.dylib"
 		# @param new_id [String] the dylib's new ID
 		# @return [void]
+		# @raise [ArgumentError] if `new_id` is not a String
 		def dylib_id=(new_id)
 			if !new_id.is_a?(String)
 				raise ArgumentError.new("argument must be a String")
@@ -169,7 +170,7 @@ module MachO
 				return nil
 			end
 
-			dylib_cmd = command('LC_ID_DYLIB').first
+			dylib_cmd = command("LC_ID_DYLIB").first
 			old_id = dylib_id
 
 			set_name_in_dylib(dylib_cmd, old_id, new_id)
@@ -179,7 +180,7 @@ module MachO
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
 			dylibs = []
-			dylib_cmds = command('LC_LOAD_DYLIB')
+			dylib_cmds = command("LC_LOAD_DYLIB")
 
 			dylib_cmds.each do |dylib_cmd|
 				cmdsize = dylib_cmd.cmdsize
@@ -200,6 +201,7 @@ module MachO
 		# @param old_name [String] the shared library's old name
 		# @param new_name [String] the shared library's new name
 		# @return [void]
+		# @raise [MachO::DylibUnknownError] if no shared library has the old name
 		def change_install_name(old_name, new_name)
 			idx = linked_dylibs.index(old_name)
 			raise DylibUnknownError.new(old_name) if idx.nil?
@@ -207,7 +209,7 @@ module MachO
 			# this is a bit of a hack - since there is a 1-1 ordered association
 			# between linked_dylibs and command('LC_LOAD_DYLIB'), we can use
 			# their indices interchangeably to avoid having to loop.
-			dylib_cmd = command('LC_LOAD_DYLIB')[idx]
+			dylib_cmd = command("LC_LOAD_DYLIB")[idx]
 
 			set_name_in_dylib(dylib_cmd, old_name, new_name)
 		end
@@ -215,6 +217,7 @@ module MachO
 		alias :change_dylib :change_install_name
 
 		# All sections of the segment `segment`.
+		# @param segment [MachO::SegmentCommand, MachO::SegmentCommand64] the segment being inspected
 		# @return [Array<MachO::Section>] if the Mach-O is 32-bit
 		# @return [Array<MachO::Section64>] if the Mach-O is 64-bit
 		def sections(segment)
@@ -253,6 +256,7 @@ module MachO
 		# Write all Mach-O data to the file used to initialize the instance.
 		# @raise [MachOError] if the instance was created from a binary string
 		# @return [void]
+		# @raise [MachO::MachOError] if the instance was initialized without a file
 		# @note Overwrites all data in the file!
 		def write!
 			if @filename.nil?
@@ -417,6 +421,7 @@ module MachO
 		# @param old_name [String] the old dylib name
 		# @param new_name [String] the new dylib name
 		# @return [void]
+		# @raise [MachO::HeaderPadError] if the new name exceeds the header pad buffer
 		# @private
 		def set_name_in_dylib(dylib_cmd, old_name, new_name)
 			if magic32?
