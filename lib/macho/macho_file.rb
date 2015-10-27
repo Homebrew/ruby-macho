@@ -398,7 +398,7 @@ module MachO
 				# why do I do this? i don't like declaring constants below
 				# classes, and i need them to resolve...
 				klass = MachO.const_get "#{LC_STRUCTURES[cmd]}"
-				command = klass.new_from_bin(offset, @raw_data.slice(offset, klass.bytesize))
+				command = klass.new_from_bin(@raw_data, offset, @raw_data.slice(offset, klass.bytesize))
 
 				load_commands << command
 				offset += command.cmdsize
