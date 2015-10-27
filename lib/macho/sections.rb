@@ -94,7 +94,7 @@ module MachO
 		@format = "a16a16VVVVVVVVV"
 		@sizeof = 68
 
-		# @private
+		# @api private
 		def initialize(sectname, segname, addr, size, offset, align, reloff,
 				nreloc, flags, reserved1, reserved2)
 			@sectname = sectname
@@ -170,7 +170,7 @@ module MachO
 		@format = "a16a16QQVVVVVVVV"
 		@sizeof = 80
 
-		# @private
+		# @api private
 		def initialize(sectname, segname, addr, size, offset, align, reloff,
 				nreloc, flags, reserved1, reserved2, reserved3)
 			@sectname = sectname

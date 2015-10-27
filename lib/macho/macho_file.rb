@@ -34,7 +34,7 @@ module MachO
 			@load_commands = get_load_commands
 		end
 
-		# @private
+		# @api private
 		def initialize_from_bin(bin)
 			@filename = nil
 			@raw_data = bin
@@ -146,13 +146,7 @@ module MachO
 
 			dylib_id_cmd = command("LC_ID_DYLIB").first
 
-			cmdsize = dylib_id_cmd.cmdsize
-			offset = dylib_id_cmd.offset
-			stroffset = dylib_id_cmd.name
-
-			dylib_id = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
-
-			dylib_id.delete("\x00")
+			dylib_id_cmd.name.to_s
 		end
 
 		# Changes the Mach-O's dylib ID to `new_id`. Does nothing if not a dylib.
@@ -183,11 +177,7 @@ module MachO
 			dylib_cmds = command("LC_LOAD_DYLIB")
 
 			dylib_cmds.each do |dylib_cmd|
-				cmdsize = dylib_cmd.cmdsize
-				offset = dylib_cmd.offset
-				stroffset = dylib_cmd.name
-
-				dylib = @raw_data.slice(offset + stroffset...offset + cmdsize).unpack("Z*").first
+				dylib = dylib_cmd.name.to_s
 
 				dylibs << dylib
 			end
@@ -470,10 +460,10 @@ module MachO
 			@raw_data[dylib_cmd.offset + 4, 4] = [new_size].pack("V")
 
 			# delete the old name
-			@raw_data.slice!(dylib_cmd.offset + dylib_cmd.name...dylib_cmd.offset + dylib_cmd.class.bytesize + old_name.size)
+			@raw_data.slice!(dylib_cmd.offset + dylib_cmd.name.to_i...dylib_cmd.offset + dylib_cmd.class.bytesize + old_name.size)
 
 			# insert the new id
-			@raw_data.insert(dylib_cmd.offset + dylib_cmd.name, new_name)
+			@raw_data.insert(dylib_cmd.offset + dylib_cmd.name.to_i, new_name)
 
 			# pad/unpad after new_sizeofcmds until offsets are corrected
 			null_pad = old_name.size - new_name.size

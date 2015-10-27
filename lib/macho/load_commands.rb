@@ -303,15 +303,15 @@ module MachO
 		# @param offset [Fixnum] the offset to initialize with
 		# @param bin [String] the binary string to initialize with
 		# @return [MachO::LoadCommand] the new load command
-		# @private
+		# @api private
 		def self.new_from_bin(raw_data, offset, bin)
 			self.new(raw_data, offset, *bin.unpack(@format))
 		end
 
-		# @param offset [Fixnum] the offset to initialize iwth
+		# @param offset [Fixnum] the offset to initialize with
 		# @param cmd [Fixnum] the load command's identifying number
 		# @param cmdsize [Fixnum] the size of the load command in bytes
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize)
 			@raw_data = raw_data
 			@offset = offset
@@ -322,6 +322,33 @@ module MachO
 		# @return [String] a string representation of the load command's identifying number
 		def to_s
 			LOAD_COMMANDS[cmd]
+		end
+
+		# Represents a Load Command string. A rough analogue to the lc_str
+		# struct used internally by OS X. This class allows ruby-macho to
+		# pretend that strings stored in LCs are immediately available without
+		# explicit operations on the raw Mach-O data.
+		class LCStr
+			# @param raw_data [String] the raw Mach-O data.
+			# @param lc [MachO::LoadCommand] the load command
+			# @param lc_str [Fixnum] the offset to the beginning of the string
+			# @api private
+			def initialize(raw_data, lc, lc_str)
+				@raw_data = raw_data
+				@lc = lc
+				@lc_str = lc_str
+				@str = @raw_data.slice(@lc.offset + @lc_str...@lc.offset + @lc.cmdsize).delete("\x00")
+			end
+
+			# @return [String] a string representation of the LCStr
+			def to_s
+				@str
+			end
+
+			# @return [Fixnum] the offset to the beginning of the string in the load command
+			def to_i
+				@lc_str
+			end
 		end
 	end
 
@@ -334,7 +361,7 @@ module MachO
 		@format = "VVa16"
 		@sizeof = 24
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, uuid)
 			super(raw_data, offset, cmd, cmdsize)
 			@uuid = uuid.unpack("C16") # re-unpack for the actual UUID array
@@ -385,7 +412,7 @@ module MachO
 		@format = "VVa16VVVVVVVV"
 		@sizeof = 56
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
 				filesize, maxprot, initprot, nsects, flags)
 			super(raw_data, offset, cmd, cmdsize)
@@ -439,7 +466,7 @@ module MachO
 		@format = "VVa16QQQQVVVV"
 		@sizeof = 72
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
 				filesize, maxprot, initprot, nsects, flags)
 			super(raw_data, offset, cmd, cmdsize)
@@ -464,7 +491,7 @@ module MachO
 	# on filetype. Corresponds to LC_ID_DYLIB, LC_LOAD_DYLIB, LC_LOAD_WEAK_DYLIB,
 	# and LC_REEXPORT_DYLIB.
 	class DylibCommand < LoadCommand
-		# @return [Fixnum] the library's path name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the library's path name as an LCStr
 		attr_reader :name
 
 		# @return [Fixnum] the library's build time stamp
@@ -479,11 +506,11 @@ module MachO
 		@format = "VVVVVV"
 		@sizeof = 24
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, name, timestamp, current_version,
 				compatibility_version)
 			super(raw_data, offset, cmd, cmdsize)
-			@name = name
+			@name = LCStr.new(raw_data, self, name)
 			@timestamp = timestamp
 			@current_version = current_version
 			@compatibility_version = compatibility_version
@@ -494,23 +521,23 @@ module MachO
 	# on filetype. Corresponds to LC_ID_DYLINKER, LC_LOAD_DYLINKER, and
 	# LC_DYLD_ENVIRONMENT.
 	class DylinkerCommand < LoadCommand
-		# @return [Fixnum] the dynamic linker's path name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the dynamic linker's path name as an LCStr
 		attr_reader :name
 
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, name)
 			super(raw_data, offset, cmd, cmdsize)
-			@name = name
+			@name = LCStr.new(raw_data, self, name)
 		end
 	end
 
 	# A load command used to indicate dynamic libraries used in prebinding.
 	# Corresponds to LC_PREBOUND_DYLIB.
 	class PreboundDylibCommand < LoadCommand
-		# @return [Fixnum] the library's path name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the library's path name as an LCStr
 		attr_reader :name
 
 		# @return [Fixnum] the number of modules in the library
@@ -522,10 +549,10 @@ module MachO
 		@format = "VVVVV"
 		@sizeof = 20
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, name, nmodules, linked_modules)
 			super(raw_data, offset, cmd, cmdsize)
-			@name = name
+			@name = LCStr.new(raw_data, self, name)
 			@nmodules = nmodules
 			@linked_modules = linked_modules
 		end
@@ -568,7 +595,7 @@ module MachO
 		@format = "VVVVVVVVVV"
 		@sizeof = 40
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, init_address, init_module,
 				reserved1, reserved2, reserved3, reserved4, reserved5,
 				reserved6)
@@ -615,7 +642,7 @@ module MachO
 		@format = "VVQQQQQQQQ"
 		@sizeof = 72
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, init_address, init_module,
 				reserved1, reserved2, reserved3, reserved4, reserved5,
 				reserved6)
@@ -634,64 +661,64 @@ module MachO
 	# A load command signifying membership of a subframework containing the name
 	# of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
 	class SubFrameworkCommand < LoadCommand
-		# @return [Fixnum] the umbrella framework name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the umbrella framework name as an LCStr
 		attr_reader :umbrella
 
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, umbrella)
 			super(raw_data, offset, cmd, cmdsize)
-			@umbrella = umbrella
+			@umbrella = LCStr.new(raw_data, self, umbrella)
 		end
 	end
 
 	# A load command signifying membership of a subumbrella containing the name
 	# of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
 	class SubUmbrellaCommand < LoadCommand
-		# @return [Fixnum] the subumbrella framework name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the subumbrella framework name as an LCStr
 		attr_reader :sub_umbrella
 
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, sub_umbrella)
 			super(raw_data, offset, cmd, cmdsize)
-			@sub_umbrella = sub_umbrella
+			@sub_umbrella = LCStr.new(raw_data, self, sub_umbrella)
 		end
 	end
 
 	# A load command signifying a sublibrary of a shared library. Corresponds
 	# to LC_SUB_LIBRARY.
 	class SubLibraryCommand < LoadCommand
-		# @return [Fixnum] the sublibrary name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the sublibrary name as an LCStr
 		attr_reader :sub_library
 
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, sub_library)
 			super(raw_data, offset, cmd, cmdsize)
-			@sub_library = sub_library
+			@sub_library = LCStr.new(raw_data, self, sub_library)
 		end
 	end
 
 	# A load command signifying a shared library that is a subframework of
 	# an umbrella framework. Corresponds to LC_SUB_CLIENT.
 	class SubClientCommand < LoadCommand
-		# @return [Fixnum] the subclient name (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the subclient name as an LCStr
 		attr_reader :sub_client
 
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, sub_client)
 			super(raw_data, offset, cmd, cmdsize)
-			@sub_client = sub_client
+			@sub_client = LCStr.new(raw_data, self, sub_client)
 		end
 	end
 
@@ -713,7 +740,7 @@ module MachO
 		@format = "VVVVVV"
 		@sizeof = 24
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, symoff, nsyms, stroff, strsize)
 			super(raw_data, offset, cmd, cmdsize)
 			@symoff = symoff
@@ -785,7 +812,7 @@ module MachO
 		@sizeof = 80
 
 		# ugh
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
 				nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff,
 				nmodtab, extrefsymoff, nextrefsyms, indirectsymoff,
@@ -824,7 +851,7 @@ module MachO
 		@format = "VVVV"
 		@sizeof = 16
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, htoffset, nhints)
 			super(raw_data, offset, cmd, cmdsize)
 			@htoffset = htoffset
@@ -841,7 +868,7 @@ module MachO
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, cksum)
 			super(raw_data, offset, cmd, cmdsize)
 			@cksum = cksum
@@ -852,16 +879,16 @@ module MachO
 	# be added to the current run path used to find @rpath prefixed dylibs.
 	# Corresponds to LC_RPATH.
 	class RpathCommand < LoadCommand
-		# @return [Fixnum] the oath to add to the run path (lc_str)
+		# @return [MachO::LoadCommand::LCStr] the path to add to the run path as an LCStr
 		attr_reader :path
 
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, path)
 			super(raw_data, offset, cmd, cmdsize)
-			@path = path
+			@path = LCStr.new(raw_data, self, path)
 		end
 	end
 
@@ -878,7 +905,7 @@ module MachO
 		@format = "VVVV"
 		@sizeof = 16
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, dataoff, datasize)
 			super(raw_data, offset, cmd, cmdsize)
 			@dataoff = dataoff
@@ -901,7 +928,7 @@ module MachO
 		@format = "VVVVV"
 		@sizeof = 20
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
 			super(raw_data, offset, cmd, cmdsize)
 			@cryptoff = cryptoff
@@ -928,7 +955,7 @@ module MachO
 		@format = "VVVVVV"
 		@sizeof = 24
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
 			super(raw_data, offset, cmd, cmdsize)
 			@cryptoff = cryptoff
@@ -950,7 +977,7 @@ module MachO
 		@format = "VVVV"
 		@sizeof = 16
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, version, sdk)
 			super(raw_data, offset, cmd, cmdsize)
 			@version = version
@@ -1017,7 +1044,7 @@ module MachO
 		@format = "VVVVVVVVVVVV"
 		@sizeof = 48
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, rebase_off, rebase_size, bind_off,
 				bind_size, weak_bind_off, weak_bind_size, lazy_bind_off,
 				lazy_bind_size, export_off, export_size)
@@ -1044,7 +1071,7 @@ module MachO
 		@format = "VVV"
 		@sizeof = 12
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, count)
 			super(raw_data, offset, cmd, cmdsize)
 			@count = count
@@ -1062,7 +1089,7 @@ module MachO
 		@format = "VVQQ"
 		@sizeof = 24
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, entryoff, stacksize)
 			super(raw_data, offset, cmd, cmdsize)
 			@entryoff = entryoff
@@ -1079,7 +1106,7 @@ module MachO
 		@format = "VVQ"
 		@sizeof = 16
 
-		# @private
+		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, version)
 			super(raw_data, offset, cmd, cmdsize)
 			@version = version

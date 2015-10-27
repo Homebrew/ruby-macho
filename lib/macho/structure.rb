@@ -12,6 +12,7 @@ module MachO
 		end
 
 		# @return [MachO::MachOStructure] a new MachOStructure initialized with `bin`
+		# @api private
 		def self.new_from_bin(bin)
 			self.new(*bin.unpack(@format))
 		end
