@@ -287,13 +287,8 @@ module MachO
 		def get_magic
 			magic = @raw_data[0..3].unpack("N").first
 
-			if !MachO.magic?(magic)
-				raise MagicError.new(magic)
-			end
-			
-			if MachO.fat_magic?(magic)
-				raise FatBinaryError.new
-			end
+			raise MagicError.new(magic) unless MachO.magic?(magic)
+			raise FatBinaryError.new if MachO.fat_magic?(magic)
 
 			magic
 		end
@@ -305,9 +300,7 @@ module MachO
 		def get_cputype
 			cputype = @raw_data[4..7].unpack("V").first
 
-			if !CPU_TYPES.has_key?(cputype)
-				raise CPUTypeError.new(cputype)
-			end
+			raise CPUTypeError.new(cputype) unless CPU_TYPES.key?(cputype)
 
 			cputype
 		end
@@ -318,13 +311,9 @@ module MachO
 		# @private
 		def get_cpusubtype
 			cpusubtype = @raw_data[8..11].unpack("V").first
+			cpusubtype &= ~CPU_SUBTYPE_LIB64 # this mask isn't documented!
 
-			# this mask isn't documented!
-			cpusubtype &= ~CPU_SUBTYPE_LIB64
-
-			if !CPU_SUBTYPES.has_key?(cpusubtype)
-				raise CPUSubtypeError.new(cpusubtype)
-			end
+			raise CPUSubtypeError.new(cpusubtype) unless CPU_SUBTYPES.key?(cpusubtype)
 
 			cpusubtype
 		end
@@ -336,9 +325,7 @@ module MachO
 		def get_filetype
 			filetype = @raw_data[12..15].unpack("V").first
 
-			if !MH_FILETYPES.has_key?(filetype)
-				raise FiletypeError.new(filetype)
-			end
+			raise FiletypeError.new(filetype) unless MH_FILETYPES.key?(filetype)
 
 			filetype
 		end
@@ -347,27 +334,21 @@ module MachO
 		# @return [Fixnum] the number of load commands
 		# @private
 		def get_ncmds
-			ncmds = @raw_data[16..19].unpack("V").first
-
-			ncmds
+			@raw_data[16..19].unpack("V").first
 		end
 
 		# The size of all load commands, in bytes.
 		# return [Fixnum] the size of all load commands
 		# @private
 		def get_sizeofcmds
-			sizeofcmds = @raw_data[20..23].unpack("V").first
-
-			sizeofcmds
+			@raw_data[20..23].unpack("V").first
 		end
 
 		# The Mach-O header's flags.
 		# @return [Fixnum] the flags
 		# @private
 		def get_flags
-			flags = @raw_data[24..27].unpack("V").first
-
-			flags
+			@raw_data[24..27].unpack("V").first
 		end
 
 		# All load commands in the file.
@@ -381,9 +362,7 @@ module MachO
 			header[:ncmds].times do
 				cmd = @raw_data.slice(offset, 4).unpack("V").first
 
-				if !LC_STRUCTURES.has_key?(cmd)
-					raise LoadCommandError.new(cmd)
-				end
+				raise LoadCommandError.new(cmd) unless LC_STRUCTURES.key?(cmd)
 
 				# why do I do this? i don't like declaring constants below
 				# classes, and i need them to resolve...
