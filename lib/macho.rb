@@ -1,4 +1,4 @@
-require "#{File.dirname(__FILE__)}/cstruct"
+require "#{File.dirname(__FILE__)}/macho/cstruct"
 require "#{File.dirname(__FILE__)}/macho/headers"
 require "#{File.dirname(__FILE__)}/macho/structure"
 require "#{File.dirname(__FILE__)}/macho/load_commands"
