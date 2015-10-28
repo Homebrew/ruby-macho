@@ -91,8 +91,8 @@ module MachO
 		# @return [void] reserved (for count or sizeof)
 		attr_reader :reserved2
 
-		@format = "a16a16VVVVVVVVV"
-		@sizeof = 68
+		FORMAT = "a16a16VVVVVVVVV"
+		SIZEOF = 68
 
 		# @api private
 		def initialize(sectname, segname, addr, size, offset, align, reloff,
@@ -130,79 +130,19 @@ module MachO
 	end
 
 	# Represents a section of a segment for 64-bit architectures.
-	class Section64 < MachOStructure
-		# @return [String] the name of the section, including null pad bytes
-		attr_reader :sectname
-
-		# @return [String] the name of the segment's section, including null pad bytes
-		attr_reader :segname
-
-		# @return [Fixnum] the memory address of the section
-		attr_reader :addr
-
-		# @return [Fixnum] the size, in bytes, of the section
-		attr_reader :size
-
-		# @return [Fixnum] the file offset of the section
-		attr_reader :offset
-
-		# @return [Fixnum] the section alignment (power of 2) of the section
-		attr_reader :align
-
-		# @return [Fixnum] the file offset of the section's relocation entries
-		attr_reader :reloff
-
-		# @return [Fixnum] the number of relocation entries
-		attr_reader :nreloc
-
-		# @return [Fixnum] flags for type and addrributes of the section
-		attr_reader :flags
-
-		# @return [void] reserved (for offset or index)
-		attr_reader :reserved1
-
-		# @return [void] reserved (for count or sizeof)
-		attr_reader :reserved2
-
+	class Section64 < Section
 		# @return [void] reserved
 		attr_reader :reserved3
 
-		@format = "a16a16QQVVVVVVVV"
-		@sizeof = 80
+		FORMAT = "a16a16QQVVVVVVVV"
+		SIZEOF = 80
 
 		# @api private
 		def initialize(sectname, segname, addr, size, offset, align, reloff,
 				nreloc, flags, reserved1, reserved2, reserved3)
-			@sectname = sectname
-			@segname = segname
-			@addr = addr
-			@size = size
-			@offset = offset
-			@align = align
-			@reloff = reloff
-			@nreloc = nreloc
-			@flags = flags
-			@reserved1 = reserved1
-			@reserved2 = reserved2
+			super(sectname, segname, addr, size, offset, align, reloff,
+				nreloc, flags, reserved1, reserved2)
 			@reserved3 = reserved3
-		end
-
-		# @return [String] the section's name, with any trailing NULL characters removed
-		def section_name
-			@sectname.delete("\x00")
-		end
-
-		# @return [String] the parent segment's name, with any trailing NULL characters removed
-		def segment_name
-			@segname.delete("\x00")
-		end
-
-		# @example
-		#  puts "this section is regular" if sect.flag?(S_REGULAR)
-		# @param flag [Fixnum] a section flag constant
-		# @return [Boolean] true if `flag` is present in the sections's flag field
-		def flag?(flag)
-			flags & flag == flag
 		end
 	end
 end

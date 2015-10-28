@@ -296,8 +296,8 @@ module MachO
 		# @return [Fixnum] the size of the load command, in bytes
 		attr_reader :cmdsize
 
-		@format = "VV"
-		@sizeof = 8
+		FORMAT = "VV"
+		SIZEOF = 8
 
 		# Creates a new LoadCommand given an offset and binary string
 		# @param offset [Fixnum] the offset to initialize with
@@ -305,7 +305,7 @@ module MachO
 		# @return [MachO::LoadCommand] the new load command
 		# @api private
 		def self.new_from_bin(raw_data, offset, bin)
-			self.new(raw_data, offset, *bin.unpack(@format))
+			self.new(raw_data, offset, *bin.unpack(self::FORMAT))
 		end
 
 		# @param offset [Fixnum] the offset to initialize with
@@ -358,8 +358,8 @@ module MachO
 		# @return [Array<Fixnum>] the UUID
 		attr_reader :uuid
 
-		@format = "VVa16"
-		@sizeof = 24
+		FORMAT = "VVa16"
+		SIZEOF = 24
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, uuid)
@@ -409,8 +409,8 @@ module MachO
 		# @return [Fixnum] any flags associated with the segment
 		attr_reader :flags
 
-		@format = "VVa16VVVVVVVV"
-		@sizeof = 56
+		FORMAT = "VVa16VVVVVVVV"
+		SIZEOF = 56
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
@@ -463,8 +463,8 @@ module MachO
 		# @return [Fixnum] any flags associated with the segment
 		attr_reader :flags
 
-		@format = "VVa16QQQQVVVV"
-		@sizeof = 72
+		FORMAT = "VVa16QQQQVVVV"
+		SIZEOF = 72
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
@@ -503,8 +503,8 @@ module MachO
 		# @return [Fixnum] the library's compatibility version number
 		attr_reader :compatibility_version
 
-		@format = "VVVVVV"
-		@sizeof = 24
+		FORMAT = "VVVVVV"
+		SIZEOF = 24
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, name, timestamp, current_version,
@@ -524,8 +524,8 @@ module MachO
 		# @return [MachO::LoadCommand::LCStr] the dynamic linker's path name as an LCStr
 		attr_reader :name
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, name)
@@ -546,8 +546,8 @@ module MachO
 		# @return [Fixnum] a bit vector of linked modules
 		attr_reader :linked_modules
 
-		@format = "VVVVV"
-		@sizeof = 20
+		FORMAT = "VVVVV"
+		SIZEOF = 20
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, name, nmodules, linked_modules)
@@ -592,8 +592,8 @@ module MachO
 		# @return [void]
 		attr_reader :reserved6
 
-		@format = "VVVVVVVVVV"
-		@sizeof = 40
+		FORMAT = "VVVVVVVVVV"
+		SIZEOF = 40
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, init_address, init_module,
@@ -639,8 +639,8 @@ module MachO
 		# @return [void]
 		attr_reader :reserved6
 
-		@format = "VVQQQQQQQQ"
-		@sizeof = 72
+		FORMAT = "VVQQQQQQQQ"
+		SIZEOF = 72
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, init_address, init_module,
@@ -664,8 +664,8 @@ module MachO
 		# @return [MachO::LoadCommand::LCStr] the umbrella framework name as an LCStr
 		attr_reader :umbrella
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, umbrella)
@@ -680,8 +680,8 @@ module MachO
 		# @return [MachO::LoadCommand::LCStr] the subumbrella framework name as an LCStr
 		attr_reader :sub_umbrella
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, sub_umbrella)
@@ -696,8 +696,8 @@ module MachO
 		# @return [MachO::LoadCommand::LCStr] the sublibrary name as an LCStr
 		attr_reader :sub_library
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, sub_library)
@@ -712,8 +712,8 @@ module MachO
 		# @return [MachO::LoadCommand::LCStr] the subclient name as an LCStr
 		attr_reader :sub_client
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, sub_client)
@@ -737,8 +737,8 @@ module MachO
 		# @return the string table size in bytes
 		attr_reader :strsize
 
-		@format = "VVVVVV"
-		@sizeof = 24
+		FORMAT = "VVVVVV"
+		SIZEOF = 24
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, symoff, nsyms, stroff, strsize)
@@ -808,8 +808,8 @@ module MachO
 		attr_reader :nlocrel
 
 
-		@format = "VVVVVVVVVVVVVVVVVVVV"
-		@sizeof = 80
+		FORMAT = "VVVVVVVVVVVVVVVVVVVV"
+		SIZEOF = 80
 
 		# ugh
 		# @api private
@@ -848,8 +848,8 @@ module MachO
 		# @return [Fixnum] the number of hints in the hint table
 		attr_reader :nhints
 
-		@format = "VVVV"
-		@sizeof = 16
+		FORMAT = "VVVV"
+		SIZEOF = 16
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, htoffset, nhints)
@@ -865,8 +865,8 @@ module MachO
 		# @return [Fixnum] the checksum or 0
 		attr_reader :cksum
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, cksum)
@@ -882,8 +882,8 @@ module MachO
 		# @return [MachO::LoadCommand::LCStr] the path to add to the run path as an LCStr
 		attr_reader :path
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, path)
@@ -902,8 +902,8 @@ module MachO
 		# @return [Fixnum] size of the data in the __LINKEDIT segment
 		attr_reader :datasize
 
-		@format = "VVVV"
-		@sizeof = 16
+		FORMAT = "VVVV"
+		SIZEOF = 16
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, dataoff, datasize)
@@ -925,8 +925,8 @@ module MachO
 		# @return [Fixnum] the encryption system, or 0 if not encrypted yet
 		attr_reader :cryptid
 
-		@format = "VVVVV"
-		@sizeof = 20
+		FORMAT = "VVVVV"
+		SIZEOF = 20
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
@@ -952,8 +952,8 @@ module MachO
 		# @return [Fixnum] 64-bit padding value
 		attr_reader :pad
 
-		@format = "VVVVVV"
-		@sizeof = 24
+		FORMAT = "VVVVVV"
+		SIZEOF = 24
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
@@ -974,8 +974,8 @@ module MachO
 		# @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
 		attr_reader :sdk
 
-		@format = "VVVV"
-		@sizeof = 16
+		FORMAT = "VVVV"
+		SIZEOF = 16
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, version, sdk)
@@ -1041,8 +1041,8 @@ module MachO
 		# @return [Fixnum] the size of the export information
 		attr_reader :export_size
 
-		@format = "VVVVVVVVVVVV"
-		@sizeof = 48
+		FORMAT = "VVVVVVVVVVVV"
+		SIZEOF = 48
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, rebase_off, rebase_size, bind_off,
@@ -1068,8 +1068,8 @@ module MachO
 		# @return [Fixnum] the number of strings
 		attr_reader :count
 
-		@format = "VVV"
-		@sizeof = 12
+		FORMAT = "VVV"
+		SIZEOF = 12
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, count)
@@ -1086,8 +1086,8 @@ module MachO
 		# @return [Fixnum] if not 0, the initial stack size.
 		attr_reader :stacksize
 
-		@format = "VVQQ"
-		@sizeof = 24
+		FORMAT = "VVQQ"
+		SIZEOF = 24
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, entryoff, stacksize)
@@ -1103,8 +1103,8 @@ module MachO
 		# @return [Fixnum] the version packed as a24.b10.c10.d10.e10
 		attr_reader :version
 
-		@format = "VVQ"
-		@sizeof = 16
+		FORMAT = "VVQ"
+		SIZEOF = 16
 
 		# @api private
 		def initialize(raw_data, offset, cmd, cmdsize, version)

@@ -242,8 +242,8 @@ module MachO
 		# @return [Fixnum] the number of fat architecture structures following the header
 		attr_reader :nfat_arch
 
-		@format = "VV"
-		@sizeof = 8
+		FORMAT = "VV"
+		SIZEOF = 8
 
 		# @api private
 		def initialize(magic, nfat_arch)
@@ -271,8 +271,8 @@ module MachO
 		# @return [Fixnum] the alignment, as a power of 2
 		attr_reader :align
 
-		@format = "VVVVV"
-		@sizeof = 20
+		FORMAT = "VVVVV"
+		SIZEOF = 20
 
 		# @api private
 		def initialize(cputype, cpusubtype, offset, size, align)
@@ -307,8 +307,8 @@ module MachO
 		# @return [Fixnum] the header flags associated with the Mach-O
 		attr_reader :flags
 
-		@format = "VVVVVVV"
-		@sizeof = 28
+		FORMAT = "VVVVVVV"
+		SIZEOF = 28
 
 		# @api private
 		def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
@@ -332,53 +332,18 @@ module MachO
 	end
 
 	# 64-bit Mach-O file header structure
-	class MachHeader64 < MachOStructure
-		# @return [Fixnum] the magic number
-		attr_reader :magic
-
-		# @return [Fixnum] the CPU type of the Mach-O
-		attr_reader :cputype
-
-		# @return [Fixnum] the CPU subtype of the Mach-O
-		attr_reader :cpusubtype
-
-		# @return [Fixnum] the file type of the Mach-O
-		attr_reader :filetype
-
-		# @return [Fixnum] the number of load commands in the Mach-O
-		attr_reader :ncmds
-
-		# @return [Fixnum] the size of all load commands, in bytes, in the Mach-O
-		attr_reader :sizeofcmds
-
-		# @return [Fixnum] the header flags associated with the Mach-O
-		attr_reader :flags
-
+	class MachHeader64 < MachHeader
 		# @return [void]
 		attr_reader :reserved
 
-		@format = "VVVVVVVV"
-		@sizeof = 32
+		FORMAT = "VVVVVVVV"
+		SIZEOF = 32
 
 		# @api private
 		def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
 				flags, reserved)
-			@magic = magic
-			@cputype = cputype
-			@cpusubtype = cpusubtype
-			@filetype = filetype
-			@ncmds = ncmds
-			@sizeofcmds = sizeofcmds
-			@flags = flags
+			super(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
 			@reserved = reserved
-		end
-
-		# @example
-		#  puts "this mach-o has position-independent execution" if header.flag?(MH_PIE)
-		# @param flag [Fixnum] a mach header flag constant
-		# @return [Boolean] true if `flag` is present in the header's flag section
-		def flag?(flag)
-			flags & flag == flag
 		end
 	end
 end
