@@ -245,6 +245,7 @@ module MachO
 		@format = "VV"
 		@sizeof = 8
 
+		# @api private
 		def initialize(magic, nfat_arch)
 			@magic = magic
 			@nfat_arch = nfat_arch
@@ -273,6 +274,7 @@ module MachO
 		@format = "VVVVV"
 		@sizeof = 20
 
+		# @api private
 		def initialize(cputype, cpusubtype, offset, size, align)
 			@cputype = cputype
 			@cpusubtype = cpusubtype
@@ -308,6 +310,7 @@ module MachO
 		@format = "VVVVVVV"
 		@sizeof = 28
 
+		# @api private
 		def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
 				flags)
 			@magic = magic
@@ -357,6 +360,7 @@ module MachO
 		@format = "VVVVVVVV"
 		@sizeof = 32
 
+		# @api private
 		def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
 				flags, reserved)
 			@magic = magic
