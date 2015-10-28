@@ -234,29 +234,62 @@ module MachO
 	}
 
 	# Fat binary header structure
-	class FatHeader < CStruct
-		uint32 :magic
-		uint32 :nfat_arch # number of FatArchs that follow
+	class FatHeader < MachOStructure
+		attr_reader :magic
+		attr_reader :nfat_arch # number of FatArchs that follow
+
+		@format = "VV"
+		@sizeof = 8
+
+		def initialize(magic, nfat_arch)
+			@magic = magic
+			@nfat_arch = nfat_arch
+		end
 	end
 
 	# Fat binary header architecture structure
-	class FatArch < CStruct
-		int32 :cputype
-		int32 :cpusubtype
-		uint32 :offset
-		uint32 :size
-		uint32 :align
+	class FatArch < MachOStructure
+		attr_reader :cputype
+		attr_reader :cpusubtype
+		attr_reader :offset
+		attr_reader :size
+		attr_reader :align
+
+		@format = "VVVVV"
+		@sizeof = 20
+
+		def initialize(cputype, cpusubtype, offset, size, align)
+			@cputype = cputype
+			@cpusubtype = cpusubtype
+			@offset = offset
+			@size = size
+			@align = align
+		end
 	end
 
 	# 32-bit Mach-O file header structure
-	class MachHeader < CStruct
-		uint32 :magic
-		int32 :cputype
-		int32 :cpusubtype
-		uint32 :filetype
-		uint32 :ncmds
-		uint32 :sizeofcmds
-		uint32 :flags
+	class MachHeader < MachOStructure
+		attr_reader :magic
+		attr_reader :cputype
+		attr_reader :cpusubtype
+		attr_reader :filetype
+		attr_reader :ncmds
+		attr_reader :sizeofcmds
+		attr_reader :flags
+
+		@format = "VVVVVVV"
+		@sizeof = 28
+
+		def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
+				flags)
+			@magic = magic
+			@cputype = cputype
+			@cpusubtype = cpusubtype
+			@filetype = filetype
+			@ncmds = ncmds
+			@sizeofcmds = sizeofcmds
+			@flags = flags
+		end
 
 		# @example
 		#  puts "this mach-o has position-independent execution" if header.flag?(MH_PIE)
@@ -268,15 +301,30 @@ module MachO
 	end
 
 	# 64-bit Mach-O file header structure
-	class MachHeader64 < CStruct
-		uint32 :magic
-		int32 :cputype
-		int32 :cpusubtype
-		uint32 :filetype
-		uint32 :ncmds
-		uint32 :sizeofcmds
-		uint32 :flags
-		uint32 :reserved
+	class MachHeader64 < MachOStructure
+		attr_reader :magic
+		attr_reader :cputype
+		attr_reader :cpusubtype
+		attr_reader :filetype
+		attr_reader :ncmds
+		attr_reader :sizeofcmds
+		attr_reader :flags
+		attr_reader :reserved
+
+		@format = "VVVVVVVV"
+		@sizeof = 32
+
+		def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
+				flags, reserved)
+			@magic = magic
+			@cputype = cputype
+			@cpusubtype = cpusubtype
+			@filetype = filetype
+			@ncmds = ncmds
+			@sizeofcmds = sizeofcmds
+			@flags = flags
+			@reserved = reserved
+		end
 
 		# @example
 		#  puts "this mach-o has position-independent execution" if header.flag?(MH_PIE)

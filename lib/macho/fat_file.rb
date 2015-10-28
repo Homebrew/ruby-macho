@@ -119,6 +119,8 @@ module MachO
 
 		# Obtain the fat header from raw file data.
 		# @return [MachO::FatHeader] the fat header
+		# @raise [MachO::MagicError] if the magic is not valid Mach-O magic
+		# @raise [MachO::MachOBinaryError] if the magic is for a non-fat Mach-O file
 		# @private
 		def get_fat_header
 			magic, nfat_arch = @raw_data[0..7].unpack("N2")
@@ -135,7 +137,7 @@ module MachO
 		def get_fat_archs
 			archs = []
 
-			header[:nfat_arch].times do |i|
+			header.nfat_arch.times do |i|
 				fields = @raw_data[8 + (FatArch.bytesize * i), FatArch.bytesize].unpack("N5")
 				archs << FatArch.new(*fields)
 			end
@@ -150,7 +152,7 @@ module MachO
 			machos = []
 
 			fat_archs.each do |arch|
-				machos << MachOFile.new_from_bin(@raw_data[arch[:offset], arch[:size]])
+				machos << MachOFile.new_from_bin(@raw_data[arch.offset, arch.size])
 			end
 
 			machos
@@ -163,7 +165,7 @@ module MachO
 			machos.each_with_index do |macho, i|
 				arch = fat_archs[i]
 
-				@raw_data[arch[:offset], arch[:size]] = macho.serialize
+				@raw_data[arch.offset, arch.size] = macho.serialize
 			end
 		end
 	end

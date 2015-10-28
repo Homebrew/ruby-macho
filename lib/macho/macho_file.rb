@@ -50,67 +50,67 @@ module MachO
 
 		# @return [Boolean] true if the Mach-O has 32-bit magic, false otherwise
 		def magic32?
-			MachO.magic32?(header[:magic])
+			MachO.magic32?(header.magic)
 		end
 
 		# @return [Boolean] true if the Mach-O has 64-bit magic, false otherwise
 		def magic64?
-			MachO.magic64?(header[:magic])
+			MachO.magic64?(header.magic)
 		end
 
 		# @return [Boolean] true if the Mach-O is of type `MH_EXECUTE`, false otherwise
 		def executable?
-			header[:filetype] == MH_EXECUTE
+			header.filetype == MH_EXECUTE
 		end
 
 		# @return [Boolean] true if the Mach-O is of type `MH_DYLIB`, false otherwise
 		def dylib?
-			header[:filetype] == MH_DYLIB
+			header.filetype == MH_DYLIB
 		end
 
 		# @return [Boolean] true if the Mach-O is of type `MH_BUNDLE`, false otherwise
 		def bundle?
-			header[:filetype] == MH_BUNDLE
+			header.filetype == MH_BUNDLE
 		end
 
 		# @return [Fixnum] the Mach-O's magic number
 		def magic
-			header[:magic]
+			header.magic
 		end
 
 		# @return [String] a string representation of the Mach-O's magic number
 		def magic_string
-			MH_MAGICS[header[:magic]]
+			MH_MAGICS[header.magic]
 		end
 
 		# @return [String] a string representation of the Mach-O's filetype
 		def filetype
-			MH_FILETYPES[header[:filetype]]
+			MH_FILETYPES[header.filetype]
 		end
 
 		# @return [String] a string representation of the Mach-O's CPU type
 		def cputype
-			CPU_TYPES[header[:cputype]]
+			CPU_TYPES[header.cputype]
 		end
 
 		# @return [String] a string representation of the Mach-O's CPU subtype
 		def cpusubtype
-			CPU_SUBTYPES[header[:cpusubtype]]
+			CPU_SUBTYPES[header.cpusubtype]
 		end
 
 		# @return [Fixnum] the number of load commands in the Mach-O's header
 		def ncmds
-			header[:ncmds]
+			header.ncmds
 		end
 
 		# @return [Fixnum] the size of all load commands, in bytes
 		def sizeofcmds
-			header[:sizeofcmds]
+			header.sizeofcmds
 		end
 
 		# @return [Fixnum] execution flags set by the linker
 		def flags
-			header[:flags]
+			header.flags
 		end
 
 		# All load commands of a given name.
@@ -342,10 +342,10 @@ module MachO
 		# @raise [MachO::LoadCommandError] if an unknown load command is encountered
 		# @private
 		def get_load_commands
-			offset = header.bytesize
+			offset = header.class.bytesize
 			load_commands = []
 
-			header[:ncmds].times do
+			header.ncmds.times do
 				cmd = @raw_data.slice(offset, 4).unpack("V").first
 
 				raise LoadCommandError.new(cmd) unless LC_STRUCTURES.key?(cmd)
@@ -385,7 +385,7 @@ module MachO
 				cmd_round = 8
 			end
 
-			new_sizeofcmds = header[:sizeofcmds]
+			new_sizeofcmds = header.sizeofcmds
 			old_name = old_name.dup
 			new_name = new_name.dup
 
@@ -414,7 +414,7 @@ module MachO
 				end
 			end
 
-			if new_sizeofcmds + header.bytesize > low_fileoff
+			if new_sizeofcmds + header.class.bytesize > low_fileoff
 				raise HeaderPadError.new(@filename)
 			end
 
@@ -434,9 +434,9 @@ module MachO
 			null_pad = old_name.size - new_name.size
 
 			if null_pad < 0
-				@raw_data.slice!(new_sizeofcmds + header.bytesize, null_pad.abs)
+				@raw_data.slice!(new_sizeofcmds + header.class.bytesize, null_pad.abs)
 			else
-				@raw_data.insert(new_sizeofcmds + header.bytesize, "\x00" * null_pad)
+				@raw_data.insert(new_sizeofcmds + header.class.bytesize, "\x00" * null_pad)
 			end
 
 			# synchronize fields with the raw data
