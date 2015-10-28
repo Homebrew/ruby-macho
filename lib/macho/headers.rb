@@ -234,9 +234,13 @@ module MachO
 	}
 
 	# Fat binary header structure
+	# @see MachO::FatArch
 	class FatHeader < MachOStructure
+		# @return [Fixnum] the magic number of the header (and file)
 		attr_reader :magic
-		attr_reader :nfat_arch # number of FatArchs that follow
+
+		# @return [Fixnum] the number of fat architecture structures following the header
+		attr_reader :nfat_arch
 
 		@format = "VV"
 		@sizeof = 8
@@ -247,12 +251,23 @@ module MachO
 		end
 	end
 
-	# Fat binary header architecture structure
+	# Fat binary header architecture structure. A Fat binary has one or more of
+	# these, representing one or more internal Mach-O blobs.
+	# @see MachO::FatHeader
 	class FatArch < MachOStructure
+		# @return [Fixnum] the CPU type of the Mach-O
 		attr_reader :cputype
+
+		# @return [Fixnum] the CPU subtype of the Mach-O
 		attr_reader :cpusubtype
+
+		# @return [Fixnum] the file offset to the beginning of the Mach-O data
 		attr_reader :offset
+
+		# @return [Fixnum] the size, in bytes, of the Mach-O data
 		attr_reader :size
+
+		# @return [Fixnum] the alignment, as a power of 2
 		attr_reader :align
 
 		@format = "VVVVV"
@@ -269,12 +284,25 @@ module MachO
 
 	# 32-bit Mach-O file header structure
 	class MachHeader < MachOStructure
+		# @return [Fixnum] the magic number
 		attr_reader :magic
+
+		# @return [Fixnum] the CPU type of the Mach-O
 		attr_reader :cputype
+
+		# @return [Fixnum] the CPU subtype of the Mach-O
 		attr_reader :cpusubtype
+
+		# @return [Fixnum] the file type of the Mach-O
 		attr_reader :filetype
+
+		# @return [Fixnum] the number of load commands in the Mach-O
 		attr_reader :ncmds
+
+		# @return [Fixnum] the size of all load commands, in bytes, in the Mach-O
 		attr_reader :sizeofcmds
+
+		# @return [Fixnum] the header flags associated with the Mach-O
 		attr_reader :flags
 
 		@format = "VVVVVVV"
@@ -302,13 +330,28 @@ module MachO
 
 	# 64-bit Mach-O file header structure
 	class MachHeader64 < MachOStructure
+		# @return [Fixnum] the magic number
 		attr_reader :magic
+
+		# @return [Fixnum] the CPU type of the Mach-O
 		attr_reader :cputype
+
+		# @return [Fixnum] the CPU subtype of the Mach-O
 		attr_reader :cpusubtype
+
+		# @return [Fixnum] the file type of the Mach-O
 		attr_reader :filetype
+
+		# @return [Fixnum] the number of load commands in the Mach-O
 		attr_reader :ncmds
+
+		# @return [Fixnum] the size of all load commands, in bytes, in the Mach-O
 		attr_reader :sizeofcmds
+
+		# @return [Fixnum] the header flags associated with the Mach-O
 		attr_reader :flags
+
+		# @return [void]
 		attr_reader :reserved
 
 		@format = "VVVVVVVV"
