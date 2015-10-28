@@ -173,16 +173,7 @@ module MachO
 		# All shared libraries linked to the Mach-O.
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
-			dylibs = []
-			dylib_cmds = command("LC_LOAD_DYLIB")
-
-			dylib_cmds.each do |dylib_cmd|
-				dylib = dylib_cmd.name.to_s
-
-				dylibs << dylib
-			end
-
-			dylibs
+			command("LC_LOAD_DYLIB").map(&:name).map(&:to_s)
 		end
 
 		# Changes the shared library `old_name` to `new_name`
