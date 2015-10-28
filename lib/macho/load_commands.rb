@@ -382,7 +382,7 @@ module MachO
 	# A load command indicating that part of this file is to be mapped into
 	# the task's address space. Corresponds to LC_SEGMENT.
 	class SegmentCommand < LoadCommand
-		# @return [String] the name of the segment, including null padding bytes
+		# @return [String] the name of the segment
 		attr_reader :segname
 
 		# @return [Fixnum] the memory address of the segment
@@ -416,7 +416,7 @@ module MachO
 		def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
 				filesize, maxprot, initprot, nsects, flags)
 			super(raw_data, offset, cmd, cmdsize)
-			@segname = segname
+			@segname = segname.delete("\x00")
 			@vmaddr = vmaddr
 			@vmsize = vmsize
 			@fileoff = fileoff
@@ -426,17 +426,12 @@ module MachO
 			@nsects = nsects
 			@flags = flags
 		end
-
-		# @return [String] the segment's name, with any trailing NULL characters removed
-		def segment_name
-			@segname.delete("\x00")
-		end
 	end
 
 	# A load command indicating that part of this file is to be mapped into
 	# the task's address space. Corresponds to LC_SEGMENT_64.
 	class SegmentCommand64 < LoadCommand
-		# @return [String] the name of the segment, including null padding bytes
+		# @return [String] the name of the segment
 		attr_reader :segname
 
 		# @return [Fixnum] the memory address of the segment
@@ -470,7 +465,7 @@ module MachO
 		def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
 				filesize, maxprot, initprot, nsects, flags)
 			super(raw_data, offset, cmd, cmdsize)
-			@segname = segname
+			@segname = segname.delete("\x00")
 			@vmaddr = vmaddr
 			@vmsize = vmsize
 			@fileoff = fileoff
@@ -479,11 +474,6 @@ module MachO
 			@initprot = initprot
 			@nsects = nsects
 			@flags = flags
-		end
-
-		# @return [String] the segment's name, with any trailing NULL characters removed
-		def segment_name
-			@segname.delete("\x00")
 		end
 	end
 
