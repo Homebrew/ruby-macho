@@ -123,13 +123,8 @@ module MachO
 		def get_fat_header
 			magic, nfat_arch = @raw_data[0..7].unpack("N2")
 
-			if !MachO.magic?(magic)
-				raise MagicError.new(magic)
-			end
-
-			if !MachO.fat_magic?(magic)
-				raise MachOBinaryError.new
-			end
+			raise MagicError.new(magic) unless MachO.magic?(magic)
+			raise MachOBinaryError.new unless MachO.fat_magic?(magic)
 
 			FatHeader.new(magic, nfat_arch)
 		end
