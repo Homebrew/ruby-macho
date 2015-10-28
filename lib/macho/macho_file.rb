@@ -193,13 +193,8 @@ module MachO
 		# @return [void]
 		# @raise [MachO::DylibUnknownError] if no shared library has the old name
 		def change_install_name(old_name, new_name)
-			idx = linked_dylibs.index(old_name)
-			raise DylibUnknownError.new(old_name) if idx.nil?
-
-			# this is a bit of a hack - since there is a 1-1 ordered association
-			# between linked_dylibs and command('LC_LOAD_DYLIB'), we can use
-			# their indices interchangeably to avoid having to loop.
-			dylib_cmd = command("LC_LOAD_DYLIB")[idx]
+			dylib_cmd = command("LC_LOAD_DYLIB").find { |d| d.name.to_s == old_name }
+			raise DylibUnknownError.new(old_name) if dylib_cmd.nil?
 
 			set_name_in_dylib(dylib_cmd, old_name, new_name)
 		end
