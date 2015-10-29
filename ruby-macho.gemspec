@@ -1,6 +1,8 @@
+require "#{File.dirname(__FILE__)}/lib/macho"
+
 Gem::Specification.new do |s|
 	s.name = 'ruby-macho'
-	s.version = '0.1.6'
+	s.version = MachO::VERSION
 	s.summary = 'ruby-macho - Mach-O file analyzer.'
 	s.description = 'A library for viewing and manipulating Mach-O files in Ruby.'
 	s.authors = ['William Woodruff']
