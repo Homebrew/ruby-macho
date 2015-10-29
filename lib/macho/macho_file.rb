@@ -58,9 +58,29 @@ module MachO
 			MachO.magic64?(header.magic)
 		end
 
+		# @return [Boolean] true if the Mach-O is of type `MH_OBJECT`, false otherwise
+		def object?
+			header.filetype == MH_OBJECT
+		end
+
 		# @return [Boolean] true if the Mach-O is of type `MH_EXECUTE`, false otherwise
 		def executable?
 			header.filetype == MH_EXECUTE
+		end
+
+		# @return [Boolean] true if the Mach-O is of type `MH_FVMLIB`, false otherwise
+		def fvmlib?
+			header.filetype == MH_FVMLIB
+		end
+
+		# @return [Boolean] true if the Mach-O is of type `MH_CORE`, false otherwise
+		def core?
+			header.filetype == MH_CORE
+		end
+
+		# @return [Boolean] true if the Mach-O is of type `MH_PRELOAD`, false otherwise
+		def preload?
+			header.filetype == MH_PRELOAD
 		end
 
 		# @return [Boolean] true if the Mach-O is of type `MH_DYLIB`, false otherwise
@@ -68,9 +88,24 @@ module MachO
 			header.filetype == MH_DYLIB
 		end
 
+		# @return [Boolean] true if the Mach-O is of type `MH_DYLINKER`, false otherwise
+		def dylinker?
+			header.filetype == MH_DYLINKER
+		end
+
 		# @return [Boolean] true if the Mach-O is of type `MH_BUNDLE`, false otherwise
 		def bundle?
 			header.filetype == MH_BUNDLE
+		end
+
+		# @return [Boolean] true if the Mach-O is of type `MH_DSYM`, false otherwise
+		def dsym?
+			header.filetype == MH_DSYM
+		end
+
+		# @return [Boolean] true if the Mach-O is of type `MH_KEXT_BUNDLE`, false otherwise
+		def kext?
+			header.filetype == MH_KEXT_BUNDLE
 		end
 
 		# @return [Fixnum] the Mach-O's magic number
