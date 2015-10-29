@@ -1,22 +1,19 @@
-require 'minitest/autorun'
-require 'digest/sha1'
-require 'macho'
+require "minitest/autorun"
+require "macho"
+require "#{File.dirname(__FILE__)}/helpers"
 
 class MachOFileTest < Minitest::Test
-	def equal_sha1_hashes(file1, file2)
-		digest1 = Digest::SHA1.file(file1).to_s
-		digest2 = Digest::SHA1.file(file2).to_s
-
-		digest1 == digest2
-	end
+	include Helpers
 
 	def test_executable
 		file = MachO::MachOFile.new("test/bin/hello.bin")
 
 		# a file can only be ONE of these
 		assert file.executable?
-		refute file.dylib?
-		refute file.bundle?
+		checks = filechecks(except = :executable?)
+		checks.each do |check|
+			refute file.send(check)
+		end
 
 		assert_equal MachO::MH_CIGAM_64, file.magic
 		assert_equal "MH_CIGAM_64", file.magic_string
@@ -38,9 +35,11 @@ class MachOFileTest < Minitest::Test
 		file = MachO::MachOFile.new("test/bin/libhello.dylib")
 
 		# a file can only be ONE of these
-		refute file.executable?
 		assert file.dylib?
-		refute file.bundle?
+		checks = filechecks(except = :dylib?)
+		checks.each do |check|
+			refute file.send(check)
+		end
 
 		assert_equal MachO::MH_CIGAM_64, file.magic
 		assert_equal "MH_CIGAM_64", file.magic_string
@@ -62,9 +61,11 @@ class MachOFileTest < Minitest::Test
 		file = MachO::MachOFile.new("test/bin/hellobundle.so")
 
 		# a file can only be ONE of these
-		refute file.executable?
-		refute file.dylib?
 		assert file.bundle?
+		checks = filechecks(except = :bundle?)
+		checks.each do |check|
+			refute file.send(check)
+		end
 
 		assert_equal MachO::MH_CIGAM_64, file.magic
 		assert_equal "MH_CIGAM_64", file.magic_string

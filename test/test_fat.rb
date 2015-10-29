@@ -1,15 +1,25 @@
-require 'minitest/autorun'
-require 'macho'
+require "minitest/autorun"
+require "macho"
+require "#{File.dirname(__FILE__)}/helpers"
 
 class FatFileTest < Minitest::Test
+	include Helpers
+
 	def test_executable
 		file = MachO::FatFile.new("test/bin/fathello.bin")
+		checks = filechecks(except = :executable?)
+
+		assert file.executable?
+		checks.each do |check|
+			refute file.send(check)
+		end
 
 		file.machos.each do |macho|
 			# a file can only be ONE of these
 			assert macho.executable?
-			refute macho.dylib?
-			refute macho.bundle?
+			checks.each do |check|
+				refute macho.send(check)
+			end
 
 			assert MachO.magic?(macho.magic)
 
@@ -25,12 +35,19 @@ class FatFileTest < Minitest::Test
 
 	def test_dylib
 		file = MachO::FatFile.new("test/bin/libfathello.dylib")
+		checks = filechecks(except = :dylib?)
+
+		assert file.dylib?
+		checks.each do |check|
+			refute file.send(check)
+		end
 
 		file.machos.each do |macho|
 			# a file can only be ONE of these
-			refute macho.executable?
 			assert macho.dylib?
-			refute macho.bundle?
+			checks.each do |check|
+				refute macho.send(check)
+			end
 
 			assert MachO.magic?(macho.magic)
 
@@ -48,12 +65,19 @@ class FatFileTest < Minitest::Test
 
 	def test_bundle
 		file = MachO::FatFile.new("test/bin/fathellobundle.so")
+		checks = filechecks(except = :bundle?)
+
+		assert file.bundle?
+		checks.each do |check|
+			refute file.send(check)
+		end
 
 		file.machos.each do |macho|
 			# a file can only be ONE of these
-			refute macho.executable?
-			refute macho.dylib?
 			assert macho.bundle?
+			checks.each do |check|
+				refute macho.send(check)
+			end
 
 			assert MachO.magic?(macho.magic)
 
@@ -67,5 +91,44 @@ class FatFileTest < Minitest::Test
 		end
 
 		assert file.linked_dylibs
+	end
+
+	def test_extract_macho
+		file = MachO::FatFile.new("test/bin/fathello.bin")
+
+		assert file.machos.size == 2
+
+		macho1 = file.extract("CPU_TYPE_I386")
+		macho2 = file.extract("CPU_TYPE_X86_64")
+		not_real = file.extract("CPU_TYPE_NONEXISTENT")
+
+		assert macho1
+		assert macho2
+		assert_nil not_real
+
+		assert_equal file.machos[0].serialize, macho1.serialize
+		assert_equal file.machos[1].serialize, macho2.serialize
+
+		# write the extracted mach-os to disk
+		macho1.write("test/bin/extracted_macho1.bin")
+		macho2.write("test/bin/extracted_macho2.bin")
+
+		# load them back to ensure they're intact/uncorrupted
+		mfile1 = MachO::MachOFile.new("test/bin/extracted_macho1.bin")
+		mfile2 = MachO::MachOFile.new("test/bin/extracted_macho2.bin")
+
+		assert_equal file.machos[0].serialize, mfile1.serialize
+		assert_equal file.machos[1].serialize, mfile2.serialize
+	ensure
+		File.delete("test/bin/extracted_macho1.bin")
+		File.delete("test/bin/extracted_macho2.bin")
+	end
+
+	def test_change_dylib_id
+		pass
+	end
+
+	def test_change_install_name
+		pass
 	end
 end
