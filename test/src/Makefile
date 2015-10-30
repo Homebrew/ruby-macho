@@ -27,10 +27,10 @@ hello.bin:
 	$(CC) $(HELLO_SRC) -o $@
 
 libhello.dylib:
-	$(CC) -dynamiclib $(HELLO_SRC) -o $@
+	$(CC) -dynamiclib $(LIBHELLO_SRC) -o $@
 
 hellobundle.so:
-	$(CC) -bundle $(HELLO_SRC) -o $@
+	$(CC) -bundle $(LIBHELLO_SRC) -o $@
 
 fathello.o:
 	$(CC) $(FAT_ARCH_FLAGS) -c $(HELLO_SRC) -o $@
@@ -39,10 +39,10 @@ fathello.bin:
 	$(CC) $(FAT_ARCH_FLAGS) $(HELLO_SRC) -o $@
 
 libfathello.dylib:
-	$(CC) $(FAT_ARCH_FLAGS) -dynamiclib $(HELLO_SRC) -o $@
+	$(CC) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -o $@
 
 fathellobundle.so:
-	$(CC) $(FAT_ARCH_FLAGS) -bundle $(HELLO_SRC) -o $@
+	$(CC) $(FAT_ARCH_FLAGS) -bundle $(LIBHELLO_SRC) -o $@
 
 install: all
 	mkdir ../bin
