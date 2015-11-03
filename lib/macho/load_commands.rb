@@ -3,247 +3,107 @@ module MachO
 	# LC_REQ_DYLD to be recognized by the dynamic linder (dyld)
 	LC_REQ_DYLD = 0x80000000
 
-	# segment of this file to be mapped
-	LC_SEGMENT = 0x1
-
-	# link-edit stab symbol table info
-	LC_SYMTAB = 0x2
-
-	# link-edit gdb symbol table info (obsolete)
-	LC_SYMSEG = 0x3
-
-	# thread
-	LC_THREAD = 0x4
-
-	# unix thread (includes a stack)
-	LC_UNIXTHREAD = 0x5
-
-	# load a specified fixed VM shared library
-	LC_LOADFVMLIB = 0x6
-
-	# fixed VM shared library identification
-	LC_IDFVMLIB = 0x7
-
-	# object identification info (obsolete)
-	LC_IDENT = 0x8
-
-	# fixed VM file inclusion (internal use)
-	LC_FVMFILE = 0x9
-
-	# prepage command (internal use) 
-	LC_PREPAGE = 0xa
-
-	# dynamic link-edit symbol table info
-	LC_DYSYMTAB = 0xb
-
-	# load a dynamically linked shared library
-	LC_LOAD_DYLIB = 0xc
-
-	# dynamically linked shared lib ident
-	LC_ID_DYLIB = 0xd
-
-	# load a dynamic linker
-	LC_LOAD_DYLINKER = 0xe
-
-	# dynamic linker identification
-	LC_ID_DYLINKER = 0xf
-
-	# modules prebound for a dynamically linked shared library
-	LC_PREBOUND_DYLIB = 0x10
-
-	# image routines
-	LC_ROUTINES = 0x11
-
-	# sub framework
-	LC_SUB_FRAMEWORK = 0x12
-
-	# sub umbrella
-	LC_SUB_UMBRELLA = 0x13
-
-	# sub umbrella
-	LC_SUB_CLIENT = 0x14
-
-	# sub umbrella
-	LC_SUB_LIBRARY = 0x15
-
-	# two-level namespace lookup hints
-	LC_TWOLEVEL_HINTS = 0x16
-
-	# prebind checksum 
-	LC_PREBIND_CKSUM = 0x17
-
-	# load a dynamically linked shared library that is allowed to be missing (all symbols are weak imported).
-	LC_LOAD_WEAK_DYLIB = (0x18 | LC_REQ_DYLD)
-
-	# 64-bit segment of this file to be mapped
-	LC_SEGMENT_64 = 0x19
-
-	# 64-bit image routines
-	LC_ROUTINES_64 = 0x1a
-
-	# the uuid
-	LC_UUID = 0x1b
-
-	# runpath additions
-	LC_RPATH = (0x1c | LC_REQ_DYLD)
-
-	# local of code signature
-	LC_CODE_SIGNATURE = 0x1d
-
-	# local of info to split segments
-	LC_SEGMENT_SPLIT_INFO = 0x1e
-
-	# load and re-export dylib
-	LC_REEXPORT_DYLIB = (0x1f | LC_REQ_DYLD)
-
-	# delay load of dylib until first use
-	LC_LAZY_LOAD_DYLIB = 0x20
-
-	# encrypted segment information
-	LC_ENCRYPTION_INFO = 0x21
-
-	# compressed dyld information
-	LC_DYLD_INFO = 0x22
-
-	# compressed dyld information only
-	LC_DYLD_INFO_ONLY = (0x22 | LC_REQ_DYLD)
-
-	# load upward dylib
-	LC_LOAD_UPWARD_DYLIB = (0x23 | LC_REQ_DYLD)
-
-	# build for MacOSX min OS version
-	LC_VERSION_MIN_MACOSX = 0x24
-
-	# build for iPhoneOS min OS version
-	LC_VERSION_MIN_IPHONEOS = 0x25
-
-	# compressed table of function start addresses
-	LC_FUNCTION_STARTS = 0x26
-
-	# string for dyld to treat like environment variable
-	LC_DYLD_ENVIRONMENT = 0x27
-
-	# replacement for LC_UNIXTHREAD
-	LC_MAIN = (0x28 | LC_REQ_DYLD)
-
-	# table of non-instructions in __text
-	LC_DATA_IN_CODE = 0x29
-
-	# source version used to build binary
-	LC_SOURCE_VERSION = 0x2a
-
-	# Code signing DRs copied from linked dylibs
-	LC_DYLIB_CODE_SIGN_DRS = 0x2b
-
-	# 64-bit encrypted segment information
-	LC_ENCRYPTION_INFO_64 = 0x2c
-
-	# linker options in MH_OBJECT files
-	LC_LINKER_OPTION = 0x2d
-
-	# linker options in MH_OBJECT files
-	LC_LINKER_OPTIMIZATION_HINT = 0x2e
-
 	# association of load commands to string representations
+	# @api private
 	LOAD_COMMANDS = {
-		LC_SEGMENT => "LC_SEGMENT",
-		LC_SYMTAB => "LC_SYMTAB",
-		LC_SYMSEG => "LC_SYMSEG",
-		LC_THREAD => "LC_THREAD",
-		LC_UNIXTHREAD => "LC_UNIXTHREAD",
-		LC_LOADFVMLIB => "LC_LOADFVMLIB",
-		LC_IDFVMLIB => "LC_IDFVMLIB",
-		LC_IDENT => "LC_IDENT",
-		LC_FVMFILE => "LC_FVMFILE",
-		LC_PREPAGE => "LC_PREPAGE",
-		LC_DYSYMTAB => "LC_DYSYMTAB",
-		LC_LOAD_DYLIB => "LC_LOAD_DYLIB",
-		LC_ID_DYLIB => "LC_ID_DYLIB",
-		LC_LOAD_DYLINKER => "LC_LOAD_DYLINKER",
-		LC_ID_DYLINKER => "LC_ID_DYLINKER",
-		LC_PREBOUND_DYLIB => "LC_PREBOUND_DYLIB",
-		LC_ROUTINES => "LC_ROUTINES",
-		LC_SUB_FRAMEWORK => "LC_SUB_FRAMEWORK",
-		LC_SUB_UMBRELLA => "LC_SUB_UMBRELLA",
-		LC_SUB_CLIENT => "LC_SUB_CLIENT",
-		LC_SUB_LIBRARY => "LC_SUB_LIBRARY",
-		LC_TWOLEVEL_HINTS => "LC_TWOLEVEL_HINTS",
-		LC_PREBIND_CKSUM => "LC_PREBIND_CKSUM",
-		LC_LOAD_WEAK_DYLIB => "LC_LOAD_WEAK_DYLIB",
-		LC_SEGMENT_64 => "LC_SEGMENT_64",
-		LC_ROUTINES_64 => "LC_ROUTINES_64",
-		LC_UUID => "LC_UUID",
-		LC_RPATH => "LC_RPATH",
-		LC_CODE_SIGNATURE => "LC_CODE_SIGNATURE",
-		LC_SEGMENT_SPLIT_INFO => "LC_SEGMENT_SPLIT_INFO",
-		LC_REEXPORT_DYLIB => "LC_REEXPORT_DYLIB",
-		LC_LAZY_LOAD_DYLIB => "LC_LAZY_LOAD_DYLIB",
-		LC_ENCRYPTION_INFO => "LC_ENCRYPTION_INFO",
-		LC_DYLD_INFO => "LC_DYLD_INFO",
-		LC_DYLD_INFO_ONLY => "LC_DYLD_INFO_ONLY",
-		LC_LOAD_UPWARD_DYLIB => "LC_LOAD_UPWARD_DYLIB",
-		LC_VERSION_MIN_MACOSX => "LC_VERSION_MIN_MACOSX",
-		LC_VERSION_MIN_IPHONEOS => "LC_VERSION_MIN_IPHONEOS",
-		LC_FUNCTION_STARTS => "LC_FUNCTION_STARTS",
-		LC_DYLD_ENVIRONMENT => "LC_DYLD_ENVIRONMENT",
-		LC_MAIN => "LC_MAIN",
-		LC_DATA_IN_CODE => "LC_DATA_IN_CODE",
-		LC_SOURCE_VERSION => "LC_SOURCE_VERSION",
-		LC_DYLIB_CODE_SIGN_DRS => "LC_DYLIB_CODE_SIGN_DRS",
-		LC_ENCRYPTION_INFO_64 => "LC_ENCRYPTION_INFO_64",
-		LC_LINKER_OPTION => "LC_LINKER_OPTION",
-		LC_LINKER_OPTIMIZATION_HINT => "LC_LINKER_OPTIMIZATION_HINT"
+		0x1 => :LC_SEGMENT,
+		0x2 => :LC_SYMTAB,
+		0x3 => :LC_SYMSEG,
+		0x4 => :LC_THREAD,
+		0x5 => :LC_UNIXTHREAD,
+		0x6 => :LC_LOADFVMLIB,
+		0x7 => :LC_IDFVMLIB,
+		0x8 => :LC_IDENT,
+		0x9 => :LC_FVMFILE,
+		0xa => :LC_PREPAGE,
+		0xb => :LC_DYSYMTAB,
+		0xc => :LC_LOAD_DYLIB,
+		0xd => :LC_ID_DYLIB,
+		0xe => :LC_LOAD_DYLINKER,
+		0xf => :LC_ID_DYLINKER,
+		0x10 => :LC_PREBOUND_DYLIB,
+		0x11 => :LC_ROUTINES,
+		0x12 => :LC_SUB_FRAMEWORK,
+		0x13 => :LC_SUB_UMBRELLA,
+		0x14 => :LC_SUB_CLIENT,
+		0x15 => :LC_SUB_LIBRARY,
+		0x16 => :LC_TWOLEVEL_HINTS,
+		0x17 => :LC_PREBIND_CKSUM,
+		(0x18 | LC_REQ_DYLD) => :LC_LOAD_WEAK_DYLIB,
+		0x19 => :LC_SEGMENT_64,
+		0x1a => :LC_ROUTINES_64,
+		0x1b => :LC_UUID,
+		(0x1c | LC_REQ_DYLD) => :LC_RPATH,
+		0x1d => :LC_CODE_SIGNATURE,
+		0x1e => :LC_SEGMENT_SPLIT_INFO,
+		(0x1f | LC_REQ_DYLD) => :LC_REEXPORT_DYLIB,
+		0x20 => :LC_LAZY_LOAD_DYLIB,
+		0x21 => :LC_ENCRYPTION_INFO,
+		0x22 => :LC_DYLD_INFO,
+		(0x22 | LC_REQ_DYLD) => :LC_DYLD_INFO_ONLY,
+		(0x23 | LC_REQ_DYLD) => :LC_LOAD_UPWARD_DYLIB,
+		0x24 => :LC_VERSION_MIN_MACOSX,
+		0x25 => :LC_VERSION_MIN_IPHONEOS,
+		0x26 => :LC_FUNCTION_STARTS,
+		0x27 => :LC_DYLD_ENVIRONMENT,
+		(0x28 | LC_REQ_DYLD) => :LC_MAIN,
+		0x29 => :LC_DATA_IN_CODE,
+		0x2a => :LC_SOURCE_VERSION,
+		0x2b => :LC_DYLIB_CODE_SIGN_DRS,
+		0x2c => :LC_ENCRYPTION_INFO_64,
+		0x2d => :LC_LINKER_OPTION,
+		0x2e => :LC_LINKER_OPTIMIZATION_HINT
 	}
 
 	# association of load commands to string representations of class names
 	LC_STRUCTURES = {
-		LC_SEGMENT => "SegmentCommand",
-		LC_SYMTAB => "SymtabCommand",
-		LC_SYMSEG => "LoadCommand", # obsolete
-		LC_THREAD => "ThreadCommand",
-		LC_UNIXTHREAD => "ThreadCommand",
-		LC_LOADFVMLIB => "LoadCommand", # obsolete
-		LC_IDFVMLIB => "LoadCommand", # obsolete
-		LC_IDENT => "LoadCommand", # obsolete
-		LC_FVMFILE => "LoadCommand", # reserved for internal use only
-		LC_PREPAGE => "LoadCommand", # reserved for internal use only
-		LC_DYSYMTAB => "DysymtabCommand",
-		LC_LOAD_DYLIB => "DylibCommand",
-		LC_ID_DYLIB => "DylibCommand",
-		LC_LOAD_DYLINKER => "DylinkerCommand",
-		LC_ID_DYLINKER => "DylinkerCommand",
-		LC_PREBOUND_DYLIB => "PreboundDylibCommand",
-		LC_ROUTINES => "RoutinesCommand",
-		LC_SUB_FRAMEWORK => "SubFrameworkCommand",
-		LC_SUB_UMBRELLA => "SubUmbrellaCommand",
-		LC_SUB_CLIENT => "SubClientCommand",
-		LC_SUB_LIBRARY => "SubLibraryCommand",
-		LC_TWOLEVEL_HINTS => "TwolevelHintsCommand",
-		LC_PREBIND_CKSUM => "PrebindCksumCommand",
-		LC_LOAD_WEAK_DYLIB => "DylibCommand",
-		LC_SEGMENT_64 => "SegmentCommand64",
-		LC_ROUTINES_64 => "RoutinesCommand64",
-		LC_UUID => "UUIDCommand",
-		LC_RPATH => "RpathCommand",
-		LC_CODE_SIGNATURE => "LinkeditDataCommand",
-		LC_SEGMENT_SPLIT_INFO => "LinkeditDataCommand",
-		LC_REEXPORT_DYLIB => "DylibCommand",
-		LC_LAZY_LOAD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
-		LC_ENCRYPTION_INFO => "EncryptionInfoCommand",
-		LC_DYLD_INFO => "DyldInfoCommand",
-		LC_DYLD_INFO_ONLY => "DyldInfoCommand",
-		LC_LOAD_UPWARD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
-		LC_VERSION_MIN_MACOSX => "VersionMinCommand",
-		LC_VERSION_MIN_IPHONEOS => "VersionMinCommand",
-		LC_FUNCTION_STARTS => "LinkeditDataCommand",
-		LC_DYLD_ENVIRONMENT => "DylinkerCommand",
-		LC_MAIN => "EntryPointCommand",
-		LC_DATA_IN_CODE => "LinkeditDataCommand",
-		LC_SOURCE_VERSION => "SourceVersionCommand",
-		LC_DYLIB_CODE_SIGN_DRS => "LinkeditDataCommand",
-		LC_ENCRYPTION_INFO_64 => "EncryptionInfoCommand64",
-		LC_LINKER_OPTION => "LinkerOptionCommand",
-		LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
+		:LC_SEGMENT => "SegmentCommand",
+		:LC_SYMTAB => "SymtabCommand",
+		:LC_SYMSEG => "LoadCommand", # obsolete
+		:LC_THREAD => "ThreadCommand",
+		:LC_UNIXTHREAD => "ThreadCommand",
+		:LC_LOADFVMLIB => "LoadCommand", # obsolete
+		:LC_IDFVMLIB => "LoadCommand", # obsolete
+		:LC_IDENT => "LoadCommand", # obsolete
+		:LC_FVMFILE => "LoadCommand", # reserved for internal use only
+		:LC_PREPAGE => "LoadCommand", # reserved for internal use only
+		:LC_DYSYMTAB => "DysymtabCommand",
+		:LC_LOAD_DYLIB => "DylibCommand",
+		:LC_ID_DYLIB => "DylibCommand",
+		:LC_LOAD_DYLINKER => "DylinkerCommand",
+		:LC_ID_DYLINKER => "DylinkerCommand",
+		:LC_PREBOUND_DYLIB => "PreboundDylibCommand",
+		:LC_ROUTINES => "RoutinesCommand",
+		:LC_SUB_FRAMEWORK => "SubFrameworkCommand",
+		:LC_SUB_UMBRELLA => "SubUmbrellaCommand",
+		:LC_SUB_CLIENT => "SubClientCommand",
+		:LC_SUB_LIBRARY => "SubLibraryCommand",
+		:LC_TWOLEVEL_HINTS => "TwolevelHintsCommand",
+		:LC_PREBIND_CKSUM => "PrebindCksumCommand",
+		:LC_LOAD_WEAK_DYLIB => "DylibCommand",
+		:LC_SEGMENT_64 => "SegmentCommand64",
+		:LC_ROUTINES_64 => "RoutinesCommand64",
+		:LC_UUID => "UUIDCommand",
+		:LC_RPATH => "RpathCommand",
+		:LC_CODE_SIGNATURE => "LinkeditDataCommand",
+		:LC_SEGMENT_SPLIT_INFO => "LinkeditDataCommand",
+		:LC_REEXPORT_DYLIB => "DylibCommand",
+		:LC_LAZY_LOAD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
+		:LC_ENCRYPTION_INFO => "EncryptionInfoCommand",
+		:LC_DYLD_INFO => "DyldInfoCommand",
+		:LC_DYLD_INFO_ONLY => "DyldInfoCommand",
+		:LC_LOAD_UPWARD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
+		:LC_VERSION_MIN_MACOSX => "VersionMinCommand",
+		:LC_VERSION_MIN_IPHONEOS => "VersionMinCommand",
+		:LC_FUNCTION_STARTS => "LinkeditDataCommand",
+		:LC_DYLD_ENVIRONMENT => "DylinkerCommand",
+		:LC_MAIN => "EntryPointCommand",
+		:LC_DATA_IN_CODE => "LinkeditDataCommand",
+		:LC_SOURCE_VERSION => "SourceVersionCommand",
+		:LC_DYLIB_CODE_SIGN_DRS => "LinkeditDataCommand",
+		:LC_ENCRYPTION_INFO_64 => "EncryptionInfoCommand64",
+		:LC_LINKER_OPTION => "LinkerOptionCommand",
+		:LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
 	}
 
 	# pagezero segment name
@@ -319,9 +179,16 @@ module MachO
 			@cmdsize = cmdsize
 		end
 
+		# @return [Symbol] a symbol representation of the load command's identifying number
+		def type
+			LOAD_COMMANDS[cmd]
+		end
+
+		alias :to_sym :type
+
 		# @return [String] a string representation of the load command's identifying number
 		def to_s
-			LOAD_COMMANDS[cmd]
+			type.to_s
 		end
 
 		# Represents a Load Command string. A rough analogue to the lc_str

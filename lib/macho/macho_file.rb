@@ -151,10 +151,11 @@ module MachO
 		# All load commands of a given name.
 		# @example
 		#  file.command("LC_LOAD_DYLIB")
-		#  file["LC_LOAD_DYLIB"]
+		#  file[:LC_LOAD_DYLIB]
+		# @param [String, Symbol] name the load command ID
 		# @return [Array<MachO::LoadCommand>] an array of LoadCommands corresponding to `name`
 		def command(name)
-			load_commands.select { |lc| lc.to_s == name }
+			load_commands.select { |lc| lc.type == name.to_sym }
 		end
 
 		alias :[] :command
@@ -164,9 +165,9 @@ module MachO
 		# @return [Array<MachO::SegmentCommand64>] if the Mach-O is 64-bit
 		def segments
 			if magic32?
-				command("LC_SEGMENT")
+				command(:LC_SEGMENT)
 			else
-				command("LC_SEGMENT_64")
+				command(:LC_SEGMENT_64)
 			end
 		end
 
@@ -179,7 +180,7 @@ module MachO
 				return nil
 			end
 
-			dylib_id_cmd = command("LC_ID_DYLIB").first
+			dylib_id_cmd = command(:LC_ID_DYLIB).first
 
 			dylib_id_cmd.name.to_s
 		end
@@ -199,7 +200,7 @@ module MachO
 				return nil
 			end
 
-			dylib_cmd = command("LC_ID_DYLIB").first
+			dylib_cmd = command(:LC_ID_DYLIB).first
 			old_id = dylib_id
 
 			set_name_in_dylib(dylib_cmd, old_id, new_id)
@@ -208,7 +209,7 @@ module MachO
 		# All shared libraries linked to the Mach-O.
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
-			command("LC_LOAD_DYLIB").map(&:name).map(&:to_s)
+			command(:LC_LOAD_DYLIB).map(&:name).map(&:to_s)
 		end
 
 		# Changes the shared library `old_name` to `new_name`
@@ -219,7 +220,7 @@ module MachO
 		# @return [void]
 		# @raise [MachO::DylibUnknownError] if no shared library has the old name
 		def change_install_name(old_name, new_name)
-			dylib_cmd = command("LC_LOAD_DYLIB").find { |d| d.name.to_s == old_name }
+			dylib_cmd = command(:LC_LOAD_DYLIB).find { |d| d.name.to_s == old_name }
 			raise DylibUnknownError.new(old_name) if dylib_cmd.nil?
 
 			set_name_in_dylib(dylib_cmd, old_name, new_name)
@@ -291,7 +292,7 @@ module MachO
 			ncmds = get_ncmds
 			sizeofcmds = get_sizeofcmds
 			flags = get_flags
-			
+
 			if MachO.magic32?(magic)
 				MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
 			else
@@ -382,12 +383,13 @@ module MachO
 
 			header.ncmds.times do
 				cmd = @raw_data.slice(offset, 4).unpack("V").first
+				cmd_sym = LOAD_COMMANDS[cmd]
 
-				raise LoadCommandError.new(cmd) unless LC_STRUCTURES.key?(cmd)
+				raise LoadCommandError.new(cmd) if cmd_sym.nil?
 
 				# why do I do this? i don't like declaring constants below
 				# classes, and i need them to resolve...
-				klass = MachO.const_get "#{LC_STRUCTURES[cmd]}"
+				klass = MachO.const_get "#{LC_STRUCTURES[cmd_sym]}"
 				command = klass.new_from_bin(@raw_data, offset, @raw_data.slice(offset, klass.bytesize))
 
 				load_commands << command

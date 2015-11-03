@@ -5,8 +5,39 @@ require "#{File.dirname(__FILE__)}/helpers"
 class MachOFileTest < Minitest::Test
 	include Helpers
 
+	def test_load_commands
+		file = MachO::MachOFile.new(TEST_EXE)
+
+		file.load_commands.each do |lc|
+			assert lc
+			assert_equal MachO::LoadCommand, lc.class.superclass
+			assert_kind_of Fixnum, lc.offset
+			assert_kind_of Fixnum, lc.cmd
+			assert_kind_of Fixnum, lc.cmdsize
+			assert_kind_of String, lc.to_s
+			assert_kind_of Symbol, lc.type
+			assert_kind_of Symbol, lc.to_sym
+		end
+	end
+
+	def test_mach_header
+		file = MachO::MachOFile.new(TEST_DYLIB)
+		header = file.header
+
+		assert header
+		assert_kind_of MachO::MachHeader, header if file.magic32?
+		assert_kind_of MachO::MachHeader64, header if file.magic64?
+		assert_kind_of Fixnum, header.magic
+		assert_kind_of Fixnum, header.cputype
+		assert_kind_of Fixnum, header.cpusubtype
+		assert_kind_of Fixnum, header.filetype
+		assert_kind_of Fixnum, header.ncmds
+		assert_kind_of Fixnum, header.sizeofcmds
+		assert_kind_of Fixnum, header.flags
+	end
+
 	def test_executable
-		file = MachO::MachOFile.new("test/bin/hello.bin")
+		file = MachO::MachOFile.new(TEST_EXE)
 
 		# a file can only be ONE of these
 		assert file.executable?
@@ -32,7 +63,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_dylib
-		file = MachO::MachOFile.new("test/bin/libhello.dylib")
+		file = MachO::MachOFile.new(TEST_DYLIB)
 
 		# a file can only be ONE of these
 		assert file.dylib?
@@ -58,7 +89,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_bundle
-		file = MachO::MachOFile.new("test/bin/hellobundle.so")
+		file = MachO::MachOFile.new(TEST_BUNDLE)
 
 		# a file can only be ONE of these
 		assert file.bundle?
@@ -84,7 +115,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_change_dylib_id
-		file = MachO::MachOFile.new("test/bin/libhello.dylib")
+		file = MachO::MachOFile.new(TEST_DYLIB)
 
 		# changing the dylib id should work
 		old_id = file.dylib_id
@@ -115,7 +146,7 @@ class MachOFileTest < Minitest::Test
 	end
 
 	def test_change_install_name
-		file = MachO::MachOFile.new("test/bin/hello.bin")
+		file = MachO::MachOFile.new(TEST_EXE)
 
 		dylibs = file.linked_dylibs
 

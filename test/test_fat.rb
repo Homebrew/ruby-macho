@@ -5,8 +5,36 @@ require "#{File.dirname(__FILE__)}/helpers"
 class FatFileTest < Minitest::Test
 	include Helpers
 
+	def test_fat_header
+		file = MachO::FatFile.new(TEST_FAT_EXE)
+		header = file.header
+
+		assert header
+		assert_kind_of MachO::FatHeader, header
+		assert_kind_of Fixnum, header.magic
+		assert_kind_of Fixnum, header.nfat_arch
+	end
+
+	def test_fat_archs
+		file = MachO::FatFile.new(TEST_FAT_DYLIB)
+		archs = file.fat_archs
+
+		assert archs
+		assert_kind_of Array, archs
+
+		archs.each do |arch|
+			assert arch
+			assert_kind_of MachO::FatArch, arch
+			assert_kind_of Fixnum, arch.cputype
+			assert_kind_of Fixnum, arch.cpusubtype
+			assert_kind_of Fixnum, arch.offset
+			assert_kind_of Fixnum, arch.size
+			assert_kind_of Fixnum, arch.align
+		end
+	end
+
 	def test_executable
-		file = MachO::FatFile.new("test/bin/fathello.bin")
+		file = MachO::FatFile.new(TEST_FAT_EXE)
 		checks = filechecks(except = :executable?)
 
 		assert file.executable?
@@ -34,7 +62,7 @@ class FatFileTest < Minitest::Test
 	end
 
 	def test_dylib
-		file = MachO::FatFile.new("test/bin/libfathello.dylib")
+		file = MachO::FatFile.new(TEST_FAT_DYLIB)
 		checks = filechecks(except = :dylib?)
 
 		assert file.dylib?
@@ -64,7 +92,7 @@ class FatFileTest < Minitest::Test
 	end
 
 	def test_bundle
-		file = MachO::FatFile.new("test/bin/fathellobundle.so")
+		file = MachO::FatFile.new(TEST_FAT_BUNDLE)
 		checks = filechecks(except = :bundle?)
 
 		assert file.bundle?
@@ -94,7 +122,7 @@ class FatFileTest < Minitest::Test
 	end
 
 	def test_extract_macho
-		file = MachO::FatFile.new("test/bin/fathello.bin")
+		file = MachO::FatFile.new(TEST_FAT_EXE)
 
 		assert file.machos.size == 2
 
