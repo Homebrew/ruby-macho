@@ -1,5 +1,6 @@
 doc/
 .yardoc/
+coverage/
 *.dylib
 *.so
 *.a

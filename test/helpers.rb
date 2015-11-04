@@ -1,4 +1,7 @@
 require "digest/sha1"
+require "simplecov"
+
+SimpleCov.start
 
 module Helpers
 	TEST_OBJ = "test/bin/hello.o"
