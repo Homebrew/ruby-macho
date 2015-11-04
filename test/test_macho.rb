@@ -36,56 +36,109 @@ class MachOFileTest < Minitest::Test
 		assert_kind_of Fixnum, header.flags
 	end
 
-	def test_executable
+	def test_segments_and_sections
+		file = MachO::MachOFile.new(TEST_BUNDLE)
+		segments = file.segments
+
+		assert_kind_of Array, segments
+
+		segments.each do |seg|
+			assert seg
+			assert_kind_of MachO::SegmentCommand, seg if file.magic32?
+			assert_kind_of MachO::SegmentCommand64, seg if file.magic64?
+			assert_kind_of String, seg.segname
+			assert_kind_of Fixnum, seg.vmaddr
+			assert_kind_of Fixnum, seg.vmsize
+			assert_kind_of Fixnum, seg.fileoff
+			assert_kind_of Fixnum, seg.filesize
+			assert_kind_of Fixnum, seg.maxprot
+			assert_kind_of Fixnum, seg.initprot
+			assert_kind_of Fixnum, seg.nsects
+			assert_kind_of Fixnum, seg.flags
+
+			sections = file.sections(seg)
+
+			assert_kind_of Array, sections
+
+			sections.each do |sect|
+				assert sect
+				assert_kind_of MachO::Section, sect if seg.is_a? MachO::SegmentCommand
+				assert_kind_of MachO::Section64, sect if seg.is_a? MachO::SegmentCommand64
+				assert_kind_of String, sect.sectname
+				assert_kind_of String, sect.segname
+				assert_kind_of Fixnum, sect.addr
+				assert_kind_of Fixnum, sect.size
+				assert_kind_of Fixnum, sect.offset
+				assert_kind_of Fixnum, sect.align
+				assert_kind_of Fixnum, sect.reloff
+				assert_kind_of Fixnum, sect.nreloc
+				assert_kind_of Fixnum, sect.flags
+				assert_kind_of Fixnum, sect.reserved1
+				assert_kind_of Fixnum, sect.reserved2
+				assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Section64
+			end
+		end
+	end
+
+	def test_file
 		file = MachO::MachOFile.new(TEST_EXE)
 
-		# a file can only be ONE of these
-		assert file.executable?
-		checks = filechecks(except = :executable?)
-		checks.each do |check|
-			refute file.send(check)
-		end
+		assert file.serialize
+		assert_kind_of String, file.serialize
 
-		assert_equal MachO::MH_CIGAM_64, file.magic
-		assert_equal "MH_CIGAM_64", file.magic_string
-		assert_equal "MH_EXECUTE", file.filetype
-		assert file.cputype
-		assert file.cpusubtype
-		assert file.ncmds
-		assert file.sizeofcmds
-		assert file.flags
-
-		# it's not a dylib, so it has no dylib id
-		assert_nil file.dylib_id
+		assert_kind_of Fixnum, file.magic
+		assert_kind_of String, file.magic_string
+		assert_kind_of String, file.filetype
+		assert_kind_of String, file.cputype
+		assert_kind_of String, file.cpusubtype
+		assert_kind_of Fixnum, file.ncmds
+		assert_kind_of Fixnum, file.sizeofcmds
+		assert_kind_of Fixnum, file.flags
 
 		assert file.segments.size > 0
 		assert file.linked_dylibs.size > 0
 	end
 
-	def test_dylib
-		file = MachO::MachOFile.new(TEST_DYLIB)
+	def test_object
+		file = MachO::MachOFile.new(TEST_OBJ)
 
-		# a file can only be ONE of these
-		assert file.dylib?
-		checks = filechecks(except = :dylib?)
-		checks.each do |check|
+		assert file.object?
+		filechecks(except = :object?).each do |check|
 			refute file.send(check)
 		end
 
-		assert_equal MachO::MH_CIGAM_64, file.magic
-		assert_equal "MH_CIGAM_64", file.magic_string
+		assert_equal "MH_OBJECT", file.filetype
+
+		# it's not a dylib, so it has no dylib id
+		assert_nil file.dylib_id
+	end
+
+	def test_executable
+		file = MachO::MachOFile.new(TEST_EXE)
+
+		assert file.executable?
+		filechecks(except = :executable?).each do |check|
+			refute file.send(check)
+		end
+
+		assert_equal "MH_EXECUTE", file.filetype
+
+		# it's not a dylib, so it has no dylib id
+		assert_nil file.dylib_id
+	end
+
+	def test_dylib
+		file = MachO::MachOFile.new(TEST_DYLIB)
+
+		assert file.dylib?
+		filechecks(except = :dylib?).each do |check|
+			refute file.send(check)
+		end
+
 		assert_equal "MH_DYLIB", file.filetype
-		assert file.cputype
-		assert file.cpusubtype
-		assert file.ncmds
-		assert file.sizeofcmds
-		assert file.flags
 
 		# it's a dylib, so it *must* have a dylib id
 		assert file.dylib_id
-
-		assert file.segments.size > 0
-		assert file.linked_dylibs.size > 0
 	end
 
 	def test_bundle
@@ -93,25 +146,14 @@ class MachOFileTest < Minitest::Test
 
 		# a file can only be ONE of these
 		assert file.bundle?
-		checks = filechecks(except = :bundle?)
-		checks.each do |check|
+		filechecks(except = :bundle?).each do |check|
 			refute file.send(check)
 		end
 
-		assert_equal MachO::MH_CIGAM_64, file.magic
-		assert_equal "MH_CIGAM_64", file.magic_string
 		assert_equal "MH_BUNDLE", file.filetype
-		assert file.cputype
-		assert file.cpusubtype
-		assert file.ncmds
-		assert file.sizeofcmds
-		assert file.flags
 
 		# it's not a dylib, so it has no dylib id
 		assert_nil file.dylib_id
-
-		assert file.segments.size > 0
-		assert file.linked_dylibs.size > 0
 	end
 
 	def test_change_dylib_id
