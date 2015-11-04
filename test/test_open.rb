@@ -1,7 +1,10 @@
 require 'minitest/autorun'
 require 'macho'
+require "#{File.dirname(__FILE__)}/helpers"
 
 class MachOOpenTest < Minitest::Test
+	include Helpers
+
 	def test_open
 		file = MachO.open("test/bin/libhello.dylib")
 
