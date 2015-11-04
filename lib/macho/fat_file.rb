@@ -82,6 +82,14 @@ module MachO
 			machos.first.kext?
 		end
 
+		def magic
+			header.magic
+		end
+
+		def magic_string
+			MH_MAGICS[magic]
+		end
+
 		# The file's type. Assumed to be the same for every Mach-O within.
 		# @return [String] the filetype
 		def filetype

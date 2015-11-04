@@ -33,92 +33,75 @@ class FatFileTest < Minitest::Test
 		end
 	end
 
-	def test_executable
-		file = MachO::FatFile.new(TEST_FAT_EXE)
-		checks = filechecks(except = :executable?)
+	def test_machos
+		file = MachO::FatFile.new(TEST_FAT_BUNDLE)
+		machos = file.machos
 
-		assert file.executable?
-		checks.each do |check|
+		assert machos
+		assert_kind_of Array, machos
+
+		machos.each do |macho|
+			assert macho
+			assert_kind_of MachO::MachOFile, macho
+
+			assert macho.serialize
+			assert_kind_of String, macho.serialize
+		end
+	end
+
+	def test_file
+		file = MachO::FatFile.new(TEST_FAT_EXE)
+
+		assert file.serialize
+		assert_kind_of String, file.serialize
+
+		assert_kind_of Fixnum, file.magic
+		assert_kind_of String, file.magic_string
+		assert_kind_of String, file.filetype
+	end
+
+	def test_object
+		file = MachO::FatFile.new(TEST_FAT_OBJ)
+
+		assert file.object?
+		filechecks(except = :object?).each do |check|
 			refute file.send(check)
 		end
 
-		file.machos.each do |macho|
-			# a file can only be ONE of these
-			assert macho.executable?
-			checks.each do |check|
-				refute macho.send(check)
-			end
+		assert_equal "MH_OBJECT", file.filetype
+	end
 
-			assert MachO.magic?(macho.magic)
+	def test_executable
+		file = MachO::FatFile.new(TEST_FAT_EXE)
 
-			assert_equal "MH_EXECUTE", macho.filetype
-			assert macho.cputype
-			assert macho.cpusubtype
-			assert macho.ncmds
-			assert macho.sizeofcmds
-			assert macho.flags
-			assert_nil macho.dylib_id
+		assert file.executable?
+		filechecks(except = :executable?).each do |check|
+			refute file.send(check)
 		end
+
+		assert_equal "MH_EXECUTE", file.filetype
 	end
 
 	def test_dylib
 		file = MachO::FatFile.new(TEST_FAT_DYLIB)
-		checks = filechecks(except = :dylib?)
 
 		assert file.dylib?
-		checks.each do |check|
+		filechecks(except = :dylib?).each do |check|
 			refute file.send(check)
 		end
 
-		file.machos.each do |macho|
-			# a file can only be ONE of these
-			assert macho.dylib?
-			checks.each do |check|
-				refute macho.send(check)
-			end
-
-			assert MachO.magic?(macho.magic)
-
-			assert_equal "MH_DYLIB", macho.filetype
-			assert macho.cputype
-			assert macho.cpusubtype
-			assert macho.ncmds
-			assert macho.sizeofcmds
-			assert macho.flags
-			assert macho.dylib_id
-		end
-
-		assert file.linked_dylibs
+		assert_equal "MH_DYLIB", file.filetype
 	end
 
 	def test_bundle
 		file = MachO::FatFile.new(TEST_FAT_BUNDLE)
-		checks = filechecks(except = :bundle?)
 
 		assert file.bundle?
-		checks.each do |check|
+		filechecks(except = :bundle?).each do |check|
 			refute file.send(check)
 		end
 
-		file.machos.each do |macho|
-			# a file can only be ONE of these
-			assert macho.bundle?
-			checks.each do |check|
-				refute macho.send(check)
-			end
-
-			assert MachO.magic?(macho.magic)
-
-			assert_equal "MH_BUNDLE", macho.filetype
-			assert macho.cputype
-			assert macho.cpusubtype
-			assert macho.ncmds
-			assert macho.sizeofcmds
-			assert macho.flags
-			assert_nil macho.dylib_id
-		end
-
-		assert file.linked_dylibs
+		assert_equal "MH_BUNDLE", file.filetype
 	end
 
 	def test_extract_macho

@@ -115,7 +115,7 @@ module MachO
 
 		# @return [String] a string representation of the Mach-O's magic number
 		def magic_string
-			MH_MAGICS[header.magic]
+			MH_MAGICS[magic]
 		end
 
 		# @return [String] a string representation of the Mach-O's filetype
