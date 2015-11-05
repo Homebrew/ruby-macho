@@ -55,6 +55,7 @@ class MachOFileTest < Minitest::Test
 			assert_kind_of Fixnum, seg.initprot
 			assert_kind_of Fixnum, seg.nsects
 			assert_kind_of Fixnum, seg.flags
+			refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
 
 			sections = file.sections(seg)
 
@@ -73,6 +74,7 @@ class MachOFileTest < Minitest::Test
 				assert_kind_of Fixnum, sect.reloff
 				assert_kind_of Fixnum, sect.nreloc
 				assert_kind_of Fixnum, sect.flags
+				refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
 				assert_kind_of Fixnum, sect.reserved1
 				assert_kind_of Fixnum, sect.reserved2
 				assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Section64

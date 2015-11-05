@@ -130,17 +130,13 @@ module MachO
 	# segment for self-modifying code with RWX permissions
 	SEG_IMPORT = "__IMPORT"
 
-	# the file contents for this segment is for the high part of the VM space, the low part is zero filled (for stacks in core files)
-	SG_HIGHVM = 0x1
-
-	# this segment is the VM that is allocated by a fixed VM library, for overlap checking in the link editor
-	SG_FVMLIB = 0x2
-
-	# this segment has nothing that was relocated in it and nothing relocated to it, that is it maybe safely replaced without relocation
-	SG_NORELOC = 0x4
-
-	# this segment is protected.  if the segment starts at file offset 0, the first page of the segment is not protected.  all other pages of the segment are protected.
-	SG_PROTECTED_VERSION_1 = 0x8
+	# association of segment flag symbols to values
+	SEGMENT_FLAGS = {
+		:SG_HIGHVM => 0x1,
+		:SG_FVMLIB => 0x2,
+		:SG_NORELOC => 0x4,
+		:SG_PROTECTED_VERSION_1 => 0x8
+	}
 
 	# Mach-O load command structure
 	# This is the most generic load command - only cmd ID and size are
@@ -293,6 +289,16 @@ module MachO
 			@nsects = nsects
 			@flags = flags
 		end
+
+		# @example
+		#  puts "this segment relocated in/to it" if sect.flag?(:SG_NORELOC)
+		# @param flag [Symbol] a segment flag symbol
+		# @return [Boolean] true if `flag` is present in the segment's flag field
+		def flag?(flag)
+			flag = SEGMENT_FLAGS[flag]
+			return false if flag.nil?
+			flags & flag == flag
+		end
 	end
 
 	# A load command indicating that part of this file is to be mapped into
@@ -341,6 +347,16 @@ module MachO
 			@initprot = initprot
 			@nsects = nsects
 			@flags = flags
+		end
+
+		# @example
+		#  puts "this segment relocated in/to it" if sect.flag?(:SG_NORELOC)
+		# @param flag [Symbol] a segment flag symbol
+		# @return [Boolean] true if `flag` is present in the segment's flag field
+		def flag?(flag)
+			flag = SEGMENT_FLAGS[flag]
+			return false if flag.nil?
+			flags & flag == flag
 		end
 	end
 

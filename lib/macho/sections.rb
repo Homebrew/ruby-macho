@@ -129,7 +129,7 @@ module MachO
 		# @example
 		#  puts "this section is regular" if sect.flag?(:S_REGULAR)
 		# @param flag [Symbol] a section flag symbol
-		# @return [Boolean] true if `flag` is present in the sections's flag field
+		# @return [Boolean] true if `flag` is present in the section's flag field
 		def flag?(flag)
 			flag = SECTION_FLAGS[flag]
 			return false if flag.nil?
