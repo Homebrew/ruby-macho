@@ -56,6 +56,7 @@ module MachO
 	}
 
 	# association of load command symbols to string representations of classes
+	# @api private
 	LC_STRUCTURES = {
 		:LC_SEGMENT => "SegmentCommand",
 		:LC_SYMTAB => "SymtabCommand",
@@ -107,6 +108,7 @@ module MachO
 	}
 
 	# association of segment name symbols to names
+	# @api private
 	SEGMENT_NAMES = {
 		:SEG_PAGEZERO => "__PAGEZERO",
 		:SEG_TEXT => "__TEXT",
@@ -119,6 +121,7 @@ module MachO
 	}
 
 	# association of segment flag symbols to values
+	# @api private
 	SEGMENT_FLAGS = {
 		:SG_HIGHVM => 0x1,
 		:SG_FVMLIB => 0x2,

@@ -111,6 +111,7 @@ module MachO
 	MH_KEXT_BUNDLE = 0xb
 
 	# association of filetypes to string representations
+	# @api private
 	MH_FILETYPES = {
 		MH_OBJECT => "MH_OBJECT",
 		MH_EXECUTE => "MH_EXECUTE",
@@ -125,112 +126,35 @@ module MachO
 		MH_KEXT_BUNDLE => "MH_KEXT_BUNDLE"
 	}
 
-	# the object file has no undefined references (flag)
-	MH_NOUNDEFS = 0x1
-
-	# the object file is the output of an incremental link against a base file (flag)
-	MH_INCRLINK = 0x2
-
-	# the object file is input for the dynamic linker and can't be staticly link edited again (flag)
-	MH_DYLDLINK = 0x4
-
-	# the object file's undefined references are bound by the dynamic linker when loaded (flag)
-	MH_BINDATLOAD = 0x8
-
-	# the file has its dynamic undefined references prebound (flag)
-	MH_PREBOUND = 0x10
-
-	# the file has its read-only and read-write segments split (flag)
-	MH_SPLIT_SEGS = 0x20
-
-	# the shared library init routine is to be run lazily via catching memory faults to its writeable segments (obsolete) (flag)
-	MH_LAZY_INIT = 0x40
-
-	# the image is using two-level name space bindings (flag)
-	MH_TWOLEVEL = 0x80
-
-	# the executable is forcing all images to use flat name space bindings (flag)
-	MH_FORCE_FLAT = 0x100
-
-	# this umbrella guarantees no multiple defintions of symbols in its sub-images so the two-level namespace hints can always be used (flag)
-	MH_NOMULTIDEFS = 0x200
-
-	# do not have dyld notify the prebinding agent about this executable (flag)
-	MH_NOPREFIXBINDING = 0x400
-
-	# the binary is not prebound but can have its prebinding redone. only used when MH_PREBOUND is not set (flag)
-	MH_PREBINDABLE = 0x800
-
-	# indicates that this binary binds to all two-level namespace modules of its dependent libraries. only used when MH_PREBINDABLE and MH_TWOLEVEL are both set (flag)
-	MH_ALLMODSBOUND = 0x1000
-
-	# safe to divide up the sections into sub-sections via symbols for dead code stripping (flag)
-	MH_SUBSECTIONS_VIA_SYMBOLS = 0x2000
-
-	# the binary has been canonicalized via the unprebind operation (flag)
-	MH_CANONICAL = 0x4000
-
-	# the final linked image contains external weak symbols (flag)
-	MH_WEAK_DEFINES = 0x8000
-
-	# the final linked image uses weak symbols (flag)
-	MH_BINDS_TO_WEAK = 0x10000
-
-	# When this bit is set, all stacks in the task will be given stack execution privilege.  Only used in MH_EXECUTE filetypes (flag)
-	MH_ALLOW_STACK_EXECUTION = 0x20000
-
-	# When this bit is set, the binary declares it is safe for use in processes with uid zero (flag)
-	MH_ROOT_SAFE = 0x40000
-
-	# When this bit is set, the binary declares it is safe for use in processes when issetugid() is true (flag)
-	MH_SETUID_SAFE = 0x80000
-
-	# When this bit is set on a dylib, the static linker does not need to examine dependent dylibs to see if any are re-exported (flag)
-	MH_NO_REEXPORTED_DYLIBS = 0x100000
-
-	# When this bit is set, the OS will load the main executable at a random address.  Only used in MH_EXECUTE filetypes (flag)
-	MH_PIE = 0x200000
-
-	# Only for use on dylibs.  When linking against a dylib that has this bit set, the static linker will automatically not create a LC_LOAD_DYLIB load command to the dylib if no symbols are being referenced from the dylib (flag)
-	MH_DEAD_STRIPPABLE_DYLIB = 0x400000
-
-	# Contains a section of type S_THREAD_LOCAL_VARIABLES (flag)
-	MH_HAS_TLV_DESCRIPTORS = 0x800000
-
-	# When this bit is set, the OS will run the main executable with a non-executable heap even on platforms (e.g. i386) that don't require it. Only used in MH_EXECUTE filetypes (flag)
-	MH_NO_HEAP_EXECUTION = 0x1000000
-
-	# The code was linked for use in an application extension (flag)
-	MH_APP_EXTENSION_SAFE = 0x02000000
-
-	# association of mach header flags to string representations
+	# association of mach header flag symbols to values
+	# @api private
 	MH_FLAGS = {
-		MH_NOUNDEFS => "MH_NOUNDEFS",
-		MH_INCRLINK => "MH_INCRLINK",
-		MH_DYLDLINK => "MH_DYLDLINK",
-		MH_BINDATLOAD => "MH_BINDATLOAD",
-		MH_PREBOUND => "MH_PREBOUND",
-		MH_SPLIT_SEGS => "MH_SPLIT_SEGS",
-		MH_LAZY_INIT => "MH_LAZY_INIT",
-		MH_TWOLEVEL => "MH_TWOLEVEL",
-		MH_FORCE_FLAT => "MH_FORCE_FLAT",
-		MH_NOMULTIDEFS => "MH_NOMULTIDEFS",
-		MH_NOPREFIXBINDING => "MH_NOPREFIXBINDING",
-		MH_PREBINDABLE => "MH_PREBINDABLE",
-		MH_ALLMODSBOUND => "MH_ALLMODSBOUND",
-		MH_SUBSECTIONS_VIA_SYMBOLS => "MH_SUBSECTIONS_VIA_SYMBOLS",
-		MH_CANONICAL => "MH_CANONICAL",
-		MH_WEAK_DEFINES => "MH_WEAK_DEFINES",
-		MH_BINDS_TO_WEAK => "MH_BINDS_TO_WEAK",
-		MH_ALLOW_STACK_EXECUTION => "MH_ALLOW_STACK_EXECUTION",
-		MH_ROOT_SAFE => "MH_ROOT_SAFE",
-		MH_SETUID_SAFE => "MH_SETUID_SAFE",
-		MH_NO_REEXPORTED_DYLIBS => "MH_NO_REEXPORTED_DYLIBS",
-		MH_PIE => "MH_PIE",
-		MH_DEAD_STRIPPABLE_DYLIB => "MH_DEAD_STRIPPABLE_DYLIB",
-		MH_HAS_TLV_DESCRIPTORS => "MH_HAS_TLV_DESCRIPTORS",
-		MH_NO_HEAP_EXECUTION => "MH_NO_HEAP_EXECUTION",
-		MH_APP_EXTENSION_SAFE => "MH_APP_EXTENSION_SAFE"
+		:MH_NOUNDEFS => 0x1,
+		:MH_INCRLINK => 0x2,
+		:MH_DYLDLINK => 0x4,
+		:MH_BINDATLOAD => 0x8,
+		:MH_PREBOUND => 0x10,
+		:MH_SPLIT_SEGS => 0x20,
+		:MH_LAZY_INIT => 0x40,
+		:MH_TWOLEVEL => 0x80,
+		:MH_FORCE_FLAT => 0x100,
+		:MH_NOMULTIDEFS => 0x200,
+		:MH_NOPREFIXBINDING => 0x400,
+		:MH_PREBINDABLE => 0x800,
+		:MH_ALLMODSBOUND => 0x1000,
+		:MH_SUBSECTIONS_VIA_SYMBOLS => 0x2000,
+		:MH_CANONICAL => 0x4000,
+		:MH_WEAK_DEFINES => 0x8000,
+		:MH_BINDS_TO_WEAK => 0x10000,
+		:MH_ALLOW_STACK_EXECUTION => 0x20000,
+		:MH_ROOT_SAFE => 0x40000,
+		:MH_SETUID_SAFE => 0x80000,
+		:MH_NO_REEXPORTED_DYLIBS => 0x100000,
+		:MH_PIE => 0x200000,
+		:MH_DEAD_STRIPPABLE_DYLIB => 0x400000,
+		:MH_HAS_TLV_DESCRIPTORS => 0x800000,
+		:MH_NO_HEAP_EXECUTION => 0x1000000,
+		:MH_APP_EXTENSION_SAFE => 0x02000000
 	}
 
 	# Fat binary header structure
@@ -323,10 +247,12 @@ module MachO
 		end
 
 		# @example
-		#  puts "this mach-o has position-independent execution" if header.flag?(MH_PIE)
-		# @param flag [Fixnum] a mach header flag constant
+		#  puts "this mach-o has position-independent execution" if header.flag?(:MH_PIE)
+		# @param flag [Symbol] a mach header flag symbol
 		# @return [Boolean] true if `flag` is present in the header's flag section
 		def flag?(flag)
+			flag = MH_FLAGS[flag]
+			return false if flag.nil?
 			flags & flag == flag
 		end
 	end

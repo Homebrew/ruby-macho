@@ -12,6 +12,7 @@ module MachO
 	SECTION_ATTRIBUTES_SYS = 0x00ffff00
 
 	# association of section flag symbols to values
+	# @api private
 	SECTION_FLAGS = {
 		:S_REGULAR => 0x0,
 		:S_ZEROFILL => 0x1,
@@ -48,6 +49,7 @@ module MachO
 	}
 
 	# association of section name symbols to names
+	# @api private
 	SECTION_NAMES = {
 		:SECT_TEXT => "__text",
 		:SECT_FVMLIB_INIT0 => "__fvmlib_init0",

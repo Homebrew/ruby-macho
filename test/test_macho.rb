@@ -34,6 +34,7 @@ class MachOFileTest < Minitest::Test
 		assert_kind_of Fixnum, header.ncmds
 		assert_kind_of Fixnum, header.sizeofcmds
 		assert_kind_of Fixnum, header.flags
+		refute header.flag?(:THIS_IS_A_MADE_UP_FLAG)
 	end
 
 	def test_segments_and_sections
