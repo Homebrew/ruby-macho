@@ -106,29 +106,17 @@ module MachO
 		:LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
 	}
 
-	# pagezero segment name
-	SEG_PAGEZERO = "__PAGEZERO"
-
-	# text segment name
-	SEG_TEXT = "__TEXT"
-
-	# data segment name
-	SEG_DATA = "__DATA"
-
-	# objective-c runtime segment
-	SEG_OBJC = "__OBJC"
-
-	# icon segment
-	SEG_ICON = "__ICON"
-
-	# link editor structures segment
-	SEG_LINKEDIT = "__LINKEDIT"
-
-	# unix stack segment
-	SEG_UNIXSTACK = "__UNIXSTACK"
-
-	# segment for self-modifying code with RWX permissions
-	SEG_IMPORT = "__IMPORT"
+	# association of segment name symbols to names
+	SEGMENT_NAMES = {
+		:SEG_PAGEZERO => "__PAGEZERO",
+		:SEG_TEXT => "__TEXT",
+		:SEG_DATA => "__DATA",
+		:SEG_OBJC => "__OBJC",
+		:SEG_ICON => "__ICON",
+		:SEG_LINKEDIT => "__LINKEDIT",
+		:SEG_UNIXSTACK => "__UNIXSTACK",
+		:SEG_IMPORT => "__IMPORT"
+	}
 
 	# association of segment flag symbols to values
 	SEGMENT_FLAGS = {
