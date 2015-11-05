@@ -442,8 +442,8 @@ module MachO
 			# calculate the low file offset (offset to first section data)
 			segments.each do |seg|
 				sections(seg).each do |sect|
-					if sect.size != 0 && !sect.flag?(S_ZEROFILL) &&
-							!sect.flag?(S_THREAD_LOCAL_ZEROFILL) &&
+					if sect.size != 0 && !sect.flag?(:S_ZEROFILL) &&
+							!sect.flag?(:S_THREAD_LOCAL_ZEROFILL) &&
 							sect.offset < low_fileoff
 
 						low_fileoff = sect.offset

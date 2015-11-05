@@ -3,7 +3,7 @@ module MachO
 	# LC_REQ_DYLD to be recognized by the dynamic linder (dyld)
 	LC_REQ_DYLD = 0x80000000
 
-	# association of load commands to string representations
+	# association of load commands to symbol representations
 	# @api private
 	LOAD_COMMANDS = {
 		0x1 => :LC_SEGMENT,
@@ -55,7 +55,7 @@ module MachO
 		0x2e => :LC_LINKER_OPTIMIZATION_HINT
 	}
 
-	# association of load commands to string representations of class names
+	# association of load command symbols to string representations of classes
 	LC_STRUCTURES = {
 		:LC_SEGMENT => "SegmentCommand",
 		:LC_SYMTAB => "SymtabCommand",
