@@ -187,7 +187,7 @@ class MachOFileTest < Minitest::Test
 
 		assert equal_sha1_hashes("test/bin/libhello_actual.dylib", "test/bin/libhello_expected.dylib")
 	ensure
-		File.delete("test/bin/libhello_actual.dylib")
+		delete_if_exists("test/bin/libhello_actual.dylib")
 	end
 
 	def test_change_install_name
@@ -210,6 +210,31 @@ class MachOFileTest < Minitest::Test
 		# compare actual and expected file hashes, to ensure file correctness
 		assert equal_sha1_hashes("test/bin/hello_actual.bin", "test/bin/hello_expected.bin")
 	ensure
-		File.delete("test/bin/hello_actual.bin")
+		delete_if_exists("test/bin/hello_actual.bin")
+	end
+
+	def test_change_rpath
+		pass
+		# file = MachO::MachOFile.new(TEST_EXE)
+
+		# rpaths = file.rpaths
+
+		# refute_empty rpaths
+		# assert_equal "made_up_path", rpaths[0]
+
+		# begin
+		# 	file.change_rpath(rpaths[0], "/usr/lib")
+		# rescue Exception => e
+		# 	file.write("test/bin/hello_rpath_actual.bin")
+		# end
+		# new_rpaths = file.rpaths
+
+		# assert_equal "/usr/lib", new_rpaths[0]
+		# refute_equal rpaths[0], new_rpaths[0]
+
+		# file.write("test/bin/hello_rpath_actual.bin")
+
+		# # compare actual and expected file hashes, to ensure file correctness
+		# assert equal_sha1_hashes("test/bin/hello_rpath_actual.bin", "test/bin/hello_rpath_expected.bin")
 	end
 end

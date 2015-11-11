@@ -12,5 +12,5 @@ require "#{File.dirname(__FILE__)}/macho/tools"
 # The primary namespace for ruby-macho.
 module MachO
 	# release version
-	VERSION = "0.1.9".freeze
+	VERSION = "0.2.0".freeze
 end

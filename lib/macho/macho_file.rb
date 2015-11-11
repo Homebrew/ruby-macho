@@ -228,6 +228,27 @@ module MachO
 
 		alias :change_dylib :change_install_name
 
+		# All runtime paths searched by the dynamic linker for the Mach-O.
+		# @return [Array<String>] an array of all runtime paths
+		def rpaths
+			command(:LC_RPATH).map(&:path).map(&:to_s)
+		end
+
+		# Changes the runtime path `old_path` to `new_path`
+		# @example
+		#  file.change_rpath("/usr/lib", "/usr/local/lib")
+		# @param old_path [String] the old runtime path
+		# @param new_path [String] the new runtime path
+		# @return [void]
+		# @raise [MachO::RpathUnknownError] if no such old runtime path exists
+		# @api private
+		def change_rpath(old_path, new_path)
+			rpath_cmd = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
+			raise RpathUnknownError.new(old_path) if rpath_cmd.nil?
+
+			set_path_in_rpath(rpath_cmd, old_path, new_path)
+		end
+
 		# All sections of the segment `segment`.
 		# @param segment [MachO::SegmentCommand, MachO::SegmentCommand64] the segment being inspected
 		# @return [Array<MachO::Section>] if the Mach-O is 32-bit
@@ -408,14 +429,34 @@ module MachO
 			@raw_data[20..23] = new_size
 		end
 
-		# Updates the `name` field in a DylibCommand, regardless of load command type
+		# Updates the `name` field in a DylibCommand.
 		# @param dylib_cmd [MachO::DylibCommand] the dylib command
 		# @param old_name [String] the old dylib name
 		# @param new_name [String] the new dylib name
 		# @return [void]
-		# @raise [MachO::HeaderPadError] if the new name exceeds the header pad buffer
 		# @private
 		def set_name_in_dylib(dylib_cmd, old_name, new_name)
+			set_lc_str_in_cmd(dylib_cmd, dylib_cmd.name, old_name, new_name)
+		end
+
+		# Updates the `path` field in an RpathCommand.
+		# @param rpath_cmd [MachO::RpathCommand] the rpath command
+		# @param old_path [String] the old runtime name
+		# @param new_path [String] the new runtime name
+		# @return [void]
+		# @private
+		def set_path_in_rpath(rpath_cmd, old_path, new_path)
+			set_lc_str_in_cmd(rpath_cmd, rpath_cmd.path, old_path, new_path)
+		end
+
+		# Updates a generic LCStr field in any LoadCommand.
+		# @param cmd [MachO::LoadCommand] the load command
+		# @param lc_str [MachO::LoadCommand::LCStr] the load command string
+		# @param old_str [String] the old string
+		# @param new_str [String] the new string
+		# @raise [MachO::HeaderPadError] if the new name exceeds the header pad buffer
+		# @private
+		def set_lc_str_in_cmd(cmd, lc_str, old_str, new_str)
 			if magic32?
 				cmd_round = 4
 			else
@@ -423,19 +464,19 @@ module MachO
 			end
 
 			new_sizeofcmds = header.sizeofcmds
-			old_name = old_name.dup
-			new_name = new_name.dup
+			old_str = old_str.dup
+			new_str = new_str.dup
 
-			old_pad = MachO.round(old_name.size, cmd_round) - old_name.size
-			new_pad = MachO.round(new_name.size, cmd_round) - new_name.size
+			old_pad = MachO.round(old_str.size + 1, cmd_round) - old_str.size
+			new_pad = MachO.round(new_str.size + 1, cmd_round) - new_str.size
 
 			# pad the old and new IDs with null bytes to meet command bounds
-			old_name << "\x00" * old_pad
-			new_name << "\x00" * new_pad
+			old_str << "\x00" * old_pad
+			new_str << "\x00" * new_pad
 
-			# calculate the new size of the DylibCommand and sizeofcmds in MH
-			new_size = DylibCommand.bytesize + new_name.size
-			new_sizeofcmds += new_size - dylib_cmd.cmdsize
+			# calculate the new size of the cmd and sizeofcmds in MH
+			new_size = cmd.class.bytesize + new_str.size
+			new_sizeofcmds += new_size - cmd.cmdsize
 
 			low_fileoff = 2**64 # ULLONGMAX
 
@@ -458,17 +499,17 @@ module MachO
 			# update sizeofcmds in mach_header
 			set_sizeofcmds(new_sizeofcmds)
 
-			# update cmdsize in the dylib_command
-			@raw_data[dylib_cmd.offset + 4, 4] = [new_size].pack("V")
+			# update cmdsize in the cmd
+			@raw_data[cmd.offset + 4, 4] = [new_size].pack("V")
 
-			# delete the old name
-			@raw_data.slice!(dylib_cmd.offset + dylib_cmd.name.to_i...dylib_cmd.offset + dylib_cmd.class.bytesize + old_name.size)
+			# delete the old str
+			@raw_data.slice!(cmd.offset + lc_str.to_i...cmd.offset + cmd.class.bytesize + old_str.size)
 
-			# insert the new id
-			@raw_data.insert(dylib_cmd.offset + dylib_cmd.name.to_i, new_name)
+			# insert the new str
+			@raw_data.insert(cmd.offset + lc_str.to_i, new_str)
 
 			# pad/unpad after new_sizeofcmds until offsets are corrected
-			null_pad = old_name.size - new_name.size
+			null_pad = old_str.size - new_str.size
 
 			if null_pad < 0
 				@raw_data.slice!(new_sizeofcmds + header.class.bytesize, null_pad.abs)

@@ -136,10 +136,53 @@ class FatFileTest < Minitest::Test
 	end
 
 	def test_change_dylib_id
-		pass
+		file = MachO::FatFile.new(TEST_FAT_DYLIB)
+
+		# changing the dylib id should work
+		old_id = file.dylib_id
+		file.dylib_id = "testing"
+		assert_equal "testing", file.dylib_id
+
+		# change it back within the same instance
+		file.dylib_id = old_id
+		assert_equal old_id, file.dylib_id
+
+		really_big_id = "x" * 4096
+
+		# test failsafe for excessively large IDs (w/ no special linking)
+		assert_raises MachO::HeaderPadError do
+			file.dylib_id = really_big_id
+		end
+
+		file.dylib_id = "test"
+
+		file.write("test/bin/libfathello_actual.dylib")
+
+		assert equal_sha1_hashes("test/bin/libfathello_actual.dylib", "test/bin/libfathello_expected.dylib")
+	ensure
+		delete_if_exists("test/bin/libfathello_actual.dylib")
 	end
 
 	def test_change_install_name
-		pass
+		file = MachO::FatFile.new(TEST_FAT_EXE)
+
+		dylibs = file.linked_dylibs
+
+		# there should be at least one dylib linked to the binary
+		refute_empty dylibs
+
+		file.change_install_name(dylibs[0], "test")
+		new_dylibs = file.linked_dylibs
+
+		# the new dylib name should reflect the changes we've made
+		assert_equal "test", new_dylibs[0]
+		refute_equal dylibs[0], new_dylibs[0]
+
+		file.write("test/bin/fathello_actual.bin")
+
+		# compare actual and expected file hashes, to ensure file correctness
+		assert equal_sha1_hashes("test/bin/fathello_actual.bin", "test/bin/fathello_expected.bin")
+	ensure
+		delete_if_exists("test/bin/fathello_actual.bin")
 	end
 end

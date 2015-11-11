@@ -14,6 +14,12 @@ module Helpers
 	TEST_FAT_DYLIB = "test/bin/libfathello.dylib"
 	TEST_FAT_BUNDLE = "test/bin/fathellobundle.so"
 
+	def delete_if_exists(file)
+		if File.exist?(file)
+			File.delete(file)
+		end
+	end
+
 	def equal_sha1_hashes(file1, file2)
 		digest1 = Digest::SHA1.file(file1).to_s
 		digest2 = Digest::SHA1.file(file2).to_s

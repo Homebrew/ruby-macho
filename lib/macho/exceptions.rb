@@ -74,4 +74,12 @@ module MachO
 			super "No such dylib name: #{dylib}"
 		end
 	end
+
+	# Raised when attempting to change an rpath that doesn't exist.
+	class RpathUnknownError < MachOError
+		# @param path [String] the unknown runtime path
+		def initialize(path)
+			super "No such runtime path: #{path}"
+		end
+	end
 end

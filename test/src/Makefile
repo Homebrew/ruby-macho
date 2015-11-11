@@ -5,6 +5,7 @@ LIBHELLO_SRC = libhello.c
 
 MACHOS = hello.o hello.bin libhello.dylib hellobundle.so
 FATS = fathello.o fathello.bin libfathello.dylib fathellobundle.so
+EXPECTEDS =
 
 RPATH_FLAGS = -rpath made_up_path
 FAT_ARCH_FLAGS = -arch i386 -arch x86_64
@@ -15,11 +16,13 @@ ifneq ($(UNAME_S),Darwin)
 $(error This makefile can only be run on OS X)
 endif
 
-all: machos fats
+all: machos fats expecteds
 
 machos: $(MACHOS)
 
 fats: $(FATS)
+
+expecteds: $(EXPECTEDS)
 
 hello.o:
 	$(CC) -c $(HELLO_SRC) -o $@
@@ -47,7 +50,7 @@ fathellobundle.so:
 
 install: all
 	mkdir ../bin
-	mv $(MACHOS) $(FATS) ../bin
+	mv $(MACHOS) $(FATS) $(EXPECTEDS) ../bin
 
 clean:
 	rm -f $(MACHOS) $(FATS)

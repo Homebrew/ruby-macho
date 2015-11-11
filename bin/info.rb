@@ -29,7 +29,7 @@ puts file.linked_dylibs.join("\n")
 puts "\nSEGMENTS AND SECTIONS:"
 
 file.segments.each do |seg|
-	puts "SEGMENT: #{seg.segment_name}"
+	puts "SEGMENT: #{seg.segname}"
 
 	file.sections(seg).each do |sect|
 		puts "\tSECTION: #{sect.section_name}"
