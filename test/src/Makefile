@@ -6,6 +6,7 @@ LIBHELLO_SRC = libhello.c
 MACHOS = hello.o hello.bin libhello.dylib hellobundle.so
 FATS = fathello.o fathello.bin libfathello.dylib fathellobundle.so
 
+RPATH_FLAGS = -rpath made_up_path
 FAT_ARCH_FLAGS = -arch i386 -arch x86_64
 
 UNAME_S := $(shell uname -s)
@@ -24,7 +25,7 @@ hello.o:
 	$(CC) -c $(HELLO_SRC) -o $@
 
 hello.bin:
-	$(CC) $(HELLO_SRC) -o $@
+	$(CC) $(RPATH_FLAGS) $(HELLO_SRC) -o $@
 
 libhello.dylib:
 	$(CC) -dynamiclib $(LIBHELLO_SRC) -o $@
@@ -36,7 +37,7 @@ fathello.o:
 	$(CC) $(FAT_ARCH_FLAGS) -c $(HELLO_SRC) -o $@
 
 fathello.bin:
-	$(CC) $(FAT_ARCH_FLAGS) $(HELLO_SRC) -o $@
+	$(CC) $(RPATH_FLAGS) $(FAT_ARCH_FLAGS) $(HELLO_SRC) -o $@
 
 libfathello.dylib:
 	$(CC) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -o $@
