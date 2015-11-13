@@ -43,7 +43,7 @@ module MachO
 	CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64)
 
 	# PowerPC compatible CPUs (7400 series?)
-	CPU_TYPE_POWERPC = 0x24
+	CPU_TYPE_POWERPC = 0x12
 
 	# PowerPC64 compatible CPUs (970 series?)
 	CPU_TYPE_POWERPC64 = (CPU_TYPE_POWERPC | CPU_ARCH_ABI64)
