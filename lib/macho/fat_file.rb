@@ -32,60 +32,62 @@ module MachO
 			@raw_data
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_OBJECT`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_OBJECT`, false otherwise
 		def object?
 			machos.first.object?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_EXECUTE`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_EXECUTE`, false otherwise
 		def executable?
 			machos.first.executable?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_FVMLIB`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_FVMLIB`, false otherwise
 		def fvmlib?
 			machos.first.fvmlib?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_CORE`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_CORE`, false otherwise
 		def core?
 			machos.first.core?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_PRELOAD`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_PRELOAD`, false otherwise
 		def preload?
 			machos.first.preload?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_DYLIB`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_DYLIB`, false otherwise
 		def dylib?
 			machos.first.dylib?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_DYLINKER`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_DYLINKER`, false otherwise
 		def dylinker?
 			machos.first.dylinker?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_BUNDLE`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_BUNDLE`, false otherwise
 		def bundle?
 			machos.first.bundle?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_DSYM`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_DSYM`, false otherwise
 		def dsym?
 			machos.first.dsym?
 		end
 
-		# @return [Boolean] true if the Mach-O is of type `MH_KEXT_BUNDLE`, false otherwise
+		# @return [Boolean] true if the file is of type `MH_KEXT_BUNDLE`, false otherwise
 		def kext?
 			machos.first.kext?
 		end
 
+		# @return [Fixnum] the file's magic number
 		def magic
 			header.magic
 		end
 
+		# @return [String] a string representation of the file's magic number
 		def magic_string
 			MH_MAGICS[magic]
 		end
