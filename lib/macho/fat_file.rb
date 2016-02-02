@@ -131,10 +131,8 @@ module MachO
 		# All shared libraries linked to the file's Mach-Os.
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
-			dylibs = machos.map(&:linked_dylibs).flatten
-
 			# can machos inside fat binaries have different dylibs?
-			dylibs.uniq!
+			machos.flat_map(&:linked_dylibs).uniq
 		end
 
 		# Changes all dependent shared library install names from `old_name` to `new_name`.
