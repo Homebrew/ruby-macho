@@ -55,6 +55,16 @@ module MachO
 		0x2e => :LC_LINKER_OPTIMIZATION_HINT
 	}
 
+	# load commands responsible for loading dylibs
+	# @api private
+	DYLIB_LOAD_COMMANDS = [
+		:LC_LOAD_DYLIB,
+		:LC_LOAD_WEAK_DYLIB,
+		:LC_REEXPORT_DYLIB,
+		:LC_LAZY_LOAD_DYLIB,
+		:LC_LOAD_UPWARD_DYLIB,
+	].freeze
+
 	# association of load command symbols to string representations of classes
 	# @api private
 	LC_STRUCTURES = {
@@ -89,11 +99,11 @@ module MachO
 		:LC_CODE_SIGNATURE => "LinkeditDataCommand",
 		:LC_SEGMENT_SPLIT_INFO => "LinkeditDataCommand",
 		:LC_REEXPORT_DYLIB => "DylibCommand",
-		:LC_LAZY_LOAD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
+		:LC_LAZY_LOAD_DYLIB => "DylibCommand",
 		:LC_ENCRYPTION_INFO => "EncryptionInfoCommand",
 		:LC_DYLD_INFO => "DyldInfoCommand",
 		:LC_DYLD_INFO_ONLY => "DyldInfoCommand",
-		:LC_LOAD_UPWARD_DYLIB => "LoadCommand", # undoc, maybe DylibCommand?
+		:LC_LOAD_UPWARD_DYLIB => "DylibCommand",
 		:LC_VERSION_MIN_MACOSX => "VersionMinCommand",
 		:LC_VERSION_MIN_IPHONEOS => "VersionMinCommand",
 		:LC_FUNCTION_STARTS => "LinkeditDataCommand",

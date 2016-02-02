@@ -160,6 +160,12 @@ module MachO
 
 		alias :[] :command
 
+		# All load commands responsible for loading dylibs.
+		# @return [Array<MachO::DylibCommand>] an array of DylibCommands
+		def dylib_load_commands
+			load_commands.select { |lc| DYLIB_LOAD_COMMANDS.include?(lc.type) }
+		end
+
 		# All segment load commands in the Mach-O.
 		# @return [Array<MachO::SegmentCommand>] if the Mach-O is 32-bit
 		# @return [Array<MachO::SegmentCommand64>] if the Mach-O is 64-bit
@@ -209,7 +215,7 @@ module MachO
 		# All shared libraries linked to the Mach-O.
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
-			command(:LC_LOAD_DYLIB).map(&:name).map(&:to_s)
+			dylib_load_commands.map(&:name).map(&:to_s)
 		end
 
 		# Changes the shared library `old_name` to `new_name`
@@ -220,7 +226,7 @@ module MachO
 		# @return [void]
 		# @raise [MachO::DylibUnknownError] if no shared library has the old name
 		def change_install_name(old_name, new_name)
-			dylib_cmd = command(:LC_LOAD_DYLIB).find { |d| d.name.to_s == old_name }
+			dylib_cmd = dylib_load_commands.find { |d| d.name.to_s == old_name }
 			raise DylibUnknownError.new(old_name) if dylib_cmd.nil?
 
 			set_name_in_dylib(dylib_cmd, old_name, new_name)
