@@ -55,6 +55,16 @@ module MachO
 		0x2e => :LC_LINKER_OPTIMIZATION_HINT
 	}
 
+	# load commands responsible for loading dylibs
+	# @api private
+	DYLIB_LOAD_COMMANDS = [
+		:LC_LOAD_DYLIB,
+		:LC_LOAD_WEAK_DYLIB,
+		:LC_REEXPORT_DYLIB,
+		:LC_LAZY_LOAD_DYLIB,
+		:LC_LOAD_UPWARD_DYLIB,
+	].freeze
+
 	# association of load command symbols to string representations of classes
 	# @api private
 	LC_STRUCTURES = {
