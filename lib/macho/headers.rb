@@ -33,14 +33,11 @@ module MachO
 	# any CPU (unused?)
 	CPU_TYPE_ANY = -1
 
-	# x86 compatible CPUs
-	CPU_TYPE_X86 = 0x07
-
 	# i386 and later compatible CPUs
-	CPU_TYPE_I386 = CPU_TYPE_X86
+	CPU_TYPE_I386 = 0x07
 
 	# x86_64 (AMD64) compatible CPUs
-	CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64)
+	CPU_TYPE_X86_64 = (CPU_TYPE_I386 | CPU_ARCH_ABI64)
 
 	# PowerPC compatible CPUs (7400 series?)
 	CPU_TYPE_POWERPC = 0x12
@@ -51,7 +48,6 @@ module MachO
 	# association of cpu types to string representations
 	CPU_TYPES = {
 		CPU_TYPE_ANY => "CPU_TYPE_ANY",
-		CPU_TYPE_X86 => "CPU_TYPE_X86",
 		CPU_TYPE_I386 => "CPU_TYPE_I386",
 		CPU_TYPE_X86_64 => "CPU_TYPE_X86_64",
 		CPU_TYPE_POWERPC => "CPU_TYPE_POWERPC",
