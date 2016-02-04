@@ -7,11 +7,13 @@ module Helpers
 	TEST_OBJ = "test/bin/hello.o"
 	TEST_EXE = "test/bin/hello.bin"
 	TEST_DYLIB = "test/bin/libhello.dylib"
+	TEST_EXTRA_DYLIB = "test/bin/libextrahello.dylib"
 	TEST_BUNDLE = "test/bin/hellobundle.so"
 
 	TEST_FAT_OBJ = "test/bin/fathello.o"
 	TEST_FAT_EXE = "test/bin/fathello.bin"
 	TEST_FAT_DYLIB = "test/bin/libfathello.dylib"
+	TEST_FAT_EXTRA_DYLIB = "test/bin/libfatextrahello.dylib"
 	TEST_FAT_BUNDLE = "test/bin/fathellobundle.so"
 
 	def delete_if_exists(file)

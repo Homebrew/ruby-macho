@@ -144,6 +144,26 @@ class MachOFileTest < Minitest::Test
 		assert file.dylib_id
 	end
 
+	def test_extra_dylib
+		file = MachO::MachOFile.new(TEST_EXTRA_DYLIB)
+
+		assert file.dylib?
+
+		# make sure we can read LC_LOAD_UPWARD_DYLIB commands
+		lc = file[:LC_LOAD_UPWARD_DYLIB].first
+
+		assert lc
+		assert_kind_of MachO::DylibCommand, lc
+
+		dylib_name = lc.name
+
+		assert dylib_name
+		assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+
+		# TODO: figure out why we can't make dylibs with LC_LAZY_LOAD_DYLIB commands
+		# @see https://github.com/Homebrew/ruby-macho/issues/6
+	end
+
 	def test_bundle
 		file = MachO::MachOFile.new(TEST_BUNDLE)
 

@@ -93,6 +93,28 @@ class FatFileTest < Minitest::Test
 		assert_equal "MH_DYLIB", file.filetype
 	end
 
+	def test_extra_dylib
+		file = MachO::FatFile.new(TEST_FAT_EXTRA_DYLIB)
+
+		assert file.dylib?
+
+		# make sure we can read LC_LOAD_UPWARD_DYLIB commands
+		file.machos.each do |macho|
+			lc = macho[:LC_LOAD_UPWARD_DYLIB].first
+
+			assert lc
+			assert_kind_of MachO::DylibCommand, lc
+
+			dylib_name = lc.name
+
+			assert dylib_name
+			assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+		end
+
+		# TODO: figure out why we can't make dylibs with LC_LAZY_LOAD_DYLIB commands
+		# @see https://github.com/Homebrew/ruby-macho/issues/6
+	end
+
 	def test_bundle
 		file = MachO::FatFile.new(TEST_FAT_BUNDLE)
 
