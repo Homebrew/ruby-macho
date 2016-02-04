@@ -183,12 +183,12 @@ module MachO
 		# @raise [MachO::MachOBinaryError] if the magic is for a non-fat Mach-O file
 		# @private
 		def get_fat_header
-			magic, nfat_arch = @raw_data[0..7].unpack("N2")
+			fh = FatHeader.new_from_bin(@raw_data[0, FatHeader.bytesize])
 
-			raise MagicError.new(magic) unless MachO.magic?(magic)
-			raise MachOBinaryError.new unless MachO.fat_magic?(magic)
+			raise MagicError.new(fh.magic) unless MachO.magic?(fh.magic)
+			raise MachOBinaryError.new unless MachO.fat_magic?(fh.magic)
 
-			FatHeader.new(magic, nfat_arch)
+			fh
 		end
 
 		# Obtain an array of fat architectures from raw file data.
@@ -197,9 +197,10 @@ module MachO
 		def get_fat_archs
 			archs = []
 
+			fa_off = FatHeader.bytesize
+			fa_len = FatArch.bytesize
 			header.nfat_arch.times do |i|
-				fields = @raw_data[8 + (FatArch.bytesize * i), FatArch.bytesize].unpack("N5")
-				archs << FatArch.new(*fields)
+				archs << FatArch.new_from_bin(@raw_data[fa_off + (fa_len * i), fa_len])
 			end
 
 			archs

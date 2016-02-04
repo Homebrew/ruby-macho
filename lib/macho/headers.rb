@@ -162,7 +162,7 @@ module MachO
 		# @return [Fixnum] the number of fat architecture structures following the header
 		attr_reader :nfat_arch
 
-		FORMAT = "VV"
+		FORMAT = "N2" # always big-endian
 		SIZEOF = 8
 
 		# @api private
@@ -191,7 +191,7 @@ module MachO
 		# @return [Fixnum] the alignment, as a power of 2
 		attr_reader :align
 
-		FORMAT = "VVVVV"
+		FORMAT = "N5" # always big-endian
 		SIZEOF = 20
 
 		# @api private
