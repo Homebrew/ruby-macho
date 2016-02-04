@@ -5,9 +5,13 @@ module MachO
 
   # Raised when a file's magic bytes are not valid Mach-O magic.
   class MagicError < MachOError
-    # @param num [Fixnum] the unknown number
+    # @param num [Fixnum, nil] the unknown number or nil if no number was read
     def initialize(num)
-      super "Unrecognized Mach-O magic: 0x#{"%02x" % num}"
+      if num
+        super "Unrecognized Mach-O magic: 0x#{"%02x" % num}"
+      else
+        super "Unrecognized Mach-O magic: file too short"
+      end
     end
   end
 
