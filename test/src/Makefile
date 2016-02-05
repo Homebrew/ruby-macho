@@ -9,6 +9,7 @@ EXPECTEDS =
 
 RPATH_FLAGS = -rpath made_up_path
 FAT_ARCH_FLAGS = -arch i386 -arch x86_64
+LDFLAGS = -L.
 
 UNAME_S := $(shell uname -s)
 
@@ -33,8 +34,8 @@ hello.bin:
 libhello.dylib:
 	$(CC) -dynamiclib $(LIBHELLO_SRC) -o $@
 
-libextrahello.dylib:
-	$(CC) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lpthread -o $@
+libextrahello.dylib: libhello.dylib
+	$(CC) $(LDFLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lhello -o $@
 
 hellobundle.so:
 	$(CC) -bundle $(LIBHELLO_SRC) -o $@
@@ -48,8 +49,8 @@ fathello.bin:
 libfathello.dylib:
 	$(CC) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -o $@
 
-libfatextrahello.dylib:
-	$(CC) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lpthread -o $@
+libfatextrahello.dylib: libfathello.dylib
+	$(CC) $(LDFLAGS) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lfathello -o $@
 
 fathellobundle.so:
 	$(CC) $(FAT_ARCH_FLAGS) -bundle $(LIBHELLO_SRC) -o $@

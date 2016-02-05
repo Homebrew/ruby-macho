@@ -98,17 +98,19 @@ class FatFileTest < Minitest::Test
 
 		assert file.dylib?
 
-		# make sure we can read LC_LOAD_UPWARD_DYLIB commands
 		file.machos.each do |macho|
-			lc = macho[:LC_LOAD_UPWARD_DYLIB].first
+			# make sure we can read more unusual dylib load commands
+			[:LC_LOAD_UPWARD_DYLIB, :LC_LAZY_LOAD_DYLIB].each do |cmdname|
+				lc = macho[cmdname].first
 
-			assert lc
-			assert_kind_of MachO::DylibCommand, lc
+				assert lc
+				assert_kind_of MachO::DylibCommand, lc
 
-			dylib_name = lc.name
+				dylib_name = lc.name
 
-			assert dylib_name
-			assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+				assert dylib_name
+				assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+			end
 		end
 
 		# TODO: figure out why we can't make dylibs with LC_LAZY_LOAD_DYLIB commands
