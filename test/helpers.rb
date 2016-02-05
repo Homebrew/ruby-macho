@@ -1,7 +1,6 @@
+require_relative "../lib/macho"
 require "digest/sha1"
-require "simplecov"
-
-SimpleCov.start
+require "fileutils"
 
 module Helpers
 	TEST_OBJ = "test/bin/hello.o"
@@ -15,6 +14,12 @@ module Helpers
 	TEST_FAT_DYLIB = "test/bin/libfathello.dylib"
 	TEST_FAT_EXTRA_DYLIB = "test/bin/libfatextrahello.dylib"
 	TEST_FAT_BUNDLE = "test/bin/fathellobundle.so"
+
+	OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/
+
+	def installed?(util)
+		!`which #{util}`.empty?
+	end
 
 	def delete_if_exists(file)
 		if File.exist?(file)
