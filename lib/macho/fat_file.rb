@@ -131,7 +131,9 @@ module MachO
 		# All shared libraries linked to the file's Mach-Os.
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
-			# can machos inside fat binaries have different dylibs?
+			# Individual architectures in a fat binary can link to different subsets
+			# of libraries, but at this point we want to have the full picture, i.e.
+			# the union of all libraries used by all architectures.
 			machos.flat_map(&:linked_dylibs).uniq
 		end
 

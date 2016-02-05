@@ -215,7 +215,11 @@ module MachO
 		# All shared libraries linked to the Mach-O.
 		# @return [Array<String>] an array of all shared libraries
 		def linked_dylibs
-			dylib_load_commands.map(&:name).map(&:to_s)
+			# Some linkers produce multiple `LC_LOAD_DYLIB` load commands for the same
+			# library, but at this point we're really only interested in a list of
+			# unique libraries this Mach-O file links to, thus: `uniq`. (This is also
+			# for consistency with `FatFile` that merges this list across all archs.)
+			dylib_load_commands.map(&:name).map(&:to_s).uniq
 		end
 
 		# Changes the shared library `old_name` to `new_name`
