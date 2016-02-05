@@ -235,7 +235,9 @@ module MachO
 				flags)
 			@magic = magic
 			@cputype = cputype
-			@cpusubtype = cpusubtype
+			# For now we're not interested in additional capability bits also to be
+			# found in the `cpusubtype` field. We only care about the CPU sub-type.
+			@cpusubtype = cpusubtype & ~CPU_SUBTYPE_MASK
 			@filetype = filetype
 			@ncmds = ncmds
 			@sizeofcmds = sizeofcmds
