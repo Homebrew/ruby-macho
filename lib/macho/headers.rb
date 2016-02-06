@@ -162,7 +162,7 @@ module MachO
 		# @return [Fixnum] the number of fat architecture structures following the header
 		attr_reader :nfat_arch
 
-		FORMAT = "VV"
+		FORMAT = "N2" # always big-endian
 		SIZEOF = 8
 
 		# @api private
@@ -191,7 +191,7 @@ module MachO
 		# @return [Fixnum] the alignment, as a power of 2
 		attr_reader :align
 
-		FORMAT = "VVVVV"
+		FORMAT = "N5" # always big-endian
 		SIZEOF = 20
 
 		# @api private
@@ -235,7 +235,9 @@ module MachO
 				flags)
 			@magic = magic
 			@cputype = cputype
-			@cpusubtype = cpusubtype
+			# For now we're not interested in additional capability bits also to be
+			# found in the `cpusubtype` field. We only care about the CPU sub-type.
+			@cpusubtype = cpusubtype & ~CPU_SUBTYPE_MASK
 			@filetype = filetype
 			@ncmds = ncmds
 			@sizeofcmds = sizeofcmds
