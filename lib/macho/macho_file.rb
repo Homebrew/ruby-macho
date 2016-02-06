@@ -316,28 +316,23 @@ module MachO
 		# @return [MachO::MachHeader64] if the Mach-O is 64-bit
 		# @private
 		def get_mach_header
-			magic = get_magic
-			cputype = get_cputype
-			cpusubtype = get_cpusubtype
-			filetype = get_filetype
-			ncmds = get_ncmds
-			sizeofcmds = get_sizeofcmds
-			flags = get_flags
+			magic = get_and_check_magic
+			mh_klass = MachO.magic32?(magic) ? MachHeader : MachHeader64
+			mh = mh_klass.new_from_bin(@raw_data[0, mh_klass.bytesize])
 
-			if MachO.magic32?(magic)
-				MachHeader.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
-			else
-				# the reserved field is...reserved, so just fill it with 0
-				MachHeader64.new(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags, 0)
-			end
+			check_cputype(mh.cputype)
+			check_cpusubtype(mh.cpusubtype)
+			check_filetype(mh.filetype)
+
+			mh
 		end
 
-		# The file's magic number.
+		# Read just the file's magic number and check its validity.
 		# @return [Fixnum] the magic
 		# @raise [MachO::MagicError] if the magic is not valid Mach-O magic
 		# @raise [MachO::FatBinaryError] if the magic is for a Fat file
 		# @private
-		def get_magic
+		def get_and_check_magic
 			magic = @raw_data[0..3].unpack("N").first
 
 			raise MagicError.new(magic) unless MachO.magic?(magic)
@@ -346,62 +341,29 @@ module MachO
 			magic
 		end
 
-		# The file's CPU type.
-		# @return [Fixnum] the CPU type
+		# Check the file's CPU type.
+		# @param cputype [Fixnum] the CPU type
 		# @raise [MachO::CPUTypeError] if the CPU type is unknown
 		# @private
-		def get_cputype
-			cputype = @raw_data[4..7].unpack("V").first
-
+		def check_cputype(cputype)
 			raise CPUTypeError.new(cputype) unless CPU_TYPES.key?(cputype)
-
-			cputype
 		end
 
-		# The file's CPU subtype.
-		# @return [Fixnum] the CPU subtype
-		# @raise [MachO::CPUSubtypeError] if the CPU subtype is unknown
+		# Check the file's CPU sub-type.
+		# @param cpusubtype [Fixnum] the CPU subtype
+		# @raise [MachO::CPUSubtypeError] if the CPU sub-type is unknown
 		# @private
-		def get_cpusubtype
-			cpusubtype = @raw_data[8..11].unpack("V").first
-			cpusubtype &= ~CPU_SUBTYPE_LIB64 # this mask isn't documented!
-
+		def check_cpusubtype(cpusubtype)
+			# Only check sub-type w/o capability bits (see `get_mach_header`).
 			raise CPUSubtypeError.new(cpusubtype) unless CPU_SUBTYPES.key?(cpusubtype)
-
-			cpusubtype
 		end
 
-		# The file's type.
-		# @return [Fixnum] the file type
+		# Check the file's type.
+		# @param filetype [Fixnum] the file type
 		# @raise [MachO::FiletypeError] if the file type is unknown
 		# @private
-		def get_filetype
-			filetype = @raw_data[12..15].unpack("V").first
-
+		def check_filetype(filetype)
 			raise FiletypeError.new(filetype) unless MH_FILETYPES.key?(filetype)
-
-			filetype
-		end
-
-		# The number of load commands in the file.
-		# @return [Fixnum] the number of load commands
-		# @private
-		def get_ncmds
-			@raw_data[16..19].unpack("V").first
-		end
-
-		# The size of all load commands, in bytes.
-		# return [Fixnum] the size of all load commands
-		# @private
-		def get_sizeofcmds
-			@raw_data[20..23].unpack("V").first
-		end
-
-		# The Mach-O header's flags.
-		# @return [Fixnum] the flags
-		# @private
-		def get_flags
-			@raw_data[24..27].unpack("V").first
 		end
 
 		# All load commands in the file.
