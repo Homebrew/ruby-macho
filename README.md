@@ -2,7 +2,7 @@ ruby-macho
 ================
 
 [![Gem Version](https://badge.fury.io/rb/ruby-macho.svg)](http://badge.fury.io/rb/ruby-macho)
-[![Build Status](https://drone.io/github.com/woodruffw/ruby-macho/status.png)](https://drone.io/github.com/woodruffw/ruby-macho/latest)
+[![Build Status](https://travis-ci.org/Homebrew/ruby-macho.svg?branch=master)](https://travis-ci.org/Homebrew/ruby-macho)
 
 A Ruby library for examining and modifying Mach-O files.
 
