@@ -134,7 +134,7 @@ module MachO
 			# Individual architectures in a fat binary can link to different subsets
 			# of libraries, but at this point we want to have the full picture, i.e.
 			# the union of all libraries used by all architectures.
-			machos.flat_map(&:linked_dylibs).uniq
+			machos.map(&:linked_dylibs).flatten.uniq
 		end
 
 		# Changes all dependent shared library install names from `old_name` to `new_name`.

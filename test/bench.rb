@@ -1,4 +1,4 @@
-require "#{File.dirname(__FILE__)}/helpers"
+require "helpers"
 require "benchmark/ips"
 
 class RubyMachOBenchmark
