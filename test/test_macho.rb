@@ -1,5 +1,5 @@
 require "minitest/autorun"
-require "#{File.dirname(__FILE__)}/helpers"
+require "helpers"
 require "macho"
 
 class MachOFileTest < Minitest::Test

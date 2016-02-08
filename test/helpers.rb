@@ -1,4 +1,4 @@
-require_relative "../lib/macho"
+require "macho"
 require "digest/sha1"
 require "fileutils"
 

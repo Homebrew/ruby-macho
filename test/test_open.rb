@@ -1,6 +1,6 @@
-require 'minitest/autorun'
-require "#{File.dirname(__FILE__)}/helpers"
-require 'macho'
+require "minitest/autorun"
+require "helpers"
+require "macho"
 
 class MachOOpenTest < Minitest::Test
 	include Helpers
