@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
 	s.authors = ['William Woodruff']
 	s.email = 'william@tuffbizz.com'
 	s.files = Dir['LICENSE', 'README.md', '.yardopts', 'lib/**/*']
-	s.homepage = 'https://github.com/woodruffw/ruby-macho'
+	s.homepage = 'https://github.com/Homebrew/ruby-macho'
 	s.license = 'MIT'
 end
