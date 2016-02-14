@@ -7,7 +7,7 @@ file = MachO::FatFile.new(ARGV.shift)
 puts "No. architectures: #{file.fat_archs.size}"
 
 file.machos.each do |macho|
-	puts macho.cputype
+  puts macho.cputype
 end
 
 puts "changing dylib id to test..."
