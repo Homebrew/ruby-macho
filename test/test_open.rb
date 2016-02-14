@@ -3,15 +3,15 @@ require "helpers"
 require "macho"
 
 class MachOOpenTest < Minitest::Test
-	include Helpers
+  include Helpers
 
-	def test_open
-		file = MachO.open("test/bin/libhello.dylib")
+  def test_open
+    file = MachO.open("test/bin/libhello.dylib")
 
-		assert_kind_of MachO::MachOFile, file
+    assert_kind_of MachO::MachOFile, file
 
-		file = MachO.open("test/bin/libfathello.dylib")
+    file = MachO.open("test/bin/libfathello.dylib")
 
-		assert_kind_of MachO::FatFile, file
-	end
+    assert_kind_of MachO::FatFile, file
+  end
 end
