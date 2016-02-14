@@ -28,7 +28,7 @@ file.filetype # => "MH_EXECUTE"
 
 # get all load commands in the file and print their offsets:
 file.load_commands.each do |lc|
-	puts "#{lc}: offset #{lc.offset}, size: #{lc.cmdsize}"
+  puts "#{lc}: offset #{lc.offset}, size: #{lc.cmdsize}"
 end
 
 # access a specific load command
