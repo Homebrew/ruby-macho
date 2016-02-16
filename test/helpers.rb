@@ -1,6 +1,7 @@
 require "macho"
 require "digest/sha1"
 require "fileutils"
+require "tempfile"
 
 module Helpers
   TEST_OBJ = "test/bin/hello.o"
@@ -43,5 +44,13 @@ module Helpers
     checks.delete(except)
 
     checks
+  end
+
+  def tempfile_with_data(filename, data)
+    Tempfile.open(filename) do |file|
+      file.write(data)
+      file.rewind
+      yield file
+    end
   end
 end
