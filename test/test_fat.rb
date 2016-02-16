@@ -5,6 +5,31 @@ require "macho"
 class FatFileTest < Minitest::Test
   include Helpers
 
+  def test_empty_file
+    tempfile_with_data("empty_file", "") do |empty_file|
+      assert_raises MachO::TruncatedFileError do
+        MachO::FatFile.new(empty_file.path)
+      end
+    end
+  end
+
+  def test_truncated_file
+    tempfile_with_data("truncated_file", "\xCA\xFE\xBA\xBE\x00\x00") do |truncated_file|
+      assert_raises MachO::TruncatedFileError do
+        MachO::FatFile.new(truncated_file.path)
+      end
+    end
+  end
+
+  def test_java_classfile
+    blob = "\xCA\xFE\xBA\xBE\x00\x00\x00\x33therestofthisfileisnotarealjavaclassfile"
+    tempfile_with_data("fake_java_class_file", blob) do |fake_java_class_file|
+      assert_raises MachO::JavaClassFileError do
+        MachO::FatFile.new(fake_java_class_file.path)
+      end
+    end
+  end
+
   def test_fat_header
     file = MachO::FatFile.new(TEST_FAT_EXE)
     header = file.header

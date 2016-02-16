@@ -5,6 +5,22 @@ require "macho"
 class MachOFileTest < Minitest::Test
   include Helpers
 
+  def test_empty_file
+    tempfile_with_data("empty_file", "") do |empty_file|
+      assert_raises MachO::TruncatedFileError do
+        MachO::MachOFile.new(empty_file.path)
+      end
+    end
+  end
+
+  def test_truncated_file
+    tempfile_with_data("truncated_file", "\xFE\xED\xFA\xCE\x00\x00") do |truncated_file|
+      assert_raises MachO::TruncatedFileError do
+        MachO::MachOFile.new(truncated_file.path)
+      end
+    end
+  end
+
   def test_load_commands
     file = MachO::MachOFile.new(TEST_EXE)
 
