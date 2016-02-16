@@ -7,3 +7,4 @@ coverage/
 *.bin
 *.gem
 !test/bin/*
+Gemfile.lock
