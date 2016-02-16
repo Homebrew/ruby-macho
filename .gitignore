@@ -1,10 +1,16 @@
-doc/
-.yardoc/
-coverage/
-*.dylib
-*.so
-*.a
-*.bin
-*.gem
-!test/bin/*
-Gemfile.lock
+# Documentation.
+/.yardoc/
+/doc/
+
+# Gems for redistribution.
+/ruby-macho-*.gem
+
+# Testing.
+/coverage/
+
+# Build results for test cases before they are selectively moved to '/test/bin'.
+/test/src/*.a
+/test/src/*.bin
+/test/src/*.dylib
+/test/src/*.o
+/test/src/*.so
