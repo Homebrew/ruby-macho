@@ -179,14 +179,28 @@ module MachO
 
     # Obtain the fat header from raw file data.
     # @return [MachO::FatHeader] the fat header
+    # @raise [MachO::TruncatedFileError] if the file is too small to have a valid header
     # @raise [MachO::MagicError] if the magic is not valid Mach-O magic
     # @raise [MachO::MachOBinaryError] if the magic is for a non-fat Mach-O file
+    # @raise [MachO::JavaClassFileError] if the file is a Java classfile
     # @private
     def get_fat_header
+      # the smallest fat Mach-O header is 8 bytes
+      raise TruncatedFileError.new if @raw_data.size < 8
+
       fh = FatHeader.new_from_bin(@raw_data[0, FatHeader.bytesize])
 
       raise MagicError.new(fh.magic) unless MachO.magic?(fh.magic)
       raise MachOBinaryError.new unless MachO.fat_magic?(fh.magic)
+
+      # Rationale: Java classfiles have the same magic as big-endian fat
+      # Mach-Os. Classfiles encode their version at the same offset as
+      # `nfat_arch` and the lowest version number is 43, so we error out
+      # if a file claims to have over 30 internal architectures. It's
+      # technically possible for a fat Mach-O to have over 30 architectures,
+      # but this is extremely unlikely and in practice distinguishes the two
+      # formats.
+      raise JavaClassFileError.new if fh.nfat_arch > 30
 
       fh
     end

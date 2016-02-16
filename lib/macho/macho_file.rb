@@ -314,8 +314,12 @@ module MachO
     # The file's Mach-O header structure.
     # @return [MachO::MachHeader] if the Mach-O is 32-bit
     # @return [MachO::MachHeader64] if the Mach-O is 64-bit
+    # @raise [MachO::TruncatedFileError] if the file is too small to have a valid header
     # @private
     def get_mach_header
+      # the smallest Mach-O header is 28 bytes
+      raise TruncatedFileError.new if @raw_data.size < 28
+
       magic = get_and_check_magic
       mh_klass = MachO.magic32?(magic) ? MachHeader : MachHeader64
       mh = mh_klass.new_from_bin(@raw_data[0, mh_klass.bytesize])
