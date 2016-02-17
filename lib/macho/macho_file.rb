@@ -453,7 +453,7 @@ module MachO
       new_size = cmd.class.bytesize + new_str.size
       new_sizeofcmds += new_size - cmd.cmdsize
 
-      low_fileoff = 2**64 # ULLONGMAX
+      low_fileoff = @raw_data.size
 
       # calculate the low file offset (offset to first section data)
       segments.each do |seg|
