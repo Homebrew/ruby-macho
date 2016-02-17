@@ -297,7 +297,6 @@ module MachO
     end
 
     # Write all Mach-O data to the file used to initialize the instance.
-    # @raise [MachOError] if the instance was created from a binary string
     # @return [void]
     # @raise [MachO::MachOError] if the instance was initialized without a file
     # @note Overwrites all data in the file!

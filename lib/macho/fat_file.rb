@@ -13,6 +13,16 @@ module MachO
     # @return [Array<MachO::MachOFile>] an array of Mach-O binaries
     attr_reader :machos
 
+    # Creates a new FatFile instance from a binary string.
+    # @param bin [String] a binary string containing raw Mach-O data
+    # @return [MachO::FatFile] a new FatFile
+    def self.new_from_bin(bin)
+      instance = allocate
+      instance.initialize_from_bin(bin)
+
+      instance
+    end
+
     # Creates a new FatFile from the given filename.
     # @param filename [String] the fat file to load from
     # @raise [ArgumentError] if the given filename does not exist
@@ -21,6 +31,15 @@ module MachO
 
       @filename = filename
       @raw_data = open(@filename, "rb") { |f| f.read }
+      @header = get_fat_header
+      @fat_archs = get_fat_archs
+      @machos = get_machos
+    end
+
+    # @api private
+    def initialize_from_bin(bin)
+      @filename = nil
+      @raw_data = bin
       @header = get_fat_header
       @fat_archs = get_fat_archs
       @machos = get_machos
@@ -170,9 +189,15 @@ module MachO
     end
 
     # Write all (fat) data to the file used to initialize the instance.
+    # @return [void]
+    # @raise [MachO::MachOError] if the instance was initialized without a file
     # @note Overwrites all data in the file!
     def write!
-      File.open(@filename, "wb") { |f| f.write(@raw_data) }
+      if filename.nil?
+        raise MachOError.new("cannot write to a default file when initialized from a binary string")
+      else
+        File.open(@filename, "wb") { |f| f.write(@raw_data) }
+      end
     end
 
     private
