@@ -4,7 +4,23 @@ $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 
 require 'macho'
 
-file = MachO::MachOFile.new(ARGV.shift)
+# Usage: bin/info.rb [--fat|--macho] <file>
+arg1 = ARGV.shift
+case arg1
+when "--fat"
+  file = MachO::FatFile.new(ARGV.shift) # Force fat binary.
+when "--macho"
+  file = MachO::MachOFile.new(ARGV.shift) # Force Mach-O binary.
+else
+  file = MachO.open(arg1) # Auto-detect fat/Mach-O binary.
+end
+
+if file.is_a?(MachO::FatFile)
+  puts "NOTE: File is a fat binary with #{file.machos.size} architectures."
+  puts "NOTE: Only showing information for the first architecture."
+  puts
+  file = file.machos.first
+end
 
 puts "FILE INFORMATION:"
 puts "  Header type: #{file.header.class}"
