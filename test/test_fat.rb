@@ -5,6 +5,12 @@ require "macho"
 class FatFileTest < Minitest::Test
   include Helpers
 
+  def test_nonexistent_file
+    assert_raises ArgumentError do
+      MachO::FatFile.new("/this/is/a/file/that/cannot/possibly/exist")
+    end
+  end
+
   def test_empty_file
     tempfile_with_data("empty_file", "") do |empty_file|
       assert_raises MachO::TruncatedFileError do
