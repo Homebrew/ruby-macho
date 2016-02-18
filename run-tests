@@ -1,0 +1,35 @@
+#!/bin/sh
+
+die() {
+  echo "Error: $*" >&2
+  exit 1
+}
+
+ensure() {
+  "$@" \
+    || die "Failed to run '$*'. Aborting."
+}
+
+# Make sure we're in the repository root.
+ensure cd "${0%/*}"
+
+# Check that Bundler is available.
+which bundle > /dev/null 2>&1 \
+  || die "Failed to find 'bundle' executable in PATH."
+
+# Setup required Gems for testing.
+echo ">> Checking if required Gems are installed and installing missing Gems."
+if ! bundle check ; then
+  ensure bundle install --path vendor/bundle
+fi
+echo
+
+# Run the test suite.
+echo ">> Running test suite."
+bundle exec rake test
+result="$?"
+echo
+
+# Be done and return result of test suite.
+echo ">> Done."
+exit "$result"
