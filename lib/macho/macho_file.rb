@@ -24,9 +24,9 @@ module MachO
 
     # Creates a new FatFile from the given filename.
     # @param filename [String] the Mach-O file to load from
-    # @raise [ArgumentError] if the given filename does not exist
+    # @raise [ArgumentError] if the given file does not exist
     def initialize(filename)
-      raise ArgumentError.new("#{filetype}: no such file") unless File.exist?(filename)
+      raise ArgumentError.new("#{filename}: no such file") unless File.file?(filename)
 
       @filename = filename
       @raw_data = open(@filename, "rb") { |f| f.read }
