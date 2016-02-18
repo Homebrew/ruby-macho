@@ -453,17 +453,17 @@ module MachO
       new_size = cmd.class.bytesize + new_str.size
       new_sizeofcmds += new_size - cmd.cmdsize
 
-      low_fileoff = 2**64 # ULLONGMAX
+      low_fileoff = @raw_data.size
 
       # calculate the low file offset (offset to first section data)
       segments.each do |seg|
         sections(seg).each do |sect|
-          if sect.size != 0 && !sect.flag?(:S_ZEROFILL) &&
-              !sect.flag?(:S_THREAD_LOCAL_ZEROFILL) &&
-              sect.offset < low_fileoff
+          next if sect.size == 0
+          next if sect.flag?(:S_ZEROFILL)
+          next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
+          next unless sect.offset < low_fileoff
 
-            low_fileoff = sect.offset
-          end
+          low_fileoff = sect.offset
         end
       end
 
