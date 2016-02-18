@@ -104,4 +104,12 @@ module MachO
       super "No such runtime path: #{path}"
     end
   end
+
+  # Raised whenever unfinished code is called.
+  class UnimplementedError < MachOError
+    # @param thing [String] the thing that is unimplemented
+    def initialize(thing)
+      super "Unimplemented: #{thing}"
+    end
+  end
 end
