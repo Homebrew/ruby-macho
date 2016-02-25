@@ -21,7 +21,7 @@ A quick example of what ruby-macho can do:
 ```ruby
 require 'macho'
 
-file = MachO::MachOFile.open("/path/to/my/binary")
+file = MachO::MachOFile.new("/path/to/my/binary")
 
 # get the file's type (MH_OBJECT, MH_DYLIB, MH_EXECUTE, etc)
 file.filetype # => "MH_EXECUTE"
