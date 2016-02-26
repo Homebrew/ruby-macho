@@ -5,6 +5,9 @@ module MachO
   # @see https://en.wikipedia.org/wiki/Mach-O
   # @see MachO::FatFile
   class MachOFile
+    # @return [String] the filename loaded from, or nil if loaded from a binary string
+    attr_accessor :filename
+
     # @return [MachO::MachHeader] if the Mach-O is 32-bit
     # @return [MachO::MachHeader64] if the Mach-O is 64-bit
     attr_reader :header
