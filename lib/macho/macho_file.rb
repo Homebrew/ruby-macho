@@ -32,7 +32,7 @@ module MachO
       raise ArgumentError.new("#{filename}: no such file") unless File.file?(filename)
 
       @filename = filename
-      @raw_data = open(@filename, "rb") { |f| f.read }
+      @raw_data = File.open(@filename, "rb") { |f| f.read }
       @header = get_mach_header
       @load_commands = get_load_commands
     end
