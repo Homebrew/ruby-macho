@@ -12,7 +12,6 @@ module MachO
 
     magic = File.open(filename, "rb") { |f| f.read(4) }.unpack("N").first
 
-    # open file and test magic instead of using exceptions for control?
     if MachO.fat_magic?(magic)
       file = FatFile.new(filename)
     elsif MachO.magic?(magic)
