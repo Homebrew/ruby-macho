@@ -8,6 +8,9 @@ module MachO
     # @return [String] the filename loaded from, or nil if loaded from a binary string
     attr_accessor :filename
 
+    # @return [Symbol] the endianness of the file, :big or :little
+    attr_reader :endianness
+
     # @return [MachO::MachHeader] if the Mach-O is 32-bit
     # @return [MachO::MachHeader64] if the Mach-O is 64-bit
     attr_reader :header
@@ -281,10 +284,10 @@ module MachO
 
       segment.nsects.times do
         if segment.is_a? SegmentCommand
-          sections << Section.new_from_bin(@raw_data.slice(offset, Section.bytesize))
+          sections << Section.new_from_bin(endianness, @raw_data.slice(offset, Section.bytesize))
           offset += Section.bytesize
         else
-          sections << Section64.new_from_bin(@raw_data.slice(offset, Section64.bytesize))
+          sections << Section64.new_from_bin(endianness, @raw_data.slice(offset, Section64.bytesize))
           offset += Section64.bytesize
         end
       end
@@ -324,7 +327,7 @@ module MachO
 
       magic = get_and_check_magic
       mh_klass = MachO.magic32?(magic) ? MachHeader : MachHeader64
-      mh = mh_klass.new_from_bin(@raw_data[0, mh_klass.bytesize])
+      mh = mh_klass.new_from_bin(endianness, @raw_data[0, mh_klass.bytesize])
 
       check_cputype(mh.cputype)
       check_cpusubtype(mh.cputype, mh.cpusubtype)
@@ -343,6 +346,8 @@ module MachO
 
       raise MagicError.new(magic) unless MachO.magic?(magic)
       raise FatBinaryError.new if MachO.fat_magic?(magic)
+
+      @endianness = MachO.little_magic?(magic) ? :little : :big
 
       magic
     end
@@ -381,7 +386,8 @@ module MachO
       load_commands = []
 
       header.ncmds.times do
-        cmd = @raw_data.slice(offset, 4).unpack("V").first
+        fmt = (endianness == :little) ? "L<" : "L>"
+        cmd = @raw_data.slice(offset, 4).unpack(fmt).first
         cmd_sym = LOAD_COMMANDS[cmd]
 
         raise LoadCommandError.new(cmd) if cmd_sym.nil?
@@ -389,7 +395,7 @@ module MachO
         # why do I do this? i don't like declaring constants below
         # classes, and i need them to resolve...
         klass = MachO.const_get "#{LC_STRUCTURES[cmd_sym]}"
-        command = klass.new_from_bin(@raw_data, offset, @raw_data.slice(offset, klass.bytesize))
+        command = klass.new_from_bin(@raw_data, endianness, offset, @raw_data.slice(offset, klass.bytesize))
 
         load_commands << command
         offset += command.cmdsize
@@ -403,7 +409,8 @@ module MachO
     # @return [void]
     # @private
     def set_sizeofcmds(size)
-      new_size = [size].pack("V")
+      fmt = (endianness == :little) ? "L<" : "L>"
+      new_size = [size].pack(fmt)
       @raw_data[20..23] = new_size
     end
 
@@ -478,7 +485,8 @@ module MachO
       set_sizeofcmds(new_sizeofcmds)
 
       # update cmdsize in the cmd
-      @raw_data[cmd.offset + 4, 4] = [new_size].pack("V")
+      fmt = (endianness == :little) ? "L<" : "L>"
+      @raw_data[cmd.offset + 4, 4] = [new_size].pack(fmt)
 
       # delete the old str
       @raw_data.slice!(cmd.offset + lc_str.to_i...cmd.offset + cmd.class.bytesize + old_str.size)

@@ -73,7 +73,7 @@ module MachO
     :LC_SEGMENT => "SegmentCommand",
     :LC_SYMTAB => "SymtabCommand",
     :LC_SYMSEG => "LoadCommand", # obsolete
-    :LC_THREAD => "ThreadCommand",
+    :LC_THREAD => "ThreadCommand", # seems obsolete, but not documented as such
     :LC_UNIXTHREAD => "ThreadCommand",
     :LC_LOADFVMLIB => "LoadCommand", # obsolete
     :LC_IDFVMLIB => "LoadCommand", # obsolete
@@ -157,18 +157,23 @@ module MachO
     # @return [Fixnum] the size of the load command, in bytes
     attr_reader :cmdsize
 
-    FORMAT = "VV"
+    FORMAT = "L=2"
     SIZEOF = 8
 
     # Creates a new LoadCommand given an offset and binary string
+    # @param raw_data [String] the raw Mach-O data
+    # @param endianness [Symbol] the endianness of the command (:big or :little)
     # @param offset [Fixnum] the offset to initialize with
     # @param bin [String] the binary string to initialize with
     # @return [MachO::LoadCommand] the new load command
     # @api private
-    def self.new_from_bin(raw_data, offset, bin)
-      self.new(raw_data, offset, *bin.unpack(self::FORMAT))
+    def self.new_from_bin(raw_data, endianness, offset, bin)
+      format = specialize_format(self::FORMAT, endianness)
+
+      self.new(raw_data, offset, *bin.unpack(format))
     end
 
+    # @param raw_data [String] the raw Mach-O data
     # @param offset [Fixnum] the offset to initialize with
     # @param cmd [Fixnum] the load command's identifying number
     # @param cmdsize [Fixnum] the size of the load command in bytes
@@ -226,7 +231,7 @@ module MachO
     # @return [Array<Fixnum>] the UUID
     attr_reader :uuid
 
-    FORMAT = "VVa16"
+    FORMAT = "L=2a16"
     SIZEOF = 24
 
     # @api private
@@ -277,7 +282,7 @@ module MachO
     # @return [Fixnum] any flags associated with the segment
     attr_reader :flags
 
-    FORMAT = "VVa16VVVVVVVV"
+    FORMAT = "L=2a16L=4l=2L=2"
     SIZEOF = 56
 
     # @api private
@@ -336,7 +341,7 @@ module MachO
     # @return [Fixnum] any flags associated with the segment
     attr_reader :flags
 
-    FORMAT = "VVa16QQQQVVVV"
+    FORMAT = "L=2a16Q=4l=2L=2"
     SIZEOF = 72
 
     # @api private
@@ -381,7 +386,7 @@ module MachO
     # @return [Fixnum] the library's compatibility version number
     attr_reader :compatibility_version
 
-    FORMAT = "VVVVVV"
+    FORMAT = "L=6"
     SIZEOF = 24
 
     # @api private
@@ -402,7 +407,7 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the dynamic linker's path name as an LCStr
     attr_reader :name
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -424,7 +429,7 @@ module MachO
     # @return [Fixnum] a bit vector of linked modules
     attr_reader :linked_modules
 
-    FORMAT = "VVVVV"
+    FORMAT = "L=5"
     SIZEOF = 20
 
     # @api private
@@ -439,7 +444,8 @@ module MachO
   # A load command used to represent threads.
   # @note cctools-870 has all fields of thread_command commented out except common ones (cmd, cmdsize)
   class ThreadCommand < LoadCommand
-
+    FORMAT = "L=2"
+    SIZEOF = 8
   end
 
   # A load command containing the address of the dynamic shared library
@@ -470,7 +476,7 @@ module MachO
     # @return [void]
     attr_reader :reserved6
 
-    FORMAT = "VVVVVVVVVV"
+    FORMAT = "L=10"
     SIZEOF = 40
 
     # @api private
@@ -517,7 +523,7 @@ module MachO
     # @return [void]
     attr_reader :reserved6
 
-    FORMAT = "VVQQQQQQQQ"
+    FORMAT = "L=2Q=8"
     SIZEOF = 72
 
     # @api private
@@ -542,7 +548,7 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the umbrella framework name as an LCStr
     attr_reader :umbrella
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -558,7 +564,7 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the subumbrella framework name as an LCStr
     attr_reader :sub_umbrella
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -574,7 +580,7 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the sublibrary name as an LCStr
     attr_reader :sub_library
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -590,7 +596,7 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the subclient name as an LCStr
     attr_reader :sub_client
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -615,7 +621,7 @@ module MachO
     # @return the string table size in bytes
     attr_reader :strsize
 
-    FORMAT = "VVVVVV"
+    FORMAT = "L=6"
     SIZEOF = 24
 
     # @api private
@@ -686,7 +692,7 @@ module MachO
     attr_reader :nlocrel
 
 
-    FORMAT = "VVVVVVVVVVVVVVVVVVVV"
+    FORMAT = "L=20"
     SIZEOF = 80
 
     # ugh
@@ -726,7 +732,7 @@ module MachO
     # @return [Fixnum] the number of hints in the hint table
     attr_reader :nhints
 
-    FORMAT = "VVVV"
+    FORMAT = "L=4"
     SIZEOF = 16
 
     # @api private
@@ -743,7 +749,7 @@ module MachO
     # @return [Fixnum] the checksum or 0
     attr_reader :cksum
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -760,7 +766,7 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the path to add to the run path as an LCStr
     attr_reader :path
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -780,7 +786,7 @@ module MachO
     # @return [Fixnum] size of the data in the __LINKEDIT segment
     attr_reader :datasize
 
-    FORMAT = "VVVV"
+    FORMAT = "L=4"
     SIZEOF = 16
 
     # @api private
@@ -803,7 +809,7 @@ module MachO
     # @return [Fixnum] the encryption system, or 0 if not encrypted yet
     attr_reader :cryptid
 
-    FORMAT = "VVVVV"
+    FORMAT = "L=5"
     SIZEOF = 20
 
     # @api private
@@ -830,7 +836,7 @@ module MachO
     # @return [Fixnum] 64-bit padding value
     attr_reader :pad
 
-    FORMAT = "VVVVVV"
+    FORMAT = "L=6"
     SIZEOF = 24
 
     # @api private
@@ -852,7 +858,7 @@ module MachO
     # @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
     attr_reader :sdk
 
-    FORMAT = "VVVV"
+    FORMAT = "L=4"
     SIZEOF = 16
 
     # @api private
@@ -919,7 +925,7 @@ module MachO
     # @return [Fixnum] the size of the export information
     attr_reader :export_size
 
-    FORMAT = "VVVVVVVVVVVV"
+    FORMAT = "L=12"
     SIZEOF = 48
 
     # @api private
@@ -946,7 +952,7 @@ module MachO
     # @return [Fixnum] the number of strings
     attr_reader :count
 
-    FORMAT = "VVV"
+    FORMAT = "L=3"
     SIZEOF = 12
 
     # @api private
@@ -964,7 +970,7 @@ module MachO
     # @return [Fixnum] if not 0, the initial stack size.
     attr_reader :stacksize
 
-    FORMAT = "VVQQ"
+    FORMAT = "L=2Q=2"
     SIZEOF = 24
 
     # @api private
@@ -981,7 +987,7 @@ module MachO
     # @return [Fixnum] the version packed as a24.b10.c10.d10.e10
     attr_reader :version
 
-    FORMAT = "VVQ"
+    FORMAT = "L=2Q=1"
     SIZEOF = 16
 
     # @api private

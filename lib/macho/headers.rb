@@ -3,6 +3,8 @@ module MachO
   FAT_MAGIC = 0xcafebabe
 
   # little-endian fat magic
+  # this is defined, but should never appear in ruby-macho code because
+  # fat headers are always big-endian and therefore always unpacked as such.
   FAT_CIGAM = 0xbebafeca
 
   # 32-bit big-endian magic
@@ -20,7 +22,6 @@ module MachO
   # association of magic numbers to string representations
   MH_MAGICS = {
     FAT_MAGIC => "FAT_MAGIC",
-    FAT_CIGAM => "FAT_CIGAM",
     MH_MAGIC => "MH_MAGIC",
     MH_CIGAM => "MH_CIGAM",
     MH_MAGIC_64 => "MH_MAGIC_64",
@@ -238,7 +239,8 @@ module MachO
     # @return [Fixnum] the number of fat architecture structures following the header
     attr_reader :nfat_arch
 
-    FORMAT = "N2" # always big-endian
+    # always big-endian
+    FORMAT = "N2"
     SIZEOF = 8
 
     # @api private
@@ -267,7 +269,8 @@ module MachO
     # @return [Fixnum] the alignment, as a power of 2
     attr_reader :align
 
-    FORMAT = "N5" # always big-endian
+    # always big-endian
+    FORMAT = "N5"
     SIZEOF = 20
 
     # @api private
@@ -303,7 +306,7 @@ module MachO
     # @return [Fixnum] the header flags associated with the Mach-O
     attr_reader :flags
 
-    FORMAT = "VVVVVVV"
+    FORMAT = "L=7"
     SIZEOF = 28
 
     # @api private
@@ -336,7 +339,7 @@ module MachO
     # @return [void]
     attr_reader :reserved
 
-    FORMAT = "VVVVVVVV"
+    FORMAT = "L=8"
     SIZEOF = 32
 
     # @api private
