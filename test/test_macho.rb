@@ -28,7 +28,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_load_commands
-    file = MachO::MachOFile.new(TEST_EXE)
+    file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
 
     file.load_commands.each do |lc|
       assert lc
@@ -43,7 +43,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_mach_header
-    file = MachO::MachOFile.new(TEST_DYLIB)
+    file = MachO::MachOFile.new(fixture(:x86_64, "libhello.dylib"))
     header = file.header
 
     assert header
@@ -60,7 +60,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_segments_and_sections
-    file = MachO::MachOFile.new(TEST_BUNDLE)
+    file = MachO::MachOFile.new(fixture(:x86_64, "hellobundle.so"))
     segments = file.segments
 
     assert_kind_of Array, segments
@@ -106,7 +106,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_file
-    file = MachO::MachOFile.new(TEST_EXE)
+    file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
 
     assert file.serialize
     assert_kind_of String, file.serialize
@@ -125,7 +125,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_object
-    file = MachO::MachOFile.new(TEST_OBJ)
+    file = MachO::MachOFile.new(fixture(:x86_64, "hello.o"))
 
     assert file.object?
     filechecks(except = :object?).each do |check|
@@ -139,7 +139,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_executable
-    file = MachO::MachOFile.new(TEST_EXE)
+    file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
 
     assert file.executable?
     filechecks(except = :executable?).each do |check|
@@ -153,7 +153,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_dylib
-    file = MachO::MachOFile.new(TEST_DYLIB)
+    file = MachO::MachOFile.new(fixture(:x86_64, "libhello.dylib"))
 
     assert file.dylib?
     filechecks(except = :dylib?).each do |check|
@@ -167,7 +167,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_extra_dylib
-    file = MachO::MachOFile.new(TEST_EXTRA_DYLIB)
+    file = MachO::MachOFile.new(fixture(:x86_64, "libextrahello.dylib"))
 
     assert file.dylib?
 
@@ -186,7 +186,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_bundle
-    file = MachO::MachOFile.new(TEST_BUNDLE)
+    file = MachO::MachOFile.new(fixture(:x86_64, "hellobundle.so"))
 
     # a file can only be ONE of these
     assert file.bundle?
@@ -201,7 +201,11 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_change_dylib_id
-    file = MachO::MachOFile.new(TEST_DYLIB)
+    filename = fixture(:x86_64, "libhello.dylib")
+    actual = fixture(:x86_64, "libhello_actual.dylib")
+    expected = fixture(:x86_64, "libhello_expected.dylib")
+
+    file = MachO::MachOFile.new(filename)
 
     # changing the dylib id should work
     old_id = file.dylib_id
@@ -224,15 +228,19 @@ class MachOFileTest < Minitest::Test
 
     file.dylib_id = "test"
 
-    file.write("test/bin/libhello_actual.dylib")
+    file.write(actual)
 
-    assert equal_sha1_hashes("test/bin/libhello_actual.dylib", "test/bin/libhello_expected.dylib")
+    assert equal_sha1_hashes(actual, expected)
   ensure
-    delete_if_exists("test/bin/libhello_actual.dylib")
+    delete_if_exists(actual)
   end
 
   def test_change_install_name
-    file = MachO::MachOFile.new(TEST_EXE)
+    filename = fixture(:x86_64, "hello.bin")
+    actual = fixture(:x86_64, "hello_actual.bin")
+    expected = fixture(:x86_64, "hello_expected.bin")
+
+    file = MachO::MachOFile.new(filename)
 
     dylibs = file.linked_dylibs
 
@@ -246,17 +254,17 @@ class MachOFileTest < Minitest::Test
     assert_equal "test", new_dylibs[0]
     refute_equal dylibs[0], new_dylibs[0]
 
-    file.write("test/bin/hello_actual.bin")
+    file.write(actual)
 
     # compare actual and expected file hashes, to ensure file correctness
-    assert equal_sha1_hashes("test/bin/hello_actual.bin", "test/bin/hello_expected.bin")
+    assert equal_sha1_hashes(actual, expected)
   ensure
-    delete_if_exists("test/bin/hello_actual.bin")
+    delete_if_exists(actual)
   end
 
   def test_change_rpath
     pass
-    # file = MachO::MachOFile.new(TEST_EXE)
+    # file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
 
     # rpaths = file.rpaths
 

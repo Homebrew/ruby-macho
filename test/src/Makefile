@@ -3,12 +3,10 @@ CC = clang
 HELLO_SRC = hello.c
 LIBHELLO_SRC = libhello.c
 
-MACHOS = hello.o hello.bin libhello.dylib libextrahello.dylib hellobundle.so
-FATS = fathello.o fathello.bin libfathello.dylib libfatextrahello.dylib fathellobundle.so
-EXPECTEDS =
+BINDIRS = x86_64 fat-i386-x86_64
 
 RPATH_FLAGS = -rpath made_up_path
-FAT_ARCH_FLAGS = -arch i386 -arch x86_64
+FAT_I386_X86_64_FLAGS = -arch i386 -arch x86_64
 LDFLAGS = -L.
 
 UNAME_S := $(shell uname -s)
@@ -17,45 +15,29 @@ ifneq ($(UNAME_S),Darwin)
 $(error This makefile can only be run on OS X)
 endif
 
-all: machos fats expecteds
+# all: machos fats expecteds
+all: $(BINDIRS)
 
-machos: $(MACHOS)
+x86_64:
+	mkdir $@
+	$(CC) -c $(HELLO_SRC) -o $@/hello.o
+	$(CC) $(RPATH_FLAGS) $(HELLO_SRC) -o $@/hello.bin
+	$(CC) -dynamiclib $(LIBHELLO_SRC) -o $@/libhello.dylib
+	$(CC) $(LDFLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lhello -o $@/libextrahello.dylib
+	$(CC) -bundle $(LIBHELLO_SRC) -o $@/hellobundle.so
 
-fats: $(FATS)
+fat-i386-x86_64:
+	mkdir $@
+	$(CC) $(FAT_I386_X86_64_FLAGS) -c $(HELLO_SRC) -o $@/hello.o
+	$(CC) $(RPATH_FLAGS) $(FAT_I386_X86_64_FLAGS) $(HELLO_SRC) -o $@/hello.bin
+	$(CC) $(FAT_I386_X86_64_FLAGS) -dynamiclib $(LIBHELLO_SRC) -o $@/libhello.dylib
+	$(CC) $(LDFLAGS) $(FAT_I386_X86_64_FLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lfathello -o $@/libextrahello.dylib
+	$(CC) $(FAT_I386_X86_64_FLAGS) -bundle $(LIBHELLO_SRC) -o $@/hellobundle.so
 
-expecteds: $(EXPECTEDS)
-
-hello.o:
-	$(CC) -c $(HELLO_SRC) -o $@
-
-hello.bin:
-	$(CC) $(RPATH_FLAGS) $(HELLO_SRC) -o $@
-
-libhello.dylib:
-	$(CC) -dynamiclib $(LIBHELLO_SRC) -o $@
-
-libextrahello.dylib: libhello.dylib
-	$(CC) $(LDFLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lhello -o $@
-
-hellobundle.so:
-	$(CC) -bundle $(LIBHELLO_SRC) -o $@
-
-fathello.o:
-	$(CC) $(FAT_ARCH_FLAGS) -c $(HELLO_SRC) -o $@
-
-fathello.bin:
-	$(CC) $(RPATH_FLAGS) $(FAT_ARCH_FLAGS) $(HELLO_SRC) -o $@
-
-libfathello.dylib:
-	$(CC) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -o $@
-
-libfatextrahello.dylib: libfathello.dylib
-	$(CC) $(LDFLAGS) $(FAT_ARCH_FLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lfathello -o $@
-
-fathellobundle.so:
-	$(CC) $(FAT_ARCH_FLAGS) -bundle $(LIBHELLO_SRC) -o $@
+install: all
+	mv -f $(BINDIRS) ../bin/
 
 clean:
-	rm -f $(MACHOS) $(FATS)
+	rm -rf $(BINDIRS)
 
 .PHONY: all clean

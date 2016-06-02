@@ -37,7 +37,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_fat_header
-    file = MachO::FatFile.new(TEST_FAT_EXE)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "hello.bin"))
     header = file.header
 
     assert header
@@ -47,7 +47,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_fat_archs
-    file = MachO::FatFile.new(TEST_FAT_DYLIB)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "libhello.dylib"))
     archs = file.fat_archs
 
     assert archs
@@ -65,7 +65,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_machos
-    file = MachO::FatFile.new(TEST_FAT_BUNDLE)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "hellobundle.so"))
     machos = file.machos
 
     assert machos
@@ -81,7 +81,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_file
-    file = MachO::FatFile.new(TEST_FAT_EXE)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "hello.bin"))
 
     assert file.serialize
     assert_kind_of String, file.serialize
@@ -92,7 +92,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_object
-    file = MachO::FatFile.new(TEST_FAT_OBJ)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "hello.o"))
 
     assert file.object?
     filechecks(except = :object?).each do |check|
@@ -103,7 +103,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_executable
-    file = MachO::FatFile.new(TEST_FAT_EXE)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "hello.bin"))
 
     assert file.executable?
     filechecks(except = :executable?).each do |check|
@@ -114,7 +114,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_dylib
-    file = MachO::FatFile.new(TEST_FAT_DYLIB)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "libhello.dylib"))
 
     assert file.dylib?
     filechecks(except = :dylib?).each do |check|
@@ -125,7 +125,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_extra_dylib
-    file = MachO::FatFile.new(TEST_FAT_EXTRA_DYLIB)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "libextrahello.dylib"))
 
     assert file.dylib?
 
@@ -149,7 +149,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_bundle
-    file = MachO::FatFile.new(TEST_FAT_BUNDLE)
+    file = MachO::FatFile.new(fixture([:i386, :x86_64], "hellobundle.so"))
 
     assert file.bundle?
     filechecks(except = :bundle?).each do |check|
@@ -160,7 +160,11 @@ class FatFileTest < Minitest::Test
   end
 
   def test_extract_macho
-    file = MachO::FatFile.new(TEST_FAT_EXE)
+    filename = fixture([:i386, :x86_64], "hello.bin")
+    extract1 = fixture([:i386, :x86_64], "extracted_macho1.bin")
+    extract2 = fixture([:i386, :x86_64], "extracted_macho2.bin")
+
+    file = MachO::FatFile.new(filename)
 
     assert file.machos.size == 2
 
@@ -176,22 +180,26 @@ class FatFileTest < Minitest::Test
     assert_equal file.machos[1].serialize, macho2.serialize
 
     # write the extracted mach-os to disk
-    macho1.write("test/bin/extracted_macho1.bin")
-    macho2.write("test/bin/extracted_macho2.bin")
+    macho1.write(extract1)
+    macho2.write(extract2)
 
     # load them back to ensure they're intact/uncorrupted
-    mfile1 = MachO::MachOFile.new("test/bin/extracted_macho1.bin")
-    mfile2 = MachO::MachOFile.new("test/bin/extracted_macho2.bin")
+    mfile1 = MachO::MachOFile.new(extract1)
+    mfile2 = MachO::MachOFile.new(extract2)
 
     assert_equal file.machos[0].serialize, mfile1.serialize
     assert_equal file.machos[1].serialize, mfile2.serialize
   ensure
-    File.delete("test/bin/extracted_macho1.bin")
-    File.delete("test/bin/extracted_macho2.bin")
+    File.delete(extract1)
+    File.delete(extract2)
   end
 
   def test_change_dylib_id
-    file = MachO::FatFile.new(TEST_FAT_DYLIB)
+    filename = fixture([:i386, :x86_64], "libhello.dylib")
+    actual = fixture([:i386, :x86_64], "libhello_actual.dylib")
+    expected = fixture([:i386, :x86_64], "libhello_expected.dylib")
+
+    file = MachO::FatFile.new(filename)
 
     # changing the dylib id should work
     old_id = file.dylib_id
@@ -211,15 +219,19 @@ class FatFileTest < Minitest::Test
 
     file.dylib_id = "test"
 
-    file.write("test/bin/libfathello_actual.dylib")
+    file.write(actual)
 
-    assert equal_sha1_hashes("test/bin/libfathello_actual.dylib", "test/bin/libfathello_expected.dylib")
+    assert equal_sha1_hashes(actual, expected)
   ensure
-    delete_if_exists("test/bin/libfathello_actual.dylib")
+    delete_if_exists(actual)
   end
 
   def test_change_install_name
-    file = MachO::FatFile.new(TEST_FAT_EXE)
+    filename = fixture([:i386, :x86_64], "hello.bin")
+    actual = fixture([:i386, :x86_64], "hello_actual.bin")
+    expected = fixture([:i386, :x86_64], "hello_expected.bin")
+
+    file = MachO::FatFile.new(filename)
 
     dylibs = file.linked_dylibs
 
@@ -233,11 +245,11 @@ class FatFileTest < Minitest::Test
     assert_equal "test", new_dylibs[0]
     refute_equal dylibs[0], new_dylibs[0]
 
-    file.write("test/bin/fathello_actual.bin")
+    file.write(actual)
 
     # compare actual and expected file hashes, to ensure file correctness
-    assert equal_sha1_hashes("test/bin/fathello_actual.bin", "test/bin/fathello_expected.bin")
+    assert equal_sha1_hashes(actual, expected)
   ensure
-    delete_if_exists("test/bin/fathello_actual.bin")
+    delete_if_exists(actual)
   end
 end

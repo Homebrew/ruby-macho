@@ -4,19 +4,12 @@ require "fileutils"
 require "tempfile"
 
 module Helpers
-  TEST_OBJ = "test/bin/hello.o"
-  TEST_EXE = "test/bin/hello.bin"
-  TEST_DYLIB = "test/bin/libhello.dylib"
-  TEST_EXTRA_DYLIB = "test/bin/libextrahello.dylib"
-  TEST_BUNDLE = "test/bin/hellobundle.so"
-
-  TEST_FAT_OBJ = "test/bin/fathello.o"
-  TEST_FAT_EXE = "test/bin/fathello.bin"
-  TEST_FAT_DYLIB = "test/bin/libfathello.dylib"
-  TEST_FAT_EXTRA_DYLIB = "test/bin/libfatextrahello.dylib"
-  TEST_FAT_BUNDLE = "test/bin/fathellobundle.so"
-
   OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/
+
+  def fixture(archs, name)
+    arch_dir = archs.is_a?(Array) ? "fat-#{archs.join("-")}" : archs.to_s
+    "test/bin/#{arch_dir}/#{name}"
+  end
 
   def installed?(util)
     !`which #{util}`.empty?

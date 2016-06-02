@@ -11,8 +11,8 @@
 /vendor/bundle/
 
 # Build results for test cases before they are selectively moved to '/test/bin'.
-/test/src/*.a
-/test/src/*.bin
-/test/src/*.dylib
-/test/src/*.o
-/test/src/*.so
+/test/src/*/*.a
+/test/src/*/*.bin
+/test/src/*/*.dylib
+/test/src/*/*.o
+/test/src/*/*.so

@@ -6,7 +6,7 @@ class MachOToolsTest < Minitest::Test
   include Helpers
 
   def test_dylibs
-    dylibs = MachO::Tools.dylibs(TEST_EXE)
+    dylibs = MachO::Tools.dylibs(fixture(:x86_64, "hello.bin"))
 
     assert dylibs
     assert_kind_of Array, dylibs
@@ -18,7 +18,7 @@ class MachOToolsTest < Minitest::Test
   end
 
   def test_dylibs_fat
-    dylibs = MachO::Tools.dylibs(TEST_FAT_EXE)
+    dylibs = MachO::Tools.dylibs(fixture([:i386, :x86_64], "hello.bin"))
 
     assert dylibs
     assert_kind_of Array, dylibs
