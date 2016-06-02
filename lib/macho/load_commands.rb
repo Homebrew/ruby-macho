@@ -52,8 +52,10 @@ module MachO
     0x2b => :LC_DYLIB_CODE_SIGN_DRS,
     0x2c => :LC_ENCRYPTION_INFO_64,
     0x2d => :LC_LINKER_OPTION,
-    0x2e => :LC_LINKER_OPTIMIZATION_HINT
-  }
+    0x2e => :LC_LINKER_OPTIMIZATION_HINT,
+    0x2f => :LC_VERSION_MIN_TVOS,
+    0x30 => :LC_VERSION_MIN_WATCHOS,
+  }.freeze
 
   # load commands responsible for loading dylibs
   # @api private
@@ -114,8 +116,10 @@ module MachO
     :LC_DYLIB_CODE_SIGN_DRS => "LinkeditDataCommand",
     :LC_ENCRYPTION_INFO_64 => "EncryptionInfoCommand64",
     :LC_LINKER_OPTION => "LinkerOptionCommand",
-    :LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand"
-  }
+    :LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand",
+    :LC_VERSION_MIN_TVOS => "VersionMinCommand",
+    :LC_VERSION_MIN_WATCHOS => "VersionMinCommand",
+  }.freeze
 
   # association of segment name symbols to names
   # @api private
@@ -127,8 +131,8 @@ module MachO
     :SEG_ICON => "__ICON",
     :SEG_LINKEDIT => "__LINKEDIT",
     :SEG_UNIXSTACK => "__UNIXSTACK",
-    :SEG_IMPORT => "__IMPORT"
-  }
+    :SEG_IMPORT => "__IMPORT",
+  }.freeze
 
   # association of segment flag symbols to values
   # @api private
@@ -136,8 +140,8 @@ module MachO
     :SG_HIGHVM => 0x1,
     :SG_FVMLIB => 0x2,
     :SG_NORELOC => 0x4,
-    :SG_PROTECTED_VERSION_1 => 0x8
-  }
+    :SG_PROTECTED_VERSION_1 => 0x8,
+  }.freeze
 
   # Mach-O load command structure
   # This is the most generic load command - only cmd ID and size are

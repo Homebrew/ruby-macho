@@ -46,7 +46,7 @@ module MachO
     :S_ATTR_SOME_INSTRUCTIONS => 0x00000400,
     :S_ATTR_EXT_RELOC => 0x00000200,
     :S_ATTR_LOC_RELOC => 0x00000100
-  }
+  }.freeze
 
   # association of section name symbols to names
   # @api private
@@ -63,7 +63,7 @@ module MachO
     :SECT_OBJC_REFS => "__selector_refs",
     :SECT_ICON_HEADER => "__header",
     :SECT_ICON_TIFF => "__tiff"
-  }
+  }.freeze
 
   # Represents a section of a segment for 32-bit architectures.
   class Section < MachOStructure

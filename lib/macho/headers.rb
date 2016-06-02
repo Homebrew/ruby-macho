@@ -39,19 +39,27 @@ module MachO
   # x86_64 (AMD64) compatible CPUs
   CPU_TYPE_X86_64 = (CPU_TYPE_I386 | CPU_ARCH_ABI64)
 
-  # PowerPC compatible CPUs (7400 series?)
+  # 32-bit ARM compatible CPUs
+  CPU_TYPE_ARM = 0x0c
+
+  # 64-bit ARM compatible CPUs
+  CPU_TYPE_ARM64 = (CPU_TYPE_ARM | CPU_ARCH_ABI64)
+
+  # PowerPC compatible CPUs
   CPU_TYPE_POWERPC = 0x12
 
-  # PowerPC64 compatible CPUs (970 series?)
+  # PowerPC64 compatible CPUs
   CPU_TYPE_POWERPC64 = (CPU_TYPE_POWERPC | CPU_ARCH_ABI64)
 
-  # association of cpu types to string representations
+  # association of cpu types to symbol representations
   CPU_TYPES = {
-    CPU_TYPE_ANY => "CPU_TYPE_ANY",
-    CPU_TYPE_I386 => "CPU_TYPE_I386",
-    CPU_TYPE_X86_64 => "CPU_TYPE_X86_64",
-    CPU_TYPE_POWERPC => "CPU_TYPE_POWERPC",
-    CPU_TYPE_POWERPC64 => "CPU_TYPE_POWERPC64"
+    CPU_TYPE_ANY => :any,
+    CPU_TYPE_I386 => :i386,
+    CPU_TYPE_X86_64 => :x86_64,
+    CPU_TYPE_ARM => :arm,
+    CPU_TYPE_ARM64 => :arm64,
+    CPU_TYPE_POWERPC => :ppc,
+    CPU_TYPE_POWERPC64 => :ppc64,
   }
 
   # mask for CPU subtype capabilities
@@ -61,17 +69,85 @@ module MachO
   # @see http://llvm.org/docs/doxygen/html/Support_2MachO_8h_source.html
   CPU_SUBTYPE_LIB64 = 0x80000000
 
-  # all x86-type CPUs
+  # the lowest common sub-type for `CPU_TYPE_I386`
   CPU_SUBTYPE_X86_ALL = 3
 
-  # all x86-type CPUs (what makes this different from CPU_SUBTYPE_X86_ALL?)
-  CPU_SUBTYPE_X86_ARCH1 = 4
+  # the lowest common sub-type for `CPU_TYPE_X86_64`
+  CPU_SUBTYPE_X86_64_ALL = CPU_SUBTYPE_X86_ALL
 
-  # association of cpu subtypes to string representations
+  # the Haskell sub-type for `CPU_TYPE_X86_64`
+  CPU_SUBTYPE_X86_64_H = 8
+
+  # the lowest common sub-type for `CPU_TYPE_ARM`
+  CPU_SUBTYPE_ARM_ALL = 0
+
+  # the v7 sub-type for `CPU_TYPE_ARM`
+  CPU_SUBTYPE_ARM_V7 = 9
+
+  # the v7s sub-type for `CPU_TYPE_ARM`
+  CPU_SUBTYPE_ARM_V7S = 11
+
+  # the v7k sub-type for `CPU_TYPE_ARM`
+  CPU_SUBTYPE_ARM_V7K = 12
+
+  # the v8 sub-type for `CPU_TYPE_ARM`
+  CPU_SUBTYPE_ARM_V8 = 13
+
+  # the lowest common sub-type for `CPU_TYPE_ARM64`
+  CPU_SUBTYPE_ARM64_ALL = 0
+
+  # the v8 sub-type for `CPU_TYPE_ARM64`
+  CPU_SUBTYPE_ARM64_V8 = 1
+
+  # the lowest common sub-type for `CPU_TYPE_POWERPC`
+  CPU_SUBTYPE_POWERPC_ALL = 0
+
+  # the 750 (G3) sub-type for `CPU_TYPE_POWERPC`
+  CPU_SUBTYPE_POWERPC_750 = 9
+
+  # the 7400 (G4) sub-type for `CPU_TYPE_POWERPC`
+  CPU_SUBTYPE_POWERPC_7400 = 10
+
+  # the 7450 (G4 "Voyager") sub-type for `CPU_TYPE_POWERPC`
+  CPU_SUBTYPE_POWERPC_7450 = 11
+
+  # the 970 (G5) sub-type for `CPU_TYPE_POWERPC`
+  CPU_SUBTYPE_POWERPC_970 = 100
+
+  # any CPU sub-type for CPU type `CPU_TYPE_POWERPC64`
+  CPU_SUBTYPE_POWERPC64_ALL = CPU_SUBTYPE_POWERPC_ALL
+
+  # association of CPU types/subtype pairs to symbol representations
   CPU_SUBTYPES = {
-    CPU_SUBTYPE_X86_ALL => "CPU_SUBTYPE_X86_ALL",
-    CPU_SUBTYPE_X86_ARCH1 => "CPU_SUBTYPE_X86_ARCH1"
-  }
+    CPU_TYPE_I386 => {
+      CPU_SUBTYPE_X86_ALL => :i386,
+    }.freeze,
+    CPU_TYPE_X86_64 => {
+      CPU_SUBTYPE_X86_64_ALL => :x86_64,
+      CPU_SUBTYPE_X86_64_H => :x86_64h,
+    }.freeze,
+    CPU_TYPE_ARM => {
+      CPU_SUBTYPE_ARM_ALL => :arm,
+      CPU_SUBTYPE_ARM_V7 => :armv7,
+      CPU_SUBTYPE_ARM_V7S => :armv7s,
+      CPU_SUBTYPE_ARM_V7K => :armv7k,
+      CPU_SUBTYPE_ARM_V8 => :armv8,
+    }.freeze,
+    CPU_TYPE_ARM64 => {
+      CPU_SUBTYPE_ARM64_ALL => :arm64,
+      CPU_SUBTYPE_ARM64_V8 => :armv8,
+    }.freeze,
+    CPU_TYPE_POWERPC => {
+      CPU_SUBTYPE_POWERPC_ALL => :ppc,
+      CPU_SUBTYPE_POWERPC_750 => :ppc750,
+      CPU_SUBTYPE_POWERPC_7400 => :ppc7400,
+      CPU_SUBTYPE_POWERPC_7450 => :ppc7450,
+      CPU_SUBTYPE_POWERPC_970 => :ppc970,
+    }.freeze,
+    CPU_TYPE_POWERPC64 => {
+      CPU_SUBTYPE_POWERPC64_ALL => :ppc64,
+    }.freeze,
+  }.freeze
 
   # relocatable object file
   MH_OBJECT = 0x1

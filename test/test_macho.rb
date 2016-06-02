@@ -114,8 +114,8 @@ class MachOFileTest < Minitest::Test
     assert_kind_of Fixnum, file.magic
     assert_kind_of String, file.magic_string
     assert_kind_of String, file.filetype
-    assert_kind_of String, file.cputype
-    assert_kind_of String, file.cpusubtype
+    assert_kind_of Symbol, file.cputype
+    assert_kind_of Symbol, file.cpusubtype
     assert_kind_of Fixnum, file.ncmds
     assert_kind_of Fixnum, file.sizeofcmds
     assert_kind_of Fixnum, file.flags

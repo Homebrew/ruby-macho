@@ -178,8 +178,8 @@ module MachO
 
     # Extract a Mach-O with the given CPU type from the file.
     # @example
-    #  file.extract("CPU_TYPE_I386") # => MachO::MachOFile
-    # @param cputype [String] the CPU type of the Mach-O being extracted
+    #  file.extract(:i386) # => MachO::MachOFile
+    # @param cputype [Symbol] the CPU type of the Mach-O being extracted
     # @return [MachO::MachOFile, nil] the extracted Mach-O or nil if no Mach-O has the given CPU type
     def extract(cputype)
       machos.select { |macho| macho.cputype == cputype }.first
