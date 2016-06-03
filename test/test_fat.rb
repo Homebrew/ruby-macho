@@ -164,9 +164,9 @@ class FatFileTest < Minitest::Test
 
     assert file.machos.size == 2
 
-    macho1 = file.extract("CPU_TYPE_I386")
-    macho2 = file.extract("CPU_TYPE_X86_64")
-    not_real = file.extract("CPU_TYPE_NONEXISTENT")
+    macho1 = file.extract(:i386)
+    macho2 = file.extract(:x86_64)
+    not_real = file.extract(:nonexistent)
 
     assert macho1
     assert macho2

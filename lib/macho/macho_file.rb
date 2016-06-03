@@ -126,14 +126,14 @@ module MachO
       MH_FILETYPES[header.filetype]
     end
 
-    # @return [String] a string representation of the Mach-O's CPU type
+    # @return [Symbol] a symbol representation of the Mach-O's CPU type
     def cputype
       CPU_TYPES[header.cputype]
     end
 
-    # @return [String] a string representation of the Mach-O's CPU subtype
+    # @return [Symbol] a symbol representation of the Mach-O's CPU subtype
     def cpusubtype
-      CPU_SUBTYPES[header.cpusubtype]
+      CPU_SUBTYPES[header.cputype][header.cpusubtype]
     end
 
     # @return [Fixnum] the number of load commands in the Mach-O's header
@@ -327,7 +327,7 @@ module MachO
       mh = mh_klass.new_from_bin(@raw_data[0, mh_klass.bytesize])
 
       check_cputype(mh.cputype)
-      check_cpusubtype(mh.cpusubtype)
+      check_cpusubtype(mh.cputype, mh.cpusubtype)
       check_filetype(mh.filetype)
 
       mh
@@ -355,13 +355,13 @@ module MachO
       raise CPUTypeError.new(cputype) unless CPU_TYPES.key?(cputype)
     end
 
-    # Check the file's CPU sub-type.
+    # Check the file's CPU type/subtype pair.
     # @param cpusubtype [Fixnum] the CPU subtype
     # @raise [MachO::CPUSubtypeError] if the CPU sub-type is unknown
     # @private
-    def check_cpusubtype(cpusubtype)
+    def check_cpusubtype(cputype, cpusubtype)
       # Only check sub-type w/o capability bits (see `get_mach_header`).
-      raise CPUSubtypeError.new(cpusubtype) unless CPU_SUBTYPES.key?(cpusubtype)
+      raise CPUSubtypeError.new(cputype, cpusubtype) unless CPU_SUBTYPES[cputype].key?(cpusubtype)
     end
 
     # Check the file's type.
