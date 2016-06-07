@@ -5,7 +5,7 @@
 HELLO_SRC    = hello.c
 LIBHELLO_SRC = libhello.c
 RPATH_FLAGS  = -Wl,-rpath,made_up_path
-TARGET_FILES = hello.o hello.bin libhello.dylib libextrahello.dylib hellobundle.so
+TARGET_FILES = hello.o hello.bin hello_expected.bin libhello.dylib libhello_expected.dylib libextrahello.dylib hellobundle.so
 
 # Architecture-specific flags that are set by pattern matching the targets.
 ARCH_FLAGS   =
@@ -81,8 +81,16 @@ $(ALL_DIRS):
 %/hello.bin: $(HELLO_SRC) %
 	$(CC) $(ARCH_FLAGS) -o $@ $(RPATH_FLAGS) $<
 
+%/hello_expected.bin: %/hello.bin
+	cp $< $@
+	install_name_tool -change /usr/lib/libSystem.B.dylib test $@
+
 %/libhello.dylib: $(LIBHELLO_SRC) %
 	$(CC) $(ARCH_FLAGS) -o $@ -dynamiclib $<
+
+%/libhello_expected.dylib: %/libhello.dylib
+	cp $< $@
+	install_name_tool -id test $@
 
 %/libextrahello.dylib: $(LIBHELLO_SRC) % %/libhello.dylib
 	$(CC) $(ARCH_FLAGS) -o $@ -dynamiclib $< $(LIBEXTRA_LDADD)
