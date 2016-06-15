@@ -1,43 +1,101 @@
-CC = clang
+# Usage:
+#   make USE=10.6-xcode3.2.6
+#   make USE=10.11-xcode7.3
 
-HELLO_SRC = hello.c
+HELLO_SRC    = hello.c
 LIBHELLO_SRC = libhello.c
+RPATH_FLAGS  = -Wl,-rpath,made_up_path
+TARGET_FILES = hello.o hello.bin libhello.dylib libextrahello.dylib hellobundle.so
 
-BINDIRS = x86_64 fat-i386-x86_64
+# Architecture-specific flags that are set by pattern matching the targets.
+ARCH_FLAGS   =
+i386/%            : ARCH_FLAGS = -arch i386
+x86_64/%          : ARCH_FLAGS = -arch x86_64
+ppc/%             : ARCH_FLAGS = -arch ppc
+ppc64/%           : ARCH_FLAGS = -arch ppc64
+fat-i386-x86_64/% : ARCH_FLAGS = -arch i386 -arch x86_64
+fat-i386-ppc/%    : ARCH_FLAGS = -arch i386 -arch ppc
+fat-ppc-ppc64/%   : ARCH_FLAGS = -arch ppc -arch ppc64
 
-RPATH_FLAGS = -rpath made_up_path
-FAT_I386_X86_64_FLAGS = -arch i386 -arch x86_64
-LDFLAGS = -L.
-
+# Make sure we're on OS X.
 UNAME_S := $(shell uname -s)
-
 ifneq ($(UNAME_S),Darwin)
-$(error This makefile can only be run on OS X)
+  $(error This makefile can only be run on OS X, but detected $(UNAME_S))
 endif
 
-# all: machos fats expecteds
-all: $(BINDIRS)
+# Select one of the pre-defined subsets (depends on host OS X and Xcode).
+ALL_DIRS := i386 x86_64 ppc ppc64 fat-i386-x86_64 fat-i386-ppc fat-ppc-ppc64
+ifneq ($(USE_DIRS),)
+  # Trust the user to get this right, if explicitly specified.
+else ifeq ($(USE),all)
+  $(warning USE - Using 'all' is unlikely to work on a single host.)
+  USE_DIRS := $(ALL_DIRS)
+else ifeq ($(USE),10.6-xcode3.2.6)
+  USE_DIRS := i386 x86_64 ppc fat-i386-x86_64 fat-i386-ppc
+  NO_UPWARD := 1
+  NO_LAZY := 1
+else ifeq ($(USE),10.11-xcode7.3)
+  USE_DIRS := i386 x86_64 fat-i386-x86_64
+else
+  # Warn about unspecified subset, but effectively fall back to 10.11-xcode7.3.
+  $(warning USE - Option either unset or invalid. Using a safe fallback.)
+  $(warning USE - Valid choices: all, 10.6-xcode3.2.6, 10.11-xcode7.3.)
+  USE_DIRS := i386 x86_64 fat-i386-x86_64
+endif
 
-x86_64:
-	mkdir $@
-	$(CC) -c $(HELLO_SRC) -o $@/hello.o
-	$(CC) $(RPATH_FLAGS) $(HELLO_SRC) -o $@/hello.bin
-	$(CC) -dynamiclib $(LIBHELLO_SRC) -o $@/libhello.dylib
-	$(CC) $(LDFLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lhello -o $@/libextrahello.dylib
-	$(CC) -bundle $(LIBHELLO_SRC) -o $@/hellobundle.so
+# Setup target names from all/used architecture directories.
+ALL_TARGETS := $(addprefix all-,$(ALL_DIRS))
+USE_TARGETS := $(addprefix all-,$(USE_DIRS))
 
-fat-i386-x86_64:
-	mkdir $@
-	$(CC) $(FAT_I386_X86_64_FLAGS) -c $(HELLO_SRC) -o $@/hello.o
-	$(CC) $(RPATH_FLAGS) $(FAT_I386_X86_64_FLAGS) $(HELLO_SRC) -o $@/hello.bin
-	$(CC) $(FAT_I386_X86_64_FLAGS) -dynamiclib $(LIBHELLO_SRC) -o $@/libhello.dylib
-	$(CC) $(LDFLAGS) $(FAT_I386_X86_64_FLAGS) -dynamiclib $(LIBHELLO_SRC) -Wl,-upward_library,/usr/lib/libm.dylib -Wl,-lazy-lfathello -o $@/libextrahello.dylib
-	$(CC) $(FAT_I386_X86_64_FLAGS) -bundle $(LIBHELLO_SRC) -o $@/hellobundle.so
+# Tweak flags according to toolchain support.
+LIBEXTRA_LDADD = -L$(@D)
+ifeq ($(NO_UPWARD),1)
+  # Xcode 3.2.6: `ld` doesn't support `-upward_library`.
+  LIBEXTRA_LDADD += -Wl,-weak_library,/usr/lib/libz.dylib
+else
+  LIBEXTRA_LDADD += -Wl,-upward_library,/usr/lib/libz.dylib
+endif
+ifeq ($(NO_LAZY), 1)
+  # Xcode 3.2.6: `ld` theoretically supports `-lazy-l`, but gets confused.
+  LIBEXTRA_LDADD += -Wl,-reexport-lhello
+else
+  LIBEXTRA_LDADD += -Wl,-lazy-lhello
+endif
 
-install: all
-	mv -f $(BINDIRS) ../bin/
+# Setup default target (used subset).
+.PHONY: all
+all: $(USE_TARGETS)
 
+# Setup targets that build all files for a given architecture (`all-<arch>`).
+.PHONY: $(ALL_TARGETS)
+$(ALL_TARGETS): all-%: $(addprefix %/,$(TARGET_FILES))
+
+# Setup targets for creating architecture-specific output directories.
+$(ALL_DIRS):
+	mkdir -p $@
+
+# Setup architecture-specific per-file targets (`<arch>/<file>`).
+%/hello.o: $(HELLO_SRC) %
+	$(CC) $(ARCH_FLAGS) -o $@ -c $<
+
+%/hello.bin: $(HELLO_SRC) %
+	$(CC) $(ARCH_FLAGS) -o $@ $(RPATH_FLAGS) $<
+
+%/libhello.dylib: $(LIBHELLO_SRC) %
+	$(CC) $(ARCH_FLAGS) -o $@ -dynamiclib $<
+
+%/libextrahello.dylib: $(LIBHELLO_SRC) % %/libhello.dylib
+	$(CC) $(ARCH_FLAGS) -o $@ -dynamiclib $< $(LIBEXTRA_LDADD)
+
+%/hellobundle.so: $(LIBHELLO_SRC) %
+	$(CC) $(ARCH_FLAGS) -bundle $< -o $@
+
+# Remove all build products, even those not selected in the current run.
+.PHONY: clean
 clean:
-	rm -rf $(BINDIRS)
+	rm -rf $(ALL_DIRS)
 
-.PHONY: all clean
+# Move all selected build products to their final destination.
+.PHONY: install
+install: all
+	mv -f $(USE_DIRS) ../bin/
