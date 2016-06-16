@@ -216,7 +216,7 @@ module MachO
       # the smallest fat Mach-O header is 8 bytes
       raise TruncatedFileError.new if @raw_data.size < 8
 
-      fh = FatHeader.new_from_bin(@raw_data[0, FatHeader.bytesize])
+      fh = FatHeader.new_from_bin(:big, @raw_data[0, FatHeader.bytesize])
 
       raise MagicError.new(fh.magic) unless MachO.magic?(fh.magic)
       raise MachOBinaryError.new unless MachO.fat_magic?(fh.magic)
@@ -242,7 +242,7 @@ module MachO
       fa_off = FatHeader.bytesize
       fa_len = FatArch.bytesize
       header.nfat_arch.times do |i|
-        archs << FatArch.new_from_bin(@raw_data[fa_off + (fa_len * i), fa_len])
+        archs << FatArch.new_from_bin(:big, @raw_data[fa_off + (fa_len * i), fa_len])
       end
 
       archs

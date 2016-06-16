@@ -28,262 +28,309 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_load_commands
-    file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 
-    file.load_commands.each do |lc|
-      assert lc
-      assert_equal MachO::LoadCommand, lc.class.superclass
-      assert_kind_of Fixnum, lc.offset
-      assert_kind_of Fixnum, lc.cmd
-      assert_kind_of Fixnum, lc.cmdsize
-      assert_kind_of String, lc.to_s
-      assert_kind_of Symbol, lc.type
-      assert_kind_of Symbol, lc.to_sym
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      file.load_commands.each do |lc|
+        assert lc
+        assert_equal MachO::LoadCommand, lc.class.superclass
+        assert_kind_of Fixnum, lc.offset
+        assert_kind_of Fixnum, lc.cmd
+        assert_kind_of Fixnum, lc.cmdsize
+        assert_kind_of String, lc.to_s
+        assert_kind_of Symbol, lc.type
+        assert_kind_of Symbol, lc.to_sym
+      end
     end
   end
 
   def test_mach_header
-    file = MachO::MachOFile.new(fixture(:x86_64, "libhello.dylib"))
-    header = file.header
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "libhello.dylib") }
 
-    assert header
-    assert_kind_of MachO::MachHeader, header if file.magic32?
-    assert_kind_of MachO::MachHeader64, header if file.magic64?
-    assert_kind_of Fixnum, header.magic
-    assert_kind_of Fixnum, header.cputype
-    assert_kind_of Fixnum, header.cpusubtype
-    assert_kind_of Fixnum, header.filetype
-    assert_kind_of Fixnum, header.ncmds
-    assert_kind_of Fixnum, header.sizeofcmds
-    assert_kind_of Fixnum, header.flags
-    refute header.flag?(:THIS_IS_A_MADE_UP_FLAG)
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      header = file.header
+
+      assert header
+      assert_kind_of MachO::MachHeader, header if file.magic32?
+      assert_kind_of MachO::MachHeader64, header if file.magic64?
+      assert_kind_of Fixnum, header.magic
+      assert_kind_of Fixnum, header.cputype
+      assert_kind_of Fixnum, header.cpusubtype
+      assert_kind_of Fixnum, header.filetype
+      assert_kind_of Fixnum, header.ncmds
+      assert_kind_of Fixnum, header.sizeofcmds
+      assert_kind_of Fixnum, header.flags
+      refute header.flag?(:THIS_IS_A_MADE_UP_FLAG)
+    end
   end
 
   def test_segments_and_sections
-    file = MachO::MachOFile.new(fixture(:x86_64, "hellobundle.so"))
-    segments = file.segments
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hellobundle.so") }
 
-    assert_kind_of Array, segments
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
 
-    segments.each do |seg|
-      assert seg
-      assert_kind_of MachO::SegmentCommand, seg if file.magic32?
-      assert_kind_of MachO::SegmentCommand64, seg if file.magic64?
-      assert_kind_of String, seg.segname
-      assert_kind_of Fixnum, seg.vmaddr
-      assert_kind_of Fixnum, seg.vmsize
-      assert_kind_of Fixnum, seg.fileoff
-      assert_kind_of Fixnum, seg.filesize
-      assert_kind_of Fixnum, seg.maxprot
-      assert_kind_of Fixnum, seg.initprot
-      assert_kind_of Fixnum, seg.nsects
-      assert_kind_of Fixnum, seg.flags
-      refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
+      segments = file.segments
 
-      sections = file.sections(seg)
+      assert_kind_of Array, segments
 
-      assert_kind_of Array, sections
+      segments.each do |seg|
+        assert seg
+        assert_kind_of MachO::SegmentCommand, seg if file.magic32?
+        assert_kind_of MachO::SegmentCommand64, seg if file.magic64?
+        assert_kind_of String, seg.segname
+        assert_kind_of Fixnum, seg.vmaddr
+        assert_kind_of Fixnum, seg.vmsize
+        assert_kind_of Fixnum, seg.fileoff
+        assert_kind_of Fixnum, seg.filesize
+        assert_kind_of Fixnum, seg.maxprot
+        assert_kind_of Fixnum, seg.initprot
+        assert_kind_of Fixnum, seg.nsects
+        assert_kind_of Fixnum, seg.flags
+        refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
 
-      sections.each do |sect|
-        assert sect
-        assert_kind_of MachO::Section, sect if seg.is_a? MachO::SegmentCommand
-        assert_kind_of MachO::Section64, sect if seg.is_a? MachO::SegmentCommand64
-        assert_kind_of String, sect.sectname
-        assert_kind_of String, sect.segname
-        assert_kind_of Fixnum, sect.addr
-        assert_kind_of Fixnum, sect.size
-        assert_kind_of Fixnum, sect.offset
-        assert_kind_of Fixnum, sect.align
-        assert_kind_of Fixnum, sect.reloff
-        assert_kind_of Fixnum, sect.nreloc
-        assert_kind_of Fixnum, sect.flags
-        refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
-        assert_kind_of Fixnum, sect.reserved1
-        assert_kind_of Fixnum, sect.reserved2
-        assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Section64
+        sections = file.sections(seg)
+
+        assert_kind_of Array, sections
+
+        sections.each do |sect|
+          assert sect
+          assert_kind_of MachO::Section, sect if seg.is_a? MachO::SegmentCommand
+          assert_kind_of MachO::Section64, sect if seg.is_a? MachO::SegmentCommand64
+          assert_kind_of String, sect.sectname
+          assert_kind_of String, sect.segname
+          assert_kind_of Fixnum, sect.addr
+          assert_kind_of Fixnum, sect.size
+          assert_kind_of Fixnum, sect.offset
+          assert_kind_of Fixnum, sect.align
+          assert_kind_of Fixnum, sect.reloff
+          assert_kind_of Fixnum, sect.nreloc
+          assert_kind_of Fixnum, sect.flags
+          refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
+          assert_kind_of Fixnum, sect.reserved1
+          assert_kind_of Fixnum, sect.reserved2
+          assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Section64
+        end
       end
     end
   end
 
   def test_file
-    file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 
-    assert file.serialize
-    assert_kind_of String, file.serialize
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
 
-    assert_kind_of Fixnum, file.magic
-    assert_kind_of String, file.magic_string
-    assert_kind_of String, file.filetype
-    assert_kind_of Symbol, file.cputype
-    assert_kind_of Symbol, file.cpusubtype
-    assert_kind_of Fixnum, file.ncmds
-    assert_kind_of Fixnum, file.sizeofcmds
-    assert_kind_of Fixnum, file.flags
+      assert file.serialize
+      assert_kind_of String, file.serialize
 
-    assert file.segments.size > 0
-    assert file.linked_dylibs.size > 0
+      assert_kind_of Fixnum, file.magic
+      assert_kind_of String, file.magic_string
+      assert_kind_of String, file.filetype
+      assert_kind_of Symbol, file.cputype
+      assert_kind_of Symbol, file.cpusubtype
+      assert_kind_of Fixnum, file.ncmds
+      assert_kind_of Fixnum, file.sizeofcmds
+      assert_kind_of Fixnum, file.flags
+
+      assert file.segments.size > 0
+      assert file.linked_dylibs.size > 0
+    end
   end
 
   def test_object
-    file = MachO::MachOFile.new(fixture(:x86_64, "hello.o"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.o") }
 
-    assert file.object?
-    filechecks(except = :object?).each do |check|
-      refute file.send(check)
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      assert file.object?
+      filechecks(except = :object?).each do |check|
+        refute file.send(check)
+      end
+
+      assert_equal "MH_OBJECT", file.filetype
+
+      # it's not a dylib, so it has no dylib id
+      assert_nil file.dylib_id
     end
-
-    assert_equal "MH_OBJECT", file.filetype
-
-    # it's not a dylib, so it has no dylib id
-    assert_nil file.dylib_id
   end
 
   def test_executable
-    file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 
-    assert file.executable?
-    filechecks(except = :executable?).each do |check|
-      refute file.send(check)
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      assert file.executable?
+      filechecks(except = :executable?).each do |check|
+        refute file.send(check)
+      end
+
+      assert_equal "MH_EXECUTE", file.filetype
+
+      # it's not a dylib, so it has no dylib id
+      assert_nil file.dylib_id
     end
-
-    assert_equal "MH_EXECUTE", file.filetype
-
-    # it's not a dylib, so it has no dylib id
-    assert_nil file.dylib_id
   end
 
   def test_dylib
-    file = MachO::MachOFile.new(fixture(:x86_64, "libhello.dylib"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "libhello.dylib") }
 
-    assert file.dylib?
-    filechecks(except = :dylib?).each do |check|
-      refute file.send(check)
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      assert file.dylib?
+      filechecks(except = :dylib?).each do |check|
+        refute file.send(check)
+      end
+
+      assert_equal "MH_DYLIB", file.filetype
+
+      # it's a dylib, so it *must* have a dylib id
+      assert file.dylib_id
     end
-
-    assert_equal "MH_DYLIB", file.filetype
-
-    # it's a dylib, so it *must* have a dylib id
-    assert file.dylib_id
   end
 
   def test_extra_dylib
-    file = MachO::MachOFile.new(fixture(:x86_64, "libextrahello.dylib"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "libextrahello.dylib") }
+    unusual_dylib_lcs = [
+      :LC_LOAD_UPWARD_DYLIB,
+      :LC_LAZY_LOAD_DYLIB,
+      :LC_LOAD_WEAK_DYLIB,
+      :LC_REEXPORT_DYLIB
+    ]
 
-    assert file.dylib?
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
 
-    # make sure we can read more unusual dylib load commands
-    [:LC_LOAD_UPWARD_DYLIB, :LC_LAZY_LOAD_DYLIB].each do |cmdname|
-      lc = file[cmdname].first
+      assert file.dylib?
 
-      assert lc
-      assert_kind_of MachO::DylibCommand, lc
+      # make sure we can read more unusual dylib load commands
+      unusual_dylib_lcs.each do |cmdname|
+        lc = file[cmdname].first
 
-      dylib_name = lc.name
+        # PPC and x86-family binaries don't have the same dylib LCs, so ignore
+        # the ones that don't exist
+        # https://github.com/Homebrew/ruby-macho/pull/24#issuecomment-226287121
+        if lc
+          assert_kind_of MachO::DylibCommand, lc
 
-      assert dylib_name
-      assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+          dylib_name = lc.name
+
+          assert dylib_name
+          assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+        end
+      end
     end
   end
 
   def test_bundle
-    file = MachO::MachOFile.new(fixture(:x86_64, "hellobundle.so"))
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hellobundle.so") }
 
-    # a file can only be ONE of these
-    assert file.bundle?
-    filechecks(except = :bundle?).each do |check|
-      refute file.send(check)
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      # a file can only be ONE of these
+      assert file.bundle?
+      filechecks(except = :bundle?).each do |check|
+        refute file.send(check)
+      end
+
+      assert_equal "MH_BUNDLE", file.filetype
+
+      # it's not a dylib, so it has no dylib id
+      assert_nil file.dylib_id
     end
-
-    assert_equal "MH_BUNDLE", file.filetype
-
-    # it's not a dylib, so it has no dylib id
-    assert_nil file.dylib_id
   end
 
   def test_change_dylib_id
-    filename = fixture(:x86_64, "libhello.dylib")
-    actual = fixture(:x86_64, "libhello_actual.dylib")
-    expected = fixture(:x86_64, "libhello_expected.dylib")
-
-    file = MachO::MachOFile.new(filename)
-
-    # changing the dylib id should work
-    old_id = file.dylib_id
-    file.dylib_id = "testing"
-    assert_equal "testing", file.dylib_id
-
-    # change it back within the same instance
-    file.dylib_id = old_id
-    assert_equal old_id, file.dylib_id
-
-    assert file.segments.size > 0
-    assert file.linked_dylibs.size > 0
-
-    really_big_id = "x" * 4096
-
-    # test failsafe for excessively large IDs (w/ no special linking)
-    assert_raises MachO::HeaderPadError do
-      file.dylib_id = really_big_id
+    groups = SINGLE_ARCHES.map do |arch|
+      ["libhello.dylib", "libhello_actual.dylib", "libhello_expected.dylib"].map do |fn|
+        fixture(arch, fn)
+      end
     end
 
-    file.dylib_id = "test"
+    groups.each do |filename, actual, expected|
+      file = MachO::MachOFile.new(filename)
 
-    file.write(actual)
+      # changing the dylib id should work
+      old_id = file.dylib_id
+      file.dylib_id = "testing"
+      assert_equal "testing", file.dylib_id
 
-    assert equal_sha1_hashes(actual, expected)
+      # change it back within the same instance
+      file.dylib_id = old_id
+      assert_equal old_id, file.dylib_id
+
+      assert file.segments.size > 0
+      assert file.linked_dylibs.size > 0
+
+      really_big_id = "x" * 4096
+
+      # test failsafe for excessively large IDs (w/ no special linking)
+      assert_raises MachO::HeaderPadError do
+        file.dylib_id = really_big_id
+      end
+
+      file.dylib_id = "test"
+
+      file.write(actual)
+
+      assert equal_sha1_hashes(actual, expected)
+    end
   ensure
-    delete_if_exists(actual)
+    groups.each do |_, actual, _|
+      delete_if_exists(actual)
+    end
   end
 
   def test_change_install_name
-    filename = fixture(:x86_64, "hello.bin")
-    actual = fixture(:x86_64, "hello_actual.bin")
-    expected = fixture(:x86_64, "hello_expected.bin")
+    groups = SINGLE_ARCHES.map do |arch|
+      ["hello.bin", "hello_actual.bin", "hello_expected.bin"].map do |fn|
+        fixture(arch, fn)
+      end
+    end
 
-    file = MachO::MachOFile.new(filename)
+    groups.each do |filename, actual, expected|
+      file = MachO::MachOFile.new(filename)
 
-    dylibs = file.linked_dylibs
+      dylibs = file.linked_dylibs
 
-    # there should be at least one dylib linked to the binary
-    refute_empty dylibs
+      # there should be at least one dylib linked to the binary
+      refute_empty dylibs
 
-    file.change_install_name(dylibs[0], "test")
-    new_dylibs = file.linked_dylibs
+      file.change_install_name(dylibs[0], "test")
+      new_dylibs = file.linked_dylibs
 
-    # the new dylib name should reflect the changes we've made
-    assert_equal "test", new_dylibs[0]
-    refute_equal dylibs[0], new_dylibs[0]
+      # the new dylib name should reflect the changes we've made
+      assert_equal "test", new_dylibs[0]
+      refute_equal dylibs[0], new_dylibs[0]
 
-    file.write(actual)
+      file.write(actual)
 
-    # compare actual and expected file hashes, to ensure file correctness
-    assert equal_sha1_hashes(actual, expected)
+      # compare actual and expected file hashes, to ensure file correctness
+      assert equal_sha1_hashes(actual, expected)
+    end
   ensure
-    delete_if_exists(actual)
+    groups.each do |_, actual, _|
+      delete_if_exists(actual)
+    end
   end
 
   def test_change_rpath
+    groups = [
+      [
+        fixture(:x86_64, "hello.bin"),
+        fixture(:x86_64, "hello_actual.bin"),
+        fixture(:x86_64, "hello_expected.bin")
+      ]
+    ]
+
     pass
-    # file = MachO::MachOFile.new(fixture(:x86_64, "hello.bin"))
-
-    # rpaths = file.rpaths
-
-    # refute_empty rpaths
-    # assert_equal "made_up_path", rpaths[0]
-
-    # begin
-    #   file.change_rpath(rpaths[0], "/usr/lib")
-    # rescue Exception => e
-    #   file.write("test/bin/hello_rpath_actual.bin")
-    # end
-    # new_rpaths = file.rpaths
-
-    # assert_equal "/usr/lib", new_rpaths[0]
-    # refute_equal rpaths[0], new_rpaths[0]
-
-    # file.write("test/bin/hello_rpath_actual.bin")
-
-    # # compare actual and expected file hashes, to ensure file correctness
-    # assert equal_sha1_hashes("test/bin/hello_rpath_actual.bin", "test/bin/hello_rpath_expected.bin")
   end
 end

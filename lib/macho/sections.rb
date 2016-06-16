@@ -100,7 +100,7 @@ module MachO
     # @return [void] reserved (for count or sizeof)
     attr_reader :reserved2
 
-    FORMAT = "a16a16VVVVVVVVV"
+    FORMAT = "a16a16L=9"
     SIZEOF = 68
 
     # @api private
@@ -145,7 +145,7 @@ module MachO
     # @return [void] reserved
     attr_reader :reserved3
 
-    FORMAT = "a16a16QQVVVVVVVV"
+    FORMAT = "a16a16Q=2L=8"
     SIZEOF = 80
 
     # @api private
