@@ -8,6 +8,7 @@ module Helpers
 
   # architectures used in testing single-arch binaries
   SINGLE_ARCHES = [
+    :i386,
     :x86_64,
     :ppc
   ]
