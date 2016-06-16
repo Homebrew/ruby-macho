@@ -38,17 +38,12 @@ puts lc_vers.version_string # => "10.10.0"
 
 ### What works?
 
-* Reading data from x86/x86_64 Mach-O files
+* Reading data from x86/x86_64/PPC Mach-O files
 * Changing the IDs of Mach-O and Fat dylibs
 * Changing install names in Mach-O and Fat files
 
-### What might work?
-
-* Reading *some* data from PPC Mach-O files.
-
 ### What doesn't work yet?
 
-* Reading data from any other architecure's Mach-O files (probably).
 * Adding, deleting, or modifying rpaths.
 
 ### What needs to be done?
