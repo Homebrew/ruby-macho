@@ -323,13 +323,11 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_change_rpath
-    groups = [
-      [
-        fixture(:x86_64, "hello.bin"),
-        fixture(:x86_64, "hello_actual.bin"),
-        fixture(:x86_64, "hello_expected.bin")
-      ]
-    ]
+    groups = SINGLE_ARCHES.map do |arch|
+      ["", "_rpath_actual", "_rpath_expected"].map do |suffix|
+        fixture(arch, "hello#{suffix}.bin")
+      end
+    end
 
     pass
   end
