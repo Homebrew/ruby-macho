@@ -124,7 +124,7 @@ module MachO
       MH_MAGICS[magic]
     end
 
-    # @return [String] a string representation of the Mach-O's filetype
+    # @return [Symbol] a string representation of the Mach-O's filetype
     def filetype
       MH_FILETYPES[header.filetype]
     end

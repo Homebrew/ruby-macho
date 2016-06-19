@@ -14,6 +14,9 @@ executables, dynamic libraries, and so forth.
 
 ### Documentation
 
+**Important**: ruby-macho does not have a stable API (yet). Use it with this
+in mind.
+
 Full documentation is available on [RubyDoc](http://www.rubydoc.info/gems/ruby-macho/).
 
 A quick example of what ruby-macho can do:
@@ -23,8 +26,8 @@ require 'macho'
 
 file = MachO::MachOFile.new("/path/to/my/binary")
 
-# get the file's type (MH_OBJECT, MH_DYLIB, MH_EXECUTE, etc)
-file.filetype # => "MH_EXECUTE"
+# get the file's type (object, dynamic lib, executable, etc)
+file.filetype # => :execute
 
 # get all load commands in the file and print their offsets:
 file.load_commands.each do |lc|
@@ -32,7 +35,7 @@ file.load_commands.each do |lc|
 end
 
 # access a specific load command
-lc_vers = file['LC_VERSION_MIN_MACOSX'].first
+lc_vers = file[:LC_VERSION_MIN_MACOSX].first
 puts lc_vers.version_string # => "10.10.0"
 ```
 

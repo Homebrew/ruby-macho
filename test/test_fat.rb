@@ -104,7 +104,7 @@ class FatFileTest < Minitest::Test
 
       assert_kind_of Fixnum, file.magic
       assert_kind_of String, file.magic_string
-      assert_kind_of String, file.filetype
+      assert_kind_of Symbol, file.filetype
     end
   end
 
@@ -119,7 +119,7 @@ class FatFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_OBJECT", file.filetype
+      assert_equal :object, file.filetype
     end
   end
 
@@ -134,7 +134,7 @@ class FatFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_EXECUTE", file.filetype
+      assert_equal :execute, file.filetype
     end
   end
 
@@ -149,7 +149,7 @@ class FatFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_DYLIB", file.filetype
+      assert_equal :dylib, file.filetype
     end
   end
 
@@ -202,7 +202,7 @@ class FatFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_BUNDLE", file.filetype
+      assert_equal :bundle, file.filetype
     end
   end
 
