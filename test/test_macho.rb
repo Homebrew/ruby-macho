@@ -130,7 +130,7 @@ class MachOFileTest < Minitest::Test
 
       assert_kind_of Fixnum, file.magic
       assert_kind_of String, file.magic_string
-      assert_kind_of String, file.filetype
+      assert_kind_of Symbol, file.filetype
       assert_kind_of Symbol, file.cputype
       assert_kind_of Symbol, file.cpusubtype
       assert_kind_of Fixnum, file.ncmds
@@ -153,7 +153,7 @@ class MachOFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_OBJECT", file.filetype
+      assert_equal :object, file.filetype
 
       # it's not a dylib, so it has no dylib id
       assert_nil file.dylib_id
@@ -171,7 +171,7 @@ class MachOFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_EXECUTE", file.filetype
+      assert_equal :execute, file.filetype
 
       # it's not a dylib, so it has no dylib id
       assert_nil file.dylib_id
@@ -189,7 +189,7 @@ class MachOFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_DYLIB", file.filetype
+      assert_equal :dylib, file.filetype
 
       # it's a dylib, so it *must* have a dylib id
       assert file.dylib_id
@@ -241,7 +241,7 @@ class MachOFileTest < Minitest::Test
         refute file.send(check)
       end
 
-      assert_equal "MH_BUNDLE", file.filetype
+      assert_equal :bundle, file.filetype
 
       # it's not a dylib, so it has no dylib id
       assert_nil file.dylib_id

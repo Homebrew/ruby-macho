@@ -115,7 +115,7 @@ module MachO
     end
 
     # The file's type. Assumed to be the same for every Mach-O within.
-    # @return [String] the filetype
+    # @return [Symbol] the filetype
     def filetype
       machos.first.filetype
     end
