@@ -733,6 +733,9 @@ module MachO
     # @return [Fixnum] the number of hints in the hint table
     attr_reader :nhints
 
+    # @return [MachO::TwolevelHintsCommand::TwolevelHintTable] the hint table
+    attr_reader :table
+
     FORMAT = "L=4"
     SIZEOF = 16
 
@@ -741,6 +744,42 @@ module MachO
       super(view, cmd, cmdsize)
       @htoffset = htoffset
       @nhints = nhints
+      @table = TwolevelHintsTable.new(view, htoffset, nhints)
+    end
+
+    # A representation of the two-level namespace lookup hints table exposed
+    # by a {TwolevelHintsCommand} (`LC_TWOLEVEL_HINTS`).
+    class TwolevelHintsTable
+      # @return [Array<MachO::TwoLevelHintsTable::TwoLevelHint>] all hints in the table
+      attr_reader :hints
+
+      # @param view [MachO::MachOView] the view into the current Mach-O
+      # @param htoffset [Fixnum] the offset of the hints table
+      # @param nhints [Fixnum] the number of two-level hints in the table
+      # @api private
+      def initialize(view, htoffset, nhints)
+        format = (view.endianness == :little) ? "V<" : "V>"
+        raw_table = view.raw_data.slice((htoffset...(htoffset + (nhints * 4))))
+        blobs = raw_table.unpack(format * nhints)
+
+        @hints = blobs.map { |b| TwolevelHint.new(b) }
+      end
+
+      # An individual two-level namespace lookup hint.
+      class TwolevelHint
+        # @return [Fixnum] the index into the sub-images
+        attr_reader :isub_image
+
+        # @return [Fixnum] the index into the table of contents
+        attr_reader :itoc
+
+        # @param blob [Fixnum] the 32-bit number containing the lookup hint
+        # @api private
+        def initialize(blob)
+          @isub_image = (blob >> 24)
+          @itoc = (blob & ((1 << 24) - 1))
+        end
+      end
     end
   end
 
