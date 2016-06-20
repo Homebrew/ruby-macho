@@ -148,8 +148,8 @@ module MachO
   # represented, and no actual data. Used when a more specific class
   # isn't available/implemented.
   class LoadCommand < MachOStructure
-    # @return [Fixnum] the offset in the file the command was created from
-    attr_reader :offset
+    # @return [MachO::MachOView] the raw view associated with the load command
+    attr_reader :view
 
     # @return [Fixnum] the load command's identifying number
     attr_reader :cmd
@@ -161,28 +161,32 @@ module MachO
     SIZEOF = 8
 
     # Creates a new LoadCommand given an offset and binary string
-    # @param raw_data [String] the raw Mach-O data
-    # @param endianness [Symbol] the endianness of the command (:big or :little)
-    # @param offset [Fixnum] the offset to initialize with
+    # @param view [MachO::MachOView] the load command's raw view
     # @param bin [String] the binary string to initialize with
     # @return [MachO::LoadCommand] the new load command
     # @api private
-    def self.new_from_bin(raw_data, endianness, offset, bin)
-      format = specialize_format(self::FORMAT, endianness)
+    def self.new_from_bin(view)
+      bin = view.raw_data.slice(view.offset, bytesize)
+      format = specialize_format(self::FORMAT, view.endianness)
 
-      self.new(raw_data, offset, *bin.unpack(format))
+      self.new(view, *bin.unpack(format))
     end
 
-    # @param raw_data [String] the raw Mach-O data
-    # @param offset [Fixnum] the offset to initialize with
+    # @param view [MachO::MachOView] the load command's raw view
     # @param cmd [Fixnum] the load command's identifying number
     # @param cmdsize [Fixnum] the size of the load command in bytes
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize)
-      @raw_data = raw_data
-      @offset = offset
+    def initialize(view, cmd, cmdsize)
+      @view = view
+      @offset = view.offset
       @cmd = cmd
       @cmdsize = cmdsize
+    end
+
+    # @return [Fixnum] the load command's offset in the source file
+    # @deprecated use {#view} instead
+    def offset
+      view.offset
     end
 
     # @return [Symbol] a symbol representation of the load command's identifying number
@@ -235,8 +239,8 @@ module MachO
     SIZEOF = 24
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, uuid)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, uuid)
+      super(view, cmd, cmdsize)
       @uuid = uuid.unpack("C16") # re-unpack for the actual UUID array
     end
 
@@ -286,9 +290,9 @@ module MachO
     SIZEOF = 56
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
+    def initialize(view, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
         filesize, maxprot, initprot, nsects, flags)
-      super(raw_data, offset, cmd, cmdsize)
+      super(view, cmd, cmdsize)
       @segname = segname.delete("\x00")
       @vmaddr = vmaddr
       @vmsize = vmsize
@@ -345,9 +349,9 @@ module MachO
     SIZEOF = 72
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
+    def initialize(view, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
         filesize, maxprot, initprot, nsects, flags)
-      super(raw_data, offset, cmd, cmdsize)
+      super(view, cmd, cmdsize)
       @segname = segname.delete("\x00")
       @vmaddr = vmaddr
       @vmsize = vmsize
@@ -390,10 +394,9 @@ module MachO
     SIZEOF = 24
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, name, timestamp, current_version,
-        compatibility_version)
-      super(raw_data, offset, cmd, cmdsize)
-      @name = LCStr.new(raw_data, self, name)
+    def initialize(view, cmd, cmdsize, name, timestamp, current_version, compatibility_version)
+      super(view, cmd, cmdsize)
+      @name = LCStr.new(view.raw_data, self, name)
       @timestamp = timestamp
       @current_version = current_version
       @compatibility_version = compatibility_version
@@ -411,9 +414,9 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, name)
-      super(raw_data, offset, cmd, cmdsize)
-      @name = LCStr.new(raw_data, self, name)
+    def initialize(view, cmd, cmdsize, name)
+      super(view, cmd, cmdsize)
+      @name = LCStr.new(view.raw_data, self, name)
     end
   end
 
@@ -433,9 +436,9 @@ module MachO
     SIZEOF = 20
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, name, nmodules, linked_modules)
-      super(raw_data, offset, cmd, cmdsize)
-      @name = LCStr.new(raw_data, self, name)
+    def initialize(view, cmd, cmdsize, name, nmodules, linked_modules)
+      super(view, cmd, cmdsize)
+      @name = LCStr.new(view.raw_data, self, name)
       @nmodules = nmodules
       @linked_modules = linked_modules
     end
@@ -480,10 +483,9 @@ module MachO
     SIZEOF = 40
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, init_address, init_module,
-        reserved1, reserved2, reserved3, reserved4, reserved5,
-        reserved6)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, init_address, init_module, reserved1,
+        reserved2, reserved3, reserved4, reserved5, reserved6)
+      super(view, cmd, cmdsize)
       @init_address = init_address
       @init_module = init_module
       @reserved1 = reserved1
@@ -527,10 +529,9 @@ module MachO
     SIZEOF = 72
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, init_address, init_module,
-        reserved1, reserved2, reserved3, reserved4, reserved5,
-        reserved6)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, init_address, init_module, reserved1,
+        reserved2, reserved3, reserved4, reserved5, reserved6)
+      super(view, cmd, cmdsize)
       @init_address = init_address
       @init_module = init_module
       @reserved1 = reserved1
@@ -552,9 +553,9 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, umbrella)
-      super(raw_data, offset, cmd, cmdsize)
-      @umbrella = LCStr.new(raw_data, self, umbrella)
+    def initialize(view, cmd, cmdsize, umbrella)
+      super(view, cmd, cmdsize)
+      @umbrella = LCStr.new(view.raw_data, self, umbrella)
     end
   end
 
@@ -568,9 +569,9 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, sub_umbrella)
-      super(raw_data, offset, cmd, cmdsize)
-      @sub_umbrella = LCStr.new(raw_data, self, sub_umbrella)
+    def initialize(view, cmd, cmdsize, sub_umbrella)
+      super(view, cmd, cmdsize)
+      @sub_umbrella = LCStr.new(view.raw_data, self, sub_umbrella)
     end
   end
 
@@ -584,9 +585,9 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, sub_library)
-      super(raw_data, offset, cmd, cmdsize)
-      @sub_library = LCStr.new(raw_data, self, sub_library)
+    def initialize(view, cmd, cmdsize, sub_library)
+      super(view, cmd, cmdsize)
+      @sub_library = LCStr.new(view.raw_data, self, sub_library)
     end
   end
 
@@ -600,9 +601,9 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, sub_client)
-      super(raw_data, offset, cmd, cmdsize)
-      @sub_client = LCStr.new(raw_data, self, sub_client)
+    def initialize(view, cmd, cmdsize, sub_client)
+      super(view, cmd, cmdsize)
+      @sub_client = LCStr.new(view.raw_data, self, sub_client)
     end
   end
 
@@ -625,8 +626,8 @@ module MachO
     SIZEOF = 24
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, symoff, nsyms, stroff, strsize)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, symoff, nsyms, stroff, strsize)
+      super(view, cmd, cmdsize)
       @symoff = symoff
       @nsyms = nsyms
       @stroff = stroff
@@ -697,11 +698,11 @@ module MachO
 
     # ugh
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
-        nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff,
-        nmodtab, extrefsymoff, nextrefsyms, indirectsymoff,
-        nindirectsyms, extreloff, nextrel, locreloff, nlocrel)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
+        nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff, nmodtab,
+        extrefsymoff, nextrefsyms, indirectsymoff, nindirectsyms, extreloff,
+        nextrel, locreloff, nlocrel)
+      super(view, cmd, cmdsize)
       @ilocalsym = ilocalsym
       @nlocalsym = nlocalsym
       @iextdefsym = iextdefsym
@@ -736,8 +737,8 @@ module MachO
     SIZEOF = 16
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, htoffset, nhints)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, htoffset, nhints)
+      super(view, cmd, cmdsize)
       @htoffset = htoffset
       @nhints = nhints
     end
@@ -753,8 +754,8 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, cksum)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, cksum)
+      super(view, cmd, cmdsize)
       @cksum = cksum
     end
   end
@@ -770,9 +771,9 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, path)
-      super(raw_data, offset, cmd, cmdsize)
-      @path = LCStr.new(raw_data, self, path)
+    def initialize(view, cmd, cmdsize, path)
+      super(view, cmd, cmdsize)
+      @path = LCStr.new(view.raw_data, self, path)
     end
   end
 
@@ -790,8 +791,8 @@ module MachO
     SIZEOF = 16
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, dataoff, datasize)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, dataoff, datasize)
+      super(view, cmd, cmdsize)
       @dataoff = dataoff
       @datasize = datasize
     end
@@ -813,8 +814,8 @@ module MachO
     SIZEOF = 20
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, cryptoff, cryptsize, cryptid)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, cryptoff, cryptsize, cryptid)
+      super(view, cmd, cmdsize)
       @cryptoff = cryptoff
       @cryptsize = cryptsize
       @cryptid = cryptid
@@ -840,8 +841,8 @@ module MachO
     SIZEOF = 24
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, cryptoff, cryptsize, cryptid, pad)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, cryptoff, cryptsize, cryptid, pad)
+      super(view, cmd, cmdsize)
       @cryptoff = cryptoff
       @cryptsize = cryptsize
       @cryptid = cryptid
@@ -862,8 +863,8 @@ module MachO
     SIZEOF = 16
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, version, sdk)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, version, sdk)
+      super(view, cmd, cmdsize)
       @version = version
       @sdk = sdk
     end
@@ -929,10 +930,10 @@ module MachO
     SIZEOF = 48
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, rebase_off, rebase_size, bind_off,
-        bind_size, weak_bind_off, weak_bind_size, lazy_bind_off,
-        lazy_bind_size, export_off, export_size)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, rebase_off, rebase_size, bind_off,
+        bind_size, weak_bind_off, weak_bind_size, lazy_bind_off, lazy_bind_size,
+        export_off, export_size)
+      super(view, cmd, cmdsize)
       @rebase_off = rebase_off
       @rebase_size = rebase_size
       @bind_off = bind_off
@@ -956,8 +957,8 @@ module MachO
     SIZEOF = 12
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, count)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, count)
+      super(view, cmd, cmdsize)
       @count = count
     end
   end
@@ -974,8 +975,8 @@ module MachO
     SIZEOF = 24
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, entryoff, stacksize)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, entryoff, stacksize)
+      super(view, cmd, cmdsize)
       @entryoff = entryoff
       @stacksize = stacksize
     end
@@ -991,8 +992,8 @@ module MachO
     SIZEOF = 16
 
     # @api private
-    def initialize(raw_data, offset, cmd, cmdsize, version)
-      super(raw_data, offset, cmd, cmdsize)
+    def initialize(view, cmd, cmdsize, version)
+      super(view, cmd, cmdsize)
       @version = version
     end
 
