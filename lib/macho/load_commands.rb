@@ -162,7 +162,6 @@ module MachO
 
     # Creates a new LoadCommand given an offset and binary string
     # @param view [MachO::MachOView] the load command's raw view
-    # @param bin [String] the binary string to initialize with
     # @return [MachO::LoadCommand] the new load command
     # @api private
     def self.new_from_bin(view)
