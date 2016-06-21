@@ -13,7 +13,7 @@ module MachO
       self::SIZEOF
     end
 
-    # @param endianness [Symbol] either :big or :little
+    # @param endianness [Symbol] either `:big` or `:little`
     # @param bin [String] the string to be unpacked into the new structure
     # @return [MachO::MachOStructure] a new MachOStructure initialized with `bin`
     # @api private
@@ -27,7 +27,7 @@ module MachO
 
     # Convert an abstract (native-endian) String#unpack format to big or little.
     # @param format [String] the format string being converted
-    # @param endianness [Symbol] either :big or :little
+    # @param endianness [Symbol] either `:big` or `:little`
     # @return [String] the converted string
     # @api private
     def self.specialize_format(format, endianness)
