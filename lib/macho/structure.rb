@@ -18,21 +18,9 @@ module MachO
     # @return [MachO::MachOStructure] a new MachOStructure initialized with `bin`
     # @api private
     def self.new_from_bin(endianness, bin)
-      format = specialize_format(self::FORMAT, endianness)
+      format = Utils.specialize_format(self::FORMAT, endianness)
 
       self.new(*bin.unpack(format))
-    end
-
-    private
-
-    # Convert an abstract (native-endian) String#unpack format to big or little.
-    # @param format [String] the format string being converted
-    # @param endianness [Symbol] either `:big` or `:little`
-    # @return [String] the converted string
-    # @api private
-    def self.specialize_format(format, endianness)
-      modifier = (endianness == :big) ? ">" : "<"
-      format.tr("=", modifier)
     end
   end
 end

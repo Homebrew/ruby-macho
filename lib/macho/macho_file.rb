@@ -56,12 +56,12 @@ module MachO
 
     # @return [Boolean] true if the Mach-O has 32-bit magic, false otherwise
     def magic32?
-      MachO.magic32?(header.magic)
+      Utils.magic32?(header.magic)
     end
 
     # @return [Boolean] true if the Mach-O has 64-bit magic, false otherwise
     def magic64?
-      MachO.magic64?(header.magic)
+      Utils.magic64?(header.magic)
     end
 
     # @return [Boolean] true if the file is of type `MH_OBJECT`, false otherwise
@@ -326,7 +326,7 @@ module MachO
       raise TruncatedFileError.new if @raw_data.size < 28
 
       magic = get_and_check_magic
-      mh_klass = MachO.magic32?(magic) ? MachHeader : MachHeader64
+      mh_klass = Utils.magic32?(magic) ? MachHeader : MachHeader64
       mh = mh_klass.new_from_bin(endianness, @raw_data[0, mh_klass.bytesize])
 
       check_cputype(mh.cputype)
@@ -344,10 +344,10 @@ module MachO
     def get_and_check_magic
       magic = @raw_data[0..3].unpack("N").first
 
-      raise MagicError.new(magic) unless MachO.magic?(magic)
-      raise FatBinaryError.new if MachO.fat_magic?(magic)
+      raise MagicError.new(magic) unless Utils.magic?(magic)
+      raise FatBinaryError.new if Utils.fat_magic?(magic)
 
-      @endianness = MachO.little_magic?(magic) ? :little : :big
+      @endianness = Utils.little_magic?(magic) ? :little : :big
 
       magic
     end
@@ -453,8 +453,8 @@ module MachO
       old_str = old_str.dup
       new_str = new_str.dup
 
-      old_pad = MachO.round(old_str.size + 1, cmd_round) - old_str.size
-      new_pad = MachO.round(new_str.size + 1, cmd_round) - new_str.size
+      old_pad = Utils.round(old_str.size + 1, cmd_round) - old_str.size
+      new_pad = Utils.round(new_str.size + 1, cmd_round) - new_str.size
 
       # pad the old and new IDs with null bytes to meet command bounds
       old_str << "\x00" * old_pad

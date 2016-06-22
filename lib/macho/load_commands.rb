@@ -167,7 +167,7 @@ module MachO
     # @api private
     def self.new_from_bin(view)
       bin = view.raw_data.slice(view.offset, bytesize)
-      format = specialize_format(self::FORMAT, view.endianness)
+      format = Utils.specialize_format(self::FORMAT, view.endianness)
 
       self.new(view, *bin.unpack(format))
     end
@@ -758,9 +758,9 @@ module MachO
       # @param nhints [Fixnum] the number of two-level hints in the table
       # @api private
       def initialize(view, htoffset, nhints)
-        format = (view.endianness == :little) ? "V<" : "V>"
-        raw_table = view.raw_data.slice((htoffset...(htoffset + (nhints * 4))))
-        blobs = raw_table.unpack(format * nhints)
+        format = Utils.specialize_format("L=#{nhints}", view.endianness)
+        raw_table = view.raw_data[htoffset, nhints * 4]
+        blobs = raw_table.unpack(format)
 
         @hints = blobs.map { |b| TwolevelHint.new(b) }
       end
@@ -776,8 +776,8 @@ module MachO
         # @param blob [Fixnum] the 32-bit number containing the lookup hint
         # @api private
         def initialize(blob)
-          @isub_image = (blob >> 24)
-          @itoc = (blob & ((1 << 24) - 1))
+          @isub_image = blob >> 24
+          @itoc = blob & 0x00FFFFFF
         end
       end
     end

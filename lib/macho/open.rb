@@ -12,9 +12,9 @@ module MachO
 
     magic = File.open(filename, "rb") { |f| f.read(4) }.unpack("N").first
 
-    if MachO.fat_magic?(magic)
+    if Utils.fat_magic?(magic)
       file = FatFile.new(filename)
-    elsif MachO.magic?(magic)
+    elsif Utils.magic?(magic)
       file = MachOFile.new(filename)
     else
       raise MagicError.new(magic)
