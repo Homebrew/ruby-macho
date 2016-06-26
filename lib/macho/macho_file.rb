@@ -386,7 +386,7 @@ module MachO
       load_commands = []
 
       header.ncmds.times do
-        fmt = (endianness == :little) ? "L<" : "L>"
+        fmt = Utils.specialize_format("L=", endianness)
         cmd = @raw_data.slice(offset, 4).unpack(fmt).first
         cmd_sym = LOAD_COMMANDS[cmd]
 
@@ -410,7 +410,7 @@ module MachO
     # @return [void]
     # @private
     def set_sizeofcmds(size)
-      fmt = (endianness == :little) ? "L<" : "L>"
+      fmt = Utils.specialize_format("L=", endianness)
       new_size = [size].pack(fmt)
       @raw_data[20..23] = new_size
     end
@@ -486,7 +486,7 @@ module MachO
       set_sizeofcmds(new_sizeofcmds)
 
       # update cmdsize in the cmd
-      fmt = (endianness == :little) ? "L<" : "L>"
+      fmt = Utils.specialize_format("L=", endianness)
       @raw_data[cmd.offset + 4, 4] = [new_size].pack(fmt)
 
       # delete the old str
