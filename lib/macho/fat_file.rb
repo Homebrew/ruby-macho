@@ -218,8 +218,8 @@ module MachO
 
       fh = FatHeader.new_from_bin(:big, @raw_data[0, FatHeader.bytesize])
 
-      raise MagicError.new(fh.magic) unless MachO.magic?(fh.magic)
-      raise MachOBinaryError.new unless MachO.fat_magic?(fh.magic)
+      raise MagicError.new(fh.magic) unless Utils.magic?(fh.magic)
+      raise MachOBinaryError.new unless Utils.fat_magic?(fh.magic)
 
       # Rationale: Java classfiles have the same magic as big-endian fat
       # Mach-Os. Classfiles encode their version at the same offset as
