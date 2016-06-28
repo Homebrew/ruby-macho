@@ -177,7 +177,6 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize)
       @view = view
-      @offset = view.offset
       @cmd = cmd
       @cmdsize = cmdsize
     end
