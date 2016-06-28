@@ -204,25 +204,25 @@ module MachO
     # pretend that strings stored in LCs are immediately available without
     # explicit operations on the raw Mach-O data.
     class LCStr
-      # @param raw_data [String] the raw Mach-O data.
       # @param lc [MachO::LoadCommand] the load command
       # @param lc_str [Fixnum] the offset to the beginning of the string
       # @api private
-      def initialize(raw_data, lc, lc_str)
-        @raw_data = raw_data
-        @lc = lc
-        @lc_str = lc_str
-        @str = @raw_data.slice(@lc.offset + @lc_str...@lc.offset + @lc.cmdsize).delete("\x00")
+      def initialize(lc, lc_str)
+        view = lc.view
+        lc_str_abs = view.offset + lc_str
+        lc_end = view.offset + lc.cmdsize - 1
+        @string = view.raw_data.slice(lc_str_abs..lc_end).delete("\x00")
+        @string_offset = lc_str
       end
 
       # @return [String] a string representation of the LCStr
       def to_s
-        @str
+        @string
       end
 
       # @return [Fixnum] the offset to the beginning of the string in the load command
       def to_i
-        @lc_str
+        @string_offset
       end
     end
   end
@@ -394,7 +394,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, name, timestamp, current_version, compatibility_version)
       super(view, cmd, cmdsize)
-      @name = LCStr.new(view.raw_data, self, name)
+      @name = LCStr.new(self, name)
       @timestamp = timestamp
       @current_version = current_version
       @compatibility_version = compatibility_version
@@ -414,7 +414,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, name)
       super(view, cmd, cmdsize)
-      @name = LCStr.new(view.raw_data, self, name)
+      @name = LCStr.new(self, name)
     end
   end
 
@@ -436,7 +436,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, name, nmodules, linked_modules)
       super(view, cmd, cmdsize)
-      @name = LCStr.new(view.raw_data, self, name)
+      @name = LCStr.new(self, name)
       @nmodules = nmodules
       @linked_modules = linked_modules
     end
@@ -553,7 +553,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, umbrella)
       super(view, cmd, cmdsize)
-      @umbrella = LCStr.new(view.raw_data, self, umbrella)
+      @umbrella = LCStr.new(self, umbrella)
     end
   end
 
@@ -569,7 +569,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, sub_umbrella)
       super(view, cmd, cmdsize)
-      @sub_umbrella = LCStr.new(view.raw_data, self, sub_umbrella)
+      @sub_umbrella = LCStr.new(self, sub_umbrella)
     end
   end
 
@@ -585,7 +585,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, sub_library)
       super(view, cmd, cmdsize)
-      @sub_library = LCStr.new(view.raw_data, self, sub_library)
+      @sub_library = LCStr.new(self, sub_library)
     end
   end
 
@@ -601,7 +601,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, sub_client)
       super(view, cmd, cmdsize)
-      @sub_client = LCStr.new(view.raw_data, self, sub_client)
+      @sub_client = LCStr.new(self, sub_client)
     end
   end
 
@@ -810,7 +810,7 @@ module MachO
     # @api private
     def initialize(view, cmd, cmdsize, path)
       super(view, cmd, cmdsize)
-      @path = LCStr.new(view.raw_data, self, path)
+      @path = LCStr.new(self, path)
     end
   end
 
