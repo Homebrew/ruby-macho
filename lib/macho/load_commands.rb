@@ -1112,6 +1112,7 @@ module MachO
     def initialize(view, cmd, cmdsize, name, minor_version, header_addr)
       super(view, cmd, cmdsize)
       @name = LCStr.new(self, name)
+      @minor_version = minor_version
       @header_addr = header_addr
     end
   end
