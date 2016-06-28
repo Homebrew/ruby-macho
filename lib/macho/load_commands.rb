@@ -72,14 +72,14 @@ module MachO
   LC_STRUCTURES = {
     :LC_SEGMENT => "SegmentCommand",
     :LC_SYMTAB => "SymtabCommand",
-    :LC_SYMSEG => "LoadCommand", # obsolete
+    :LC_SYMSEG => "SymsegCommand", # obsolete
     :LC_THREAD => "ThreadCommand", # seems obsolete, but not documented as such
     :LC_UNIXTHREAD => "ThreadCommand",
-    :LC_LOADFVMLIB => "LoadCommand", # obsolete
-    :LC_IDFVMLIB => "LoadCommand", # obsolete
-    :LC_IDENT => "LoadCommand", # obsolete
-    :LC_FVMFILE => "LoadCommand", # reserved for internal use only
-    :LC_PREPAGE => "LoadCommand", # reserved for internal use only
+    :LC_LOADFVMLIB => "FvmlibCommand", # obsolete
+    :LC_IDFVMLIB => "FvmlibCommand", # obsolete
+    :LC_IDENT => "IdentCommand", # obsolete
+    :LC_FVMFILE => "FvmfileCommand", # reserved for internal use only
+    :LC_PREPAGE => "LoadCommand", # reserved for internal use only, no public struct
     :LC_DYSYMTAB => "DysymtabCommand",
     :LC_LOAD_DYLIB => "DylibCommand",
     :LC_ID_DYLIB => "DylibCommand",
@@ -1044,6 +1044,75 @@ module MachO
       ].map { |s| s.to_i(2) }
 
       segs.join(".")
+    end
+  end
+
+  # An obsolete load command containing the offset and size of the (GNU style)
+  # symbol table information. Corresponds to LC_SYMSEG.
+  class SymsegCommand < LoadCommand
+    # @return [Fixnum] the offset to the symbol segment
+    attr_reader :offset
+
+    # @return [Fixnum] the size of the symbol segment in bytes
+    attr_reader :size
+
+    FORMAT = "L=4"
+    SIZEOF = 16
+
+    # @api private
+    def initialize(view, cmd, cmdsize, offset, size)
+      super(view, cmd, cmdsize)
+      @offset = offset
+      @size = size
+    end
+  end
+
+  # An obsolete load command containing a free format string table. Each string
+  # is null-terminated and the command is zero-padded to a multiple of 4.
+  # Corresponds to LC_IDENT.
+  class IdentCommand < LoadCommand
+    FORMAT = "L=2"
+    SIZEOF = 8
+  end
+
+  # An obsolete load command containing the path to a file to be loaded into
+  # memory. Corresponds to LC_FVMFILE.
+  class FvmfileCommand < LoadCommand
+    # @return [MachO::LoadCommand::LCStr] the pathname of the file being loaded
+    attr_reader :name
+
+    # @return [Fixnum] the virtual address being loaded at
+    attr_reader :header_addr
+
+    FORMAT = "L=4"
+    SIZEOF = 16
+
+    def initialize(view, cmd, cmdsize, name, header_addr)
+      super(view, cmd, cmdsize)
+      @name = LCStr.new(self, name)
+      @header_addr = header_addr
+    end
+  end
+
+  # An obsolete load command containing the path to a library to be loaded into
+  # memory. Corresponds to LC_LOADFVMLIB and LC_IDFVMLIB.
+  class FvmlibCommand < LoadCommand
+    # @return [MachO::LoadCommand::LCStr] the library's target pathname
+    attr_reader :name
+
+    # @return [Fixnum] the library's minor version number
+    attr_reader :minor_version
+
+    # @return [Fixnum] the library's header address
+    attr_reader :header_addr
+
+    FORMAT = "L=5"
+    SIZEOF = 20
+
+    def initialize(view, cmd, cmdsize, name, minor_version, header_addr)
+      super(view, cmd, cmdsize)
+      @name = LCStr.new(self, name)
+      @header_addr = header_addr
     end
   end
 end
