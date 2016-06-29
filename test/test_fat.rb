@@ -317,4 +317,53 @@ class FatFileTest < Minitest::Test
       delete_if_exists(actual)
     end
   end
+
+  def test_get_rpaths
+    groups = FAT_ARCH_PAIRS.map do |arch|
+      ["", "_actual", "_expected"].map do |fn|
+        fixture(arch, "hello#{fn}.bin")
+      end
+    end
+
+    groups.each do |filename, actual, expected|
+      file = MachO::FatFile.new(filename)
+      rpaths = file.rpaths
+
+      assert_kind_of Array, rpaths
+      assert_kind_of String, rpaths.first
+      assert_equal "made_up_path", rpaths.first
+    end
+  end
+
+  def test_change_rpath
+    groups = FAT_ARCH_PAIRS.map do |arch|
+      ["", "_rpath_actual", "_rpath_expected"].map do |fn|
+        fixture(arch, "hello#{fn}.bin")
+      end
+    end
+
+    groups.each do |filename, actual, expected|
+      file = MachO::FatFile.new(filename)
+      rpaths = file.rpaths
+
+      # there should be at least one rpath in each binary
+      refute_empty rpaths
+
+      file.change_rpath(rpaths.first, "/usr/lib")
+      new_rpaths = file.rpaths
+
+      # the new rpath should reflect the changes we've made
+      assert_equal "/usr/lib", new_rpaths.first
+      refute_empty rpaths.first, new_rpaths.first
+
+      file.write(actual)
+
+      # compare actual and expected file hashes, to ensure file correctness
+      assert equal_sha1_hashes(actual, expected)
+    end
+  ensure
+    groups.each do |_, actual, _|
+      delete_if_exists(actual)
+    end
+  end
 end
