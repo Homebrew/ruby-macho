@@ -124,6 +124,7 @@ module MachO
     # @example
     #  file.dylib_id # => 'libBar.dylib'
     # @return [String, nil] the file's dylib ID
+    # @see MachO::MachOFile#linked_dylibs
     def dylib_id
       machos.first.dylib_id
     end
@@ -134,6 +135,7 @@ module MachO
     # @param new_id [String] the new dylib ID
     # @return [void]
     # @raise [ArgumentError] if `new_id` is not a String
+    # @see MachO::MachOFile#linked_dylibs
     def dylib_id=(new_id)
       if !new_id.is_a?(String)
         raise ArgumentError.new("argument must be a String")
@@ -152,6 +154,7 @@ module MachO
 
     # All shared libraries linked to the file's Mach-Os.
     # @return [Array<String>] an array of all shared libraries
+    # @see MachO::MachOFile#linked_dylibs
     def linked_dylibs
       # Individual architectures in a fat binary can link to different subsets
       # of libraries, but at this point we want to have the full picture, i.e.
@@ -166,6 +169,7 @@ module MachO
     # @param old_name [String] the shared library name being changed
     # @param new_name [String] the new name
     # @todo incomplete
+    # @see MachO::MachOFile#change_install_name
     def change_install_name(old_name, new_name)
       machos.each do |macho|
         macho.change_install_name(old_name, new_name)
@@ -175,6 +179,27 @@ module MachO
     end
 
     alias :change_dylib :change_install_name
+
+    # All runtime paths associated with the file's Mach-Os.
+    # @return [Array<String>] an array of all runtime paths
+    # @see MachO::MachOFile#rpaths
+    def rpaths
+      # Can individual architectures have different runtime paths?
+      machos.map(&:rpaths).flatten.uniq
+    end
+
+    # Change the runtime path `old_path` to `new_path` in the file's Mach-Os.
+    # @param old_path [String] the old runtime path
+    # @param new_path [String] the new runtime path
+    # @return [void]
+    # @see MachO::MachOFile#change_rpath
+    def change_rpath(old_path, new_path)
+      machos.each do |macho|
+        macho.change_rpath(old_path, new_path)
+      end
+
+      synchronize_raw_data
+    end
 
     # Extract a Mach-O with the given CPU type from the file.
     # @example

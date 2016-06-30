@@ -257,7 +257,6 @@ module MachO
     # @param new_path [String] the new runtime path
     # @return [void]
     # @raise [MachO::RpathUnknownError] if no such old runtime path exists
-    # @api private
     def change_rpath(old_path, new_path)
       rpath_cmd = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
       raise RpathUnknownError.new(old_path) if rpath_cmd.nil?
@@ -442,6 +441,8 @@ module MachO
     # @param new_str [String] the new string
     # @raise [MachO::HeaderPadError] if the new name exceeds the header pad buffer
     # @private
+    # @todo This needs to be replaced.
+    # @see https://github.com/Homebrew/ruby-macho/pull/35
     def set_lc_str_in_cmd(cmd, lc_str, old_str, new_str)
       if magic32?
         cmd_round = 4
@@ -453,20 +454,26 @@ module MachO
       old_str = old_str.dup
       new_str = new_str.dup
 
-      old_pad = Utils.round(old_str.size + 1, cmd_round) - old_str.size
-      new_pad = Utils.round(new_str.size + 1, cmd_round) - new_str.size
+      old_prepad = cmd.class.bytesize + old_str.size + 1
+      new_prepad = cmd.class.bytesize + new_str.size + 1
 
-      # pad the old and new IDs with null bytes to meet command bounds
+      # calculate the original and new padded sizes of the strings
+      old_padded_size = Utils.round(old_prepad, cmd_round)
+      new_padded_size = Utils.round(new_prepad, cmd_round)
+
+      # calculate the number of pad bytes used in the old and new strings
+      old_pad = old_padded_size - (old_prepad)
+      new_pad = new_padded_size - (new_prepad)
+
+      # pad the old and new strings with null bytes to meet command bounds
       old_str << "\x00" * old_pad
       new_str << "\x00" * new_pad
 
-      # calculate the new size of the cmd and sizeofcmds in MH
-      new_size = cmd.class.bytesize + new_str.size
-      new_sizeofcmds += new_size - cmd.cmdsize
-
-      low_fileoff = @raw_data.size
+      # calculate the new sizeofcmds in MH
+      new_sizeofcmds += new_padded_size - cmd.cmdsize
 
       # calculate the low file offset (offset to first section data)
+      low_fileoff = @raw_data.size
       segments.each do |seg|
         sections(seg).each do |sect|
           next if sect.size == 0
@@ -487,7 +494,7 @@ module MachO
 
       # update cmdsize in the cmd
       fmt = Utils.specialize_format("L=", endianness)
-      @raw_data[cmd.offset + 4, 4] = [new_size].pack(fmt)
+      @raw_data[cmd.offset + 4, 4] = [new_padded_size].pack(fmt)
 
       # delete the old str
       @raw_data.slice!(cmd.offset + lc_str.to_i...cmd.offset + cmd.class.bytesize + old_str.size)
