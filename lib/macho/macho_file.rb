@@ -404,6 +404,26 @@ module MachO
       load_commands
     end
 
+    # The low file offset (offset to first section data).
+    # @return [Fixnum] the offset
+    # @private
+    def low_fileoff
+      offset = @raw_data.size
+
+      segments.each do |seg|
+        sections(seg).each do |sect|
+          next if sect.size == 0
+          next if sect.flag?(:S_ZEROFILL)
+          next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
+          next unless sect.offset < offset
+
+          offset = sect.offset
+        end
+      end
+
+      offset
+    end
+
     # Updates the size of all load commands in the raw data.
     # @param size [Fixnum] the new size, in bytes
     # @return [void]
@@ -454,8 +474,8 @@ module MachO
       old_str = old_str.dup
       new_str = new_str.dup
 
-      old_prepad = cmd.class.bytesize + old_str.size + 1
-      new_prepad = cmd.class.bytesize + new_str.size + 1
+      old_prepad = cmd.class.bytesize + old_str.bytesize + 1
+      new_prepad = cmd.class.bytesize + new_str.bytesize + 1
 
       # calculate the original and new padded sizes of the strings
       old_padded_size = Utils.round(old_prepad, cmd_round)
@@ -472,19 +492,6 @@ module MachO
       # calculate the new sizeofcmds in MH
       new_sizeofcmds += new_padded_size - cmd.cmdsize
 
-      # calculate the low file offset (offset to first section data)
-      low_fileoff = @raw_data.size
-      segments.each do |seg|
-        sections(seg).each do |sect|
-          next if sect.size == 0
-          next if sect.flag?(:S_ZEROFILL)
-          next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
-          next unless sect.offset < low_fileoff
-
-          low_fileoff = sect.offset
-        end
-      end
-
       if new_sizeofcmds + header.class.bytesize > low_fileoff
         raise HeaderPadError.new(@filename)
       end
@@ -497,13 +504,13 @@ module MachO
       @raw_data[cmd.offset + 4, 4] = [new_padded_size].pack(fmt)
 
       # delete the old str
-      @raw_data.slice!(cmd.offset + lc_str.to_i...cmd.offset + cmd.class.bytesize + old_str.size)
+      @raw_data.slice!(cmd.offset + lc_str.to_i, old_str.bytesize)
 
       # insert the new str
       @raw_data.insert(cmd.offset + lc_str.to_i, new_str)
 
       # pad/unpad after new_sizeofcmds until offsets are corrected
-      null_pad = old_str.size - new_str.size
+      null_pad = old_str.bytesize - new_str.bytesize
 
       if null_pad < 0
         @raw_data.slice!(new_sizeofcmds + header.class.bytesize, null_pad.abs)
