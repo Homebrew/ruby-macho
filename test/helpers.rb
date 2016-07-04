@@ -6,18 +6,25 @@ require "tempfile"
 module Helpers
   OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/
 
-  # architectures used in testing single-arch binaries
-  SINGLE_ARCHES = [
+  # architectures used in testing 32-bit single-arch binaries
+  SINGLE_32_ARCHES = [
     :i386,
+    :ppc,
+  ].freeze
+
+  # architectures used in testing 64-bit single-arch binaries
+  SINGLE_64_ARCHES = [
     :x86_64,
-    :ppc
-  ]
+  ].freeze
+
+  # architectures used in testing single-arch binaries
+  SINGLE_ARCHES = SINGLE_32_ARCHES + SINGLE_64_ARCHES
 
   # architecture pairs used in testing fat binaries
   FAT_ARCH_PAIRS = [
     [:i386, :x86_64],
     [:i386, :ppc]
-  ]
+  ].freeze
 
   def fixture(archs, name)
     arch_dir = archs.is_a?(Array) ? "fat-#{archs.join("-")}" : archs.to_s
