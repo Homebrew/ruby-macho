@@ -154,10 +154,52 @@ class MachOToolsTest < Minitest::Test
   end
 
   def test_delete_rpath
-    pass
+    groups = SINGLE_ARCHES.map do |arch|
+      ["hello.bin", "hello_actual.bin"].map do |fn|
+        fixture(arch, fn)
+      end
+    end
+
+    groups.each do |filename, actual|
+      FileUtils.cp filename, actual
+      MachO::Tools.delete_rpath(actual, "made_up_path")
+
+      original = MachO::MachOFile.new(filename)
+      modified = MachO::MachOFile.new(actual)
+
+      assert_operator modified.ncmds, :<, original.ncmds
+      assert_operator modified.sizeofcmds, :<, original.sizeofcmds
+      assert_operator modified.rpaths.size, :<, original.rpaths.size
+      assert_includes original.rpaths, "made_up_path"
+      refute_includes modified.rpaths, "made_up_path"
+    end
+  ensure
+    groups.each do |_, actual|
+      delete_if_exists(actual)
+    end
   end
 
   def test_delete_rpath_fat
-    pass
+    groups = FAT_ARCH_PAIRS.map do |arch|
+      ["hello.bin", "hello_actual.bin"].map do |fn|
+        fixture(arch, fn)
+      end
+    end
+
+    groups.each do |filename, actual|
+      FileUtils.cp filename, actual
+      MachO::Tools.delete_rpath(actual, "made_up_path")
+
+      original = MachO::FatFile.new(filename)
+      modified = MachO::FatFile.new(actual)
+
+      assert_operator modified.rpaths.size, :<, original.rpaths.size
+      assert_includes original.rpaths, "made_up_path"
+      refute_includes modified.rpaths, "made_up_path"
+    end
+  ensure
+    groups.each do |_, actual|
+      delete_if_exists(actual)
+    end
   end
 end
