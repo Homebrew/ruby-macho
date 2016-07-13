@@ -269,26 +269,23 @@ module MachO
     # @return [Array<MachO::Section>] if the Mach-O is 32-bit
     # @return [Array<MachO::Section64>] if the Mach-O is 64-bit
     def sections(segment)
-      sections = []
-
-      if !segment.is_a?(SegmentCommand) && !segment.is_a?(SegmentCommand64)
+      section_klass = case segment
+      when MachO::SegmentCommand
+        MachO::Section
+      when MachO::SegmentCommand64
+        MachO::Section64
+      else
         raise ArgumentError.new("not a valid segment")
       end
 
-      if segment.nsects.zero?
-        return sections
-      end
+      sections = []
+      return sections if segment.nsects.zero?
 
-      offset = segment.offset + segment.class.bytesize
+      offset = segment.view.offset + segment.class.bytesize
 
       segment.nsects.times do
-        if segment.is_a? SegmentCommand
-          sections << Section.new_from_bin(endianness, @raw_data.slice(offset, Section.bytesize))
-          offset += Section.bytesize
-        else
-          sections << Section64.new_from_bin(endianness, @raw_data.slice(offset, Section64.bytesize))
-          offset += Section64.bytesize
-        end
+        sections << section_klass.new_from_bin(endianness, @raw_data.slice(offset, section_klass.bytesize))
+        offset += section_klass.bytesize
       end
 
       sections
