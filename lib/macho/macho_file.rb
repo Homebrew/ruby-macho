@@ -188,9 +188,7 @@ module MachO
     #  file.dylib_id # => 'libBar.dylib'
     # @return [String, nil] the Mach-O's dylib ID
     def dylib_id
-      if !dylib?
-        return nil
-      end
+      return unless dylib?
 
       dylib_id_cmd = command(:LC_ID_DYLIB).first
 
@@ -204,13 +202,8 @@ module MachO
     # @return [void]
     # @raise [ArgumentError] if `new_id` is not a String
     def dylib_id=(new_id)
-      if !new_id.is_a?(String)
-        raise ArgumentError.new("argument must be a String")
-      end
-
-      if !dylib?
-        return nil
-      end
+      raise ArgumentError.new("new ID must be a String") unless new_id.is_a?(String)
+      return unless dylib?
 
       dylib_cmd = command(:LC_ID_DYLIB).first
       old_id = dylib_id
@@ -269,26 +262,24 @@ module MachO
     # @return [Array<MachO::Section>] if the Mach-O is 32-bit
     # @return [Array<MachO::Section64>] if the Mach-O is 64-bit
     def sections(segment)
-      sections = []
-
-      if !segment.is_a?(SegmentCommand) && !segment.is_a?(SegmentCommand64)
+      section_klass = case segment
+      when MachO::SegmentCommand
+        MachO::Section
+      when MachO::SegmentCommand64
+        MachO::Section64
+      else
         raise ArgumentError.new("not a valid segment")
       end
 
-      if segment.nsects.zero?
-        return sections
-      end
+      sections = []
+      return sections if segment.nsects.zero?
 
-      offset = segment.offset + segment.class.bytesize
+      offset = segment.view.offset + segment.class.bytesize
 
       segment.nsects.times do
-        if segment.is_a? SegmentCommand
-          sections << Section.new_from_bin(endianness, @raw_data.slice(offset, Section.bytesize))
-          offset += Section.bytesize
-        else
-          sections << Section64.new_from_bin(endianness, @raw_data.slice(offset, Section64.bytesize))
-          offset += Section64.bytesize
-        end
+        section_bin = @raw_data[offset, section_klass.bytesize]
+        sections << section_klass.new_from_bin(endianness, section_bin)
+        offset += section_klass.bytesize
       end
 
       sections
@@ -501,13 +492,13 @@ module MachO
 
       # update cmdsize in the cmd
       fmt = Utils.specialize_format("L=", endianness)
-      @raw_data[cmd.offset + 4, 4] = [new_padded_size].pack(fmt)
+      @raw_data[cmd.view.offset + 4, 4] = [new_padded_size].pack(fmt)
 
       # delete the old str
-      @raw_data.slice!(cmd.offset + lc_str.to_i, old_str.bytesize)
+      @raw_data.slice!(cmd.view.offset + lc_str.to_i, old_str.bytesize)
 
       # insert the new str
-      @raw_data.insert(cmd.offset + lc_str.to_i, new_str)
+      @raw_data.insert(cmd.view.offset + lc_str.to_i, new_str)
 
       # pad/unpad after new_sizeofcmds until offsets are corrected
       null_pad = old_str.bytesize - new_str.bytesize
