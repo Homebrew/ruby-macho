@@ -201,6 +201,18 @@ module MachO
       synchronize_raw_data
     end
 
+    # Delete the given runtime path from the file's Mach-Os.
+    # @param path [String] the runtime path to delete
+    # @return void
+    # @see MachO::MachOFile#delete_rpath
+    def delete_rpath(path)
+      machos.each do |macho|
+        macho.delete_rpath(path)
+      end
+
+      synchronize_raw_data
+    end
+
     # Extract a Mach-O with the given CPU type from the file.
     # @example
     #  file.extract(:i386) # => MachO::MachOFile

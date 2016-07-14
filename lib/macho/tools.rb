@@ -13,7 +13,6 @@ module MachO
     # @param filename [String] the Mach-O or Fat binary being modified
     # @param new_id [String] the new dylib ID for the binary
     # @return [void]
-    # @todo unstub for fat files
     def self.change_dylib_id(filename, new_id)
       file = MachO.open(filename)
 
@@ -26,7 +25,6 @@ module MachO
     # @param old_name [String] the old shared library name
     # @param new_name [String] the new shared library name
     # @return [void]
-    # @todo unstub for fat files
     def self.change_install_name(filename, old_name, new_name)
       file = MachO.open(filename)
 
@@ -39,7 +37,6 @@ module MachO
     # @param old_path [String] the old runtime path
     # @param new_path [String] the new runtime path
     # @return [void]
-    # @todo unstub
     def self.change_rpath(filename, old_path, new_path)
       file = MachO.open(filename)
 
@@ -60,9 +57,11 @@ module MachO
     # @param filename [String] the Mach-O or Fat binary being modified
     # @param old_path [String] the old runtime path
     # @return [void]
-    # @todo unstub
     def self.delete_rpath(filename, old_path)
-      raise UnimplementedError.new("removing rpaths from a Mach-O")
+      file = MachO.open(filename)
+
+      file.delete_rpath(old_path)
+      file.write!
     end
   end
 end

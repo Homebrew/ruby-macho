@@ -261,6 +261,47 @@ module MachO
       set_path_in_rpath(rpath_cmd, old_path, new_path)
     end
 
+    # Delete the given runtime path from the Mach-O.
+    # @example
+    #  file.rpaths # => ["/lib"]
+    #  file.delete_rpath("/lib")
+    #  file.rpaths # => []
+    # @param path [String] the runtime path to delete
+    # @return void
+    # @raise [MachO::RpathUnknownError] if no such runtime path exists
+    def delete_rpath(path)
+      rpath_cmds = command(:LC_RPATH).select { |r| r.path.to_s == path }
+      raise RpathUnknownError.new(old_path) if rpath_cmds.empty?
+
+      # sort_by! should be unnecessary since load commands are read in
+      # sequential order, but let's not rely on this behavior
+      rpath_cmds.sort_by! { |lc| lc.view.offset }
+
+      # calculate the size of all commands pending deletion
+      deleted_size = rpath_cmds.map(&:cmdsize).inject(0, :+)
+
+      # this behavior differs from that of install_name_tool, which
+      # will only delete the first matching rpath, instead of all matching ones
+      rpath_cmds.reverse_each do |rpath_cmd|
+        # slice the rpath out of the raw data
+        @raw_data.slice!(rpath_cmd.view.offset, rpath_cmd.cmdsize)
+      end
+
+      # decrease the number of load commands by the number deleted
+      set_ncmds(ncmds - rpath_cmds.size)
+
+      # decrease the total size of commands by the size of the deleted commands
+      set_sizeofcmds(sizeofcmds - deleted_size)
+
+      # pad the space after the load commands to preserve offsets
+      null_pad = "\x00" * deleted_size
+      @raw_data.insert(header.class.bytesize + sizeofcmds, null_pad)
+
+      # synchronize fields with the raw data
+      @header = get_mach_header
+      @load_commands = get_load_commands
+    end
+
     # All sections of the segment `segment`.
     # @param segment [MachO::SegmentCommand, MachO::SegmentCommand64] the segment being inspected
     # @return [Array<MachO::Section>] if the Mach-O is 32-bit
@@ -419,14 +460,24 @@ module MachO
       offset
     end
 
+    # Updates the number of load commands in the raw data.
+    # @param ncmds [Fixnum] the new number of commands
+    # @return [void]
+    # @private
+    def set_ncmds(ncmds)
+      fmt = Utils.specialize_format("L=", endianness)
+      ncmds_raw = [ncmds].pack(fmt)
+      @raw_data[16..19] = ncmds_raw
+    end
+
     # Updates the size of all load commands in the raw data.
     # @param size [Fixnum] the new size, in bytes
     # @return [void]
     # @private
     def set_sizeofcmds(size)
       fmt = Utils.specialize_format("L=", endianness)
-      new_size = [size].pack(fmt)
-      @raw_data[20..23] = new_size
+      size_raw = [size].pack(fmt)
+      @raw_data[20..23] = size_raw
     end
 
     # Updates the `name` field in a DylibCommand.
