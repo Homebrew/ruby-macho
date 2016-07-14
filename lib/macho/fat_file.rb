@@ -221,6 +221,8 @@ module MachO
       machos.each do |macho|
         macho.delete_rpath(path)
       end
+
+      synchronize_raw_data
     end
 
     # Extract a Mach-O with the given CPU type from the file.

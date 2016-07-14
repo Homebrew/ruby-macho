@@ -403,4 +403,41 @@ class MachOFileTest < Minitest::Test
       delete_if_exists(actual)
     end
   end
+
+  def test_add_rpath
+    groups = SINGLE_ARCHES.map do |arch|
+      ["hello.bin", "hello_actual.bin"].map do |fn|
+        fixture(arch, fn)
+      end
+    end
+
+    groups.each do |filename, actual|
+      file = MachO::MachOFile.new(filename)
+
+      orig_ncmds = file.ncmds
+      orig_sizeofcmds = file.sizeofcmds
+      orig_npaths = file.rpaths.size
+
+      file.add_rpath("/foo/bar/baz")
+      assert_operator file.ncmds, :>, orig_ncmds
+      assert_operator file.sizeofcmds, :>, orig_sizeofcmds
+      assert_operator file.rpaths.size, :>, orig_npaths
+      assert_includes file.rpaths, "/foo/bar/baz"
+
+      file.write(actual)
+      # ensure we can actually re-load and parse the modified file
+      modified = MachO::MachOFile.new(actual)
+
+      assert_equal file.serialize.bytesize, modified.serialize.bytesize
+      assert_operator modified.ncmds, :>, orig_ncmds
+      assert_operator modified.sizeofcmds, :>, orig_sizeofcmds
+      assert_equal file.rpaths.size, modified.rpaths.size
+      assert_operator modified.rpaths.size, :>, orig_npaths
+      assert_includes modified.rpaths, "/foo/bar/baz"
+    end
+  ensure
+    groups.each do |_, actual|
+      delete_if_exists(actual)
+    end
+  end
 end
