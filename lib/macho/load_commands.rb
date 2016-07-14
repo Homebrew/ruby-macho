@@ -57,6 +57,8 @@ module MachO
     0x30 => :LC_VERSION_MIN_WATCHOS,
   }.freeze
 
+  LOAD_COMMAND_CONSTANTS = LOAD_COMMANDS.invert.freeze
+
   # load commands responsible for loading dylibs
   # @api private
   DYLIB_LOAD_COMMANDS = [
@@ -65,6 +67,14 @@ module MachO
     :LC_REEXPORT_DYLIB,
     :LC_LAZY_LOAD_DYLIB,
     :LC_LOAD_UPWARD_DYLIB,
+  ].freeze
+
+  # load commands that can be created manually via {LoadCommand.create}
+  # @api private
+  CREATABLE_LOAD_COMMANDS = DYLIB_LOAD_COMMANDS + [
+    :LC_ID_DYLIB,
+    :LC_RPATH,
+    :LC_LOAD_DYLINKER,
   ].freeze
 
   # association of load command symbols to string representations of classes
@@ -160,7 +170,7 @@ module MachO
     FORMAT = "L=2"
     SIZEOF = 8
 
-    # Creates a new LoadCommand given an offset and binary string
+    # Instantiates a new LoadCommand given a view into its origin Mach-O
     # @param view [MachO::MachOView] the load command's raw view
     # @return [MachO::LoadCommand] the new load command
     # @api private
@@ -171,6 +181,23 @@ module MachO
       self.new(view, *bin.unpack(format))
     end
 
+    # Creates a new (viewless) command corresponding to the symbol provided
+    # @param cmd_sym [Symbol] the symbol of the load command being created
+    # @param args [Array] the arguments for the load command being created
+    def self.create(cmd_sym, *args)
+      raise LoadCommandNotCreatableError.new(cmd_sym) unless CREATABLE_LOAD_COMMANDS.include?(cmd_sym)
+
+      klass = MachO.const_get "#{LC_STRUCTURES[cmd_sym]}"
+      cmd = LOAD_COMMAND_CONSTANTS[cmd_sym]
+
+      # cmd will be filled in, view and cmdsize will be left unpopulated
+      klass_arity = klass.instance_method(:initialize).arity - 3
+
+      raise LoadCommandCreationArityError.new(cmd_sym, klass_arity, args.size) if klass_arity != args.size
+
+      klass.new(nil, cmd, nil, *args)
+    end
+
     # @param view [MachO::MachOView] the load command's raw view
     # @param cmd [Fixnum] the load command's identifying number
     # @param cmdsize [Fixnum] the size of the load command in bytes
@@ -179,6 +206,22 @@ module MachO
       @view = view
       @cmd = cmd
       @cmdsize = cmdsize
+    end
+
+    # @return [Boolean] true if the load command can be serialized, false otherwise
+    def serializable?
+      CREATABLE_LOAD_COMMANDS.include?(LOAD_COMMANDS[cmd])
+    end
+
+    # @param context [MachO::LoadCommand::SerializationContext] the context
+    #  to serialize into
+    # @return [String, nil] the serialized fields of the load command, or nil
+    #  if the load command can't be serialized
+    # @api private
+    def serialize(context)
+      raise LoadCommandNotSerializableError.new(LOAD_COMMANDS[cmd]) unless serializable?
+      format = Utils.specialize_format(FORMAT, context.endianness)
+      [cmd, SIZEOF].pack(format)
     end
 
     # @return [Fixnum] the load command's offset in the source file
@@ -205,14 +248,24 @@ module MachO
     # explicit operations on the raw Mach-O data.
     class LCStr
       # @param lc [MachO::LoadCommand] the load command
-      # @param lc_str [Fixnum] the offset to the beginning of the string
+      # @param lc_str [Fixnum, String] the offset to the beginning of the string,
+      #  or the string itself if not being initialized with a view.
+      # @todo devise a solution such that the `lc_str` parameter is not
+      #  interpreted differently depending on `lc.view`. The current behavior
+      #  is a hack to allow viewless load command creation.
       # @api private
       def initialize(lc, lc_str)
         view = lc.view
-        lc_str_abs = view.offset + lc_str
-        lc_end = view.offset + lc.cmdsize - 1
-        @string = view.raw_data.slice(lc_str_abs..lc_end).delete("\x00")
-        @string_offset = lc_str
+
+        if view
+          lc_str_abs = view.offset + lc_str
+          lc_end = view.offset + lc.cmdsize - 1
+          @string = view.raw_data.slice(lc_str_abs..lc_end).delete("\x00")
+          @string_offset = lc_str
+        else
+          @string = lc_str
+          @string_offset = 0
+        end
       end
 
       # @return [String] a string representation of the LCStr
@@ -223,6 +276,30 @@ module MachO
       # @return [Fixnum] the offset to the beginning of the string in the load command
       def to_i
         @string_offset
+      end
+    end
+
+    # Represents the contextual information needed by a load command to
+    # serialize itself correctly into a binary string.
+    class SerializationContext
+      # @return [Symbol] the endianness of the serialized load command
+      attr_reader :endianness
+
+      # @return [Fixnum] the constant alignment value used to pad the serialized load command
+      attr_reader :alignment
+
+      # @param macho [MachO::MachOFile] the file to contextualize
+      # @return [MachO::LoadCommand::SerializationContext] the resulting context
+      def self.context_for(macho)
+        self.new(macho.endianness, macho.alignment)
+      end
+
+      # @param endianness [Symbol] the endianness of the context
+      # @param alignment [Fixnum] the alignment of the context
+      # @api private
+      def initialize(endianness, alignment)
+        @endianness = endianness
+        @alignment = alignment
       end
     end
   end
@@ -399,6 +476,17 @@ module MachO
       @current_version = current_version
       @compatibility_version = compatibility_version
     end
+
+    # @param context [MachO::LoadCcommand::SerializationContext] the context
+    # @return [String] the serialized fields of the load command
+    # @api private
+    def serialize(context)
+      format = Utils.specialize_format(FORMAT, context.endianness)
+      string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :name => name.to_s)
+      cmdsize = SIZEOF + string_payload.bytesize
+      [cmd, cmdsize, string_offsets[:name], timestamp, current_version,
+        compatibility_version].pack(format) + string_payload
+    end
   end
 
   # A load command representing some aspect of the dynamic linker, depending
@@ -415,6 +503,16 @@ module MachO
     def initialize(view, cmd, cmdsize, name)
       super(view, cmd, cmdsize)
       @name = LCStr.new(self, name)
+    end
+
+    # @param context [MachO::LoadCcommand::SerializationContext] the context
+    # @return [String] the serialized fields of the load command
+    # @api private
+    def serialize(context)
+      format = Utils.specialize_format(FORMAT, context.endianness)
+      string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :name => name.to_s)
+      cmdsize = SIZEOF + string_payload.bytesize
+      [cmd, cmdsize, string_offsets[:name]].pack(format) + string_payload
     end
   end
 
@@ -811,6 +909,16 @@ module MachO
     def initialize(view, cmd, cmdsize, path)
       super(view, cmd, cmdsize)
       @path = LCStr.new(self, path)
+    end
+
+    # @param context [MachO::LoadCcommand::SerializationContext] the context
+    # @return [String] the serialized fields of the load command
+    # @api private
+    def serialize(context)
+      format = Utils.specialize_format(FORMAT, context.endianness)
+      string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :path => path.to_s)
+      cmdsize = SIZEOF + string_payload.bytesize
+      [cmd, cmdsize, string_offsets[:path]].pack(format) + string_payload
     end
   end
 

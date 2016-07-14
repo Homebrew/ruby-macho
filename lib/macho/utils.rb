@@ -11,6 +11,13 @@ module MachO
       value
     end
 
+    # @param size [Fixnum] the unpadded size
+    # @param alignment [Fixnum] the number to alignment the size with
+    # @return [Fixnum] the number of pad bytes required
+    def self.padding_for(size, alignment)
+      round(size, alignment) - size
+    end
+
     # Convert an abstract (native-endian) String#unpack format to big or little.
     # @param format [String] the format string being converted
     # @param endianness [Symbol] either `:big` or `:little`
@@ -18,6 +25,26 @@ module MachO
     def self.specialize_format(format, endianness)
       modifier = (endianness == :big) ? ">" : "<"
       format.tr("=", modifier)
+    end
+
+    # @param fixed_offset [Fixnum] the baseline offset for the first packed string
+    # @param alignment [Fixnum] the alignment value to use for packing
+    # @param strings [Hash] the labeled strings to pack
+    # @return Array<String, Hash> the packed string and labeled offsets
+    def self.pack_strings(fixed_offset, alignment, strings = {})
+      offsets = {}
+      next_offset = fixed_offset
+      payload = ""
+
+      strings.each do |key, string|
+        offsets[key] = next_offset
+        payload << string
+        payload << "\x00"
+        next_offset += string.bytesize + 1
+      end
+
+      payload << "\x00" * padding_for(fixed_offset + payload.bytesize, alignment)
+      [payload, offsets]
     end
 
     # @param num [Fixnum] the number being checked

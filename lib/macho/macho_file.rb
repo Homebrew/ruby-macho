@@ -64,6 +64,10 @@ module MachO
       Utils.magic64?(header.magic)
     end
 
+    def alignment
+      magic32? ? 4 : 8
+    end
+
     # @return [Boolean] true if the file is of type `MH_OBJECT`, false otherwise
     def object?
       header.filetype == MH_OBJECT
@@ -455,12 +459,6 @@ module MachO
     # @todo This needs to be replaced.
     # @see https://github.com/Homebrew/ruby-macho/pull/35
     def set_lc_str_in_cmd(cmd, lc_str, old_str, new_str)
-      if magic32?
-        cmd_round = 4
-      else
-        cmd_round = 8
-      end
-
       new_sizeofcmds = header.sizeofcmds
       old_str = old_str.dup
       new_str = new_str.dup
@@ -469,8 +467,8 @@ module MachO
       new_prepad = cmd.class.bytesize + new_str.bytesize + 1
 
       # calculate the original and new padded sizes of the strings
-      old_padded_size = Utils.round(old_prepad, cmd_round)
-      new_padded_size = Utils.round(new_prepad, cmd_round)
+      old_padded_size = Utils.round(old_prepad, alignment)
+      new_padded_size = Utils.round(new_prepad, alignment)
 
       # calculate the number of pad bytes used in the old and new strings
       old_pad = old_padded_size - (old_prepad)

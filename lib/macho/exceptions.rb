@@ -80,6 +80,32 @@ module MachO
     end
   end
 
+  # Raised when a load command can't be created manually.
+  class LoadCommandNotCreatableError < MachOError
+    # @param cmd_sym [Symbol] the uncreatable load command's symbol
+    def initialize(cmd_sym)
+      super "Load commands of type #{cmd_sym} cannot be created manually"
+    end
+  end
+
+  # Raised when the number of arguments used to create a load command manually is wrong.
+  class LoadCommandCreationArityError < MachOError
+    # @param cmd_sym [Symbol] the load command's symbol
+    # @param expected_arity [Fixnum] the number of arguments expected
+    # @param actual_arity [Fixnum] the number of arguments received
+    def initialize(cmd_sym, expected_arity, actual_arity)
+      super "Expected #{expected_arity} arguments for #{cmd_sym} creation, got #{actual_arity}"
+    end
+  end
+
+  # Raised when a load command can't be serialized.
+  class LoadCommandNotSerializableError < MachOError
+    # @param cmd_sym [Symbol] the load command's symbol
+    def initialize(cmd_sym)
+      super "Load commands of type #{cmd_sym} cannot be serialized"
+    end
+  end
+
   # Raised when load commands are too large to fit in the current file.
   class HeaderPadError < MachOError
     # @param filename [String] the filename
