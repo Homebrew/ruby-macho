@@ -170,6 +170,30 @@ module MachO
 
     alias :[] :command
 
+    # Add a new load command to the Mach-O.
+    # @param lc [MachO::LoadCommand] the load command being added
+    # @return [void]
+    # @raise [MachO::HeaderPadError] if the new command exceeds the header pad buffer
+    # @note This is public, but methods like {#add_rpath} should be preferred.
+    def add_command(lc)
+      context = LoadCommand::SerializationContext.context_for(self)
+      cmd_raw = lc.serialize(context)
+      new_sizeofcmds = sizeofcmds + cmd_raw.bytesize
+
+      if header.class.bytesize + new_sizeofcmds > low_fileoff
+        raise HeaderPadError.new(@filename)
+      end
+
+      # update the raw data to reflect the new command
+      set_ncmds(ncmds + 1)
+      set_sizeofcmds(new_sizeofcmds)
+      @raw_data[header.class.bytesize + sizeofcmds, cmd_raw.bytesize] = cmd_raw
+
+      # synchronize fields with the raw data
+      @header = get_mach_header
+      @load_commands = get_load_commands
+    end
+
     # All load commands responsible for loading dylibs.
     # @return [Array<MachO::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
@@ -259,6 +283,21 @@ module MachO
       raise RpathUnknownError.new(old_path) if rpath_cmd.nil?
 
       set_path_in_rpath(rpath_cmd, old_path, new_path)
+    end
+
+    # Add the given runtime path to the Mach-O.
+    # @example
+    #  file.rpaths # => ["/lib"]
+    #  file.add_rpath("/usr/lib")
+    #  file.rpaths # => ["/lib", "/usr/lib"]
+    # @param path [String] the new runtime path
+    # @return [void]
+    # @raise [MachO::RpathExistsError] if the runtime path already exists
+    def add_rpath(path)
+      raise RpathExistsError.new(path) if rpaths.include?(path)
+
+      rpath_cmd = LoadCommand.create(:LC_RPATH, path)
+      add_command(rpath_cmd)
     end
 
     # Delete the given runtime path from the Mach-O.

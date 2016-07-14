@@ -50,7 +50,10 @@ module MachO
     # @return [void]
     # @todo unstub
     def self.add_rpath(filename, new_path)
-      raise UnimplementedError.new("adding rpaths to a Mach-O")
+      file = MachO.open(filename)
+
+      file.add_rpath(new_path)
+      file.write!
     end
 
     # Delete a runtime path from a Mach-O or Fat binary, overwriting the source file.

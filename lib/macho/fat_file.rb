@@ -201,6 +201,18 @@ module MachO
       synchronize_raw_data
     end
 
+    # Add the given runtime path to the file's Mach-Os.
+    # @param path [String] the new runtime path
+    # @return [void]
+    # @see MachO::MachOFile#add_rpath
+    def add_rpath(path)
+      machos.each do |macho|
+        macho.add_rpath(path)
+      end
+
+      synchronize_raw_data
+    end
+
     # Delete the given runtime path from the file's Mach-Os.
     # @param path [String] the runtime path to delete
     # @return void
@@ -209,8 +221,6 @@ module MachO
       machos.each do |macho|
         macho.delete_rpath(path)
       end
-
-      synchronize_raw_data
     end
 
     # Extract a Mach-O with the given CPU type from the file.

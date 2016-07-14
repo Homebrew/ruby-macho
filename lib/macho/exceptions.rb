@@ -132,6 +132,14 @@ module MachO
     end
   end
 
+  # Raised when attempting to add an rpath that already exists.
+  class RpathExistsError < MachOError
+    # @param path [String] the extant path
+    def initialize(path)
+      super "#{path} already exists"
+    end
+  end
+
   # Raised whenever unfinished code is called.
   class UnimplementedError < MachOError
     # @param thing [String] the thing that is unimplemented
