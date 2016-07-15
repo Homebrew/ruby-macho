@@ -44,16 +44,12 @@ puts lc_vers.version_string # => "10.10.0"
 * Reading data from x86/x86_64/PPC Mach-O files
 * Changing the IDs of Mach-O and Fat dylibs
 * Changing install names in Mach-O and Fat files
-
-### What doesn't work yet?
-
-* Adding, deleting, or modifying rpaths.
+* Adding, deleting, and modifying rpaths.
 
 ### What needs to be done?
 
 * Documentation.
-* Rpath modification.
-* Many, many things.
+* Unit and performance testing.
 
 Attribution:
 
