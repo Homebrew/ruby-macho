@@ -41,6 +41,11 @@ class MachOToolsTest < Minitest::Test
       MachO::Tools.change_dylib_id(actual, "test")
 
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::MachOFile.new(actual)
+      exp = MachO::MachOFile.new(expected)
+
+      assert_equal exp.dylib_id, act.dylib_id
     end
   ensure
     groups.each do |_, actual, _|
@@ -60,6 +65,11 @@ class MachOToolsTest < Minitest::Test
       MachO::Tools.change_dylib_id(actual, "test")
 
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::FatFile.new(actual)
+      exp = MachO::FatFile.new(expected)
+
+      assert_equal exp.dylib_id, act.dylib_id
     end
   ensure
     groups.each do |_, actual, _|
@@ -80,6 +90,11 @@ class MachOToolsTest < Minitest::Test
       MachO::Tools.change_install_name(actual, oldname, "test")
 
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::MachOFile.new(actual)
+      exp = MachO::MachOFile.new(expected)
+
+      assert_equal exp.linked_dylibs.first, act.linked_dylibs.first
     end
   ensure
     groups.each do |_, actual, _|
@@ -100,6 +115,11 @@ class MachOToolsTest < Minitest::Test
       MachO::Tools.change_install_name(actual, oldname, "test")
 
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::FatFile.new(actual)
+      exp = MachO::FatFile.new(expected)
+
+      assert_equal exp.linked_dylibs.first, act.linked_dylibs.first
     end
   ensure
     groups.each do |_, actual, _|
@@ -119,6 +139,17 @@ class MachOToolsTest < Minitest::Test
       MachO::Tools.change_rpath(actual, "made_up_path", "/usr/lib")
 
       assert equal_sha1_hashes(actual, expected)
+
+      file = MachO::MachOFile.new(filename)
+      act = MachO::MachOFile.new(actual)
+      exp = MachO::MachOFile.new(expected)
+
+      assert_equal file.rpaths.size, act.rpaths.size
+      assert_equal file.ncmds, act.ncmds
+      assert_equal exp.rpaths.size, act.rpaths.size
+      assert_equal exp.ncmds, act.ncmds
+
+      assert_equal exp.rpaths.first, act.rpaths.first
     end
   ensure
     groups.each do |_, actual, _|
@@ -138,6 +169,15 @@ class MachOToolsTest < Minitest::Test
       MachO::Tools.change_rpath(actual, "made_up_path", "/usr/lib")
 
       assert equal_sha1_hashes(actual, expected)
+
+      file = MachO::FatFile.new(filename)
+      act = MachO::FatFile.new(actual)
+      exp = MachO::FatFile.new(expected)
+
+      assert_equal file.rpaths.size, act.rpaths.size
+      assert_equal exp.rpaths.size, act.rpaths.size
+
+      assert_equal exp.rpaths.first, act.rpaths.first
     end
   ensure
     groups.each do |_, actual, _|
