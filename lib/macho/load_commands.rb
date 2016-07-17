@@ -1,6 +1,7 @@
 module MachO
   # load commands added after OS X 10.1 need to be bitwise ORed with
   # LC_REQ_DYLD to be recognized by the dynamic linder (dyld)
+  # @api private
   LC_REQ_DYLD = 0x80000000
 
   # association of load commands to symbol representations
@@ -57,6 +58,8 @@ module MachO
     0x30 => :LC_VERSION_MIN_WATCHOS,
   }.freeze
 
+  # association of symbol representations to load command constants
+  # @api private
   LOAD_COMMAND_CONSTANTS = LOAD_COMMANDS.invert.freeze
 
   # load commands responsible for loading dylibs
@@ -167,7 +170,12 @@ module MachO
     # @return [Fixnum] the size of the load command, in bytes
     attr_reader :cmdsize
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 8
 
     # Instantiates a new LoadCommand given a view into its origin Mach-O
@@ -310,7 +318,12 @@ module MachO
     # @return [Array<Fixnum>] the UUID
     attr_reader :uuid
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2a16"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 24
 
     # @api private
@@ -361,7 +374,12 @@ module MachO
     # @return [Fixnum] any flags associated with the segment
     attr_reader :flags
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2a16L=4l=2L=2"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 56
 
     # @api private
@@ -420,7 +438,12 @@ module MachO
     # @return [Fixnum] any flags associated with the segment
     attr_reader :flags
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2a16Q=4l=2L=2"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 72
 
     # @api private
@@ -465,7 +488,12 @@ module MachO
     # @return [Fixnum] the library's compatibility version number
     attr_reader :compatibility_version
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=6"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 24
 
     # @api private
@@ -496,7 +524,12 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the dynamic linker's path name as an LCStr
     attr_reader :name
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -528,7 +561,12 @@ module MachO
     # @return [Fixnum] a bit vector of linked modules
     attr_reader :linked_modules
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=5"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 20
 
     # @api private
@@ -543,7 +581,12 @@ module MachO
   # A load command used to represent threads.
   # @note cctools-870 has all fields of thread_command commented out except common ones (cmd, cmdsize)
   class ThreadCommand < LoadCommand
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 8
   end
 
@@ -575,7 +618,12 @@ module MachO
     # @return [void]
     attr_reader :reserved6
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=10"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 40
 
     # @api private
@@ -621,7 +669,12 @@ module MachO
     # @return [void]
     attr_reader :reserved6
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2Q=8"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 72
 
     # @api private
@@ -645,7 +698,12 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the umbrella framework name as an LCStr
     attr_reader :umbrella
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -661,7 +719,12 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the subumbrella framework name as an LCStr
     attr_reader :sub_umbrella
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -677,7 +740,12 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the sublibrary name as an LCStr
     attr_reader :sub_library
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -693,7 +761,12 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the subclient name as an LCStr
     attr_reader :sub_client
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -718,7 +791,12 @@ module MachO
     # @return the string table size in bytes
     attr_reader :strsize
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=6"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 24
 
     # @api private
@@ -789,7 +867,12 @@ module MachO
     attr_reader :nlocrel
 
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=20"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 80
 
     # ugh
@@ -832,7 +915,12 @@ module MachO
     # @return [MachO::TwolevelHintsCommand::TwolevelHintTable] the hint table
     attr_reader :table
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=4"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 16
 
     # @api private
@@ -885,7 +973,12 @@ module MachO
     # @return [Fixnum] the checksum or 0
     attr_reader :cksum
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -902,7 +995,12 @@ module MachO
     # @return [MachO::LoadCommand::LCStr] the path to add to the run path as an LCStr
     attr_reader :path
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -932,7 +1030,12 @@ module MachO
     # @return [Fixnum] size of the data in the __LINKEDIT segment
     attr_reader :datasize
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=4"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 16
 
     # @api private
@@ -955,7 +1058,12 @@ module MachO
     # @return [Fixnum] the encryption system, or 0 if not encrypted yet
     attr_reader :cryptid
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=5"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 20
 
     # @api private
@@ -982,7 +1090,12 @@ module MachO
     # @return [Fixnum] 64-bit padding value
     attr_reader :pad
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=6"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 24
 
     # @api private
@@ -1004,7 +1117,12 @@ module MachO
     # @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
     attr_reader :sdk
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=4"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 16
 
     # @api private
@@ -1071,7 +1189,12 @@ module MachO
     # @return [Fixnum] the size of the export information
     attr_reader :export_size
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=12"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 48
 
     # @api private
@@ -1098,7 +1221,12 @@ module MachO
     # @return [Fixnum] the number of strings
     attr_reader :count
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=3"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 12
 
     # @api private
@@ -1116,7 +1244,12 @@ module MachO
     # @return [Fixnum] if not 0, the initial stack size.
     attr_reader :stacksize
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2Q=2"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 24
 
     # @api private
@@ -1133,7 +1266,12 @@ module MachO
     # @return [Fixnum] the version packed as a24.b10.c10.d10.e10
     attr_reader :version
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2Q=1"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 16
 
     # @api private
@@ -1164,7 +1302,12 @@ module MachO
     # @return [Fixnum] the size of the symbol segment in bytes
     attr_reader :size
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=4"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 16
 
     # @api private
@@ -1179,7 +1322,12 @@ module MachO
   # is null-terminated and the command is zero-padded to a multiple of 4.
   # Corresponds to LC_IDENT.
   class IdentCommand < LoadCommand
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=2"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 8
   end
 
@@ -1192,7 +1340,12 @@ module MachO
     # @return [Fixnum] the virtual address being loaded at
     attr_reader :header_addr
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=4"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 16
 
     def initialize(view, cmd, cmdsize, name, header_addr)
@@ -1214,7 +1367,12 @@ module MachO
     # @return [Fixnum] the library's header address
     attr_reader :header_addr
 
+    # @see MachOStructure::FORMAT
+    # @api private
     FORMAT = "L=5"
+
+    # @see MachOStructure::SIZEOF
+    # @api private
     SIZEOF = 20
 
     def initialize(view, cmd, cmdsize, name, minor_version, header_addr)

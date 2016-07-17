@@ -1,8 +1,10 @@
 module MachO
+  # A collection of utility functions used throughout ruby-macho.
   module Utils
+    # Rounds a value to the next multiple of the given round.
     # @param value [Fixnum] the number being rounded
     # @param round [Fixnum] the number being rounded with
-    # @return [Fixnum] the next number >= `value` such that `round` is its divisor
+    # @return [Fixnum] the rounded value
     # @see http://www.opensource.apple.com/source/cctools/cctools-870/libstuff/rnd.c
     def self.round(value, round)
       round -= 1
@@ -11,6 +13,7 @@ module MachO
       value
     end
 
+    # Returns the number of bytes needed to pad the given size to the given alignment.
     # @param size [Fixnum] the unpadded size
     # @param alignment [Fixnum] the number to alignment the size with
     # @return [Fixnum] the number of pad bytes required
@@ -18,7 +21,7 @@ module MachO
       round(size, alignment) - size
     end
 
-    # Convert an abstract (native-endian) String#unpack format to big or little.
+    # Converts an abstract (native-endian) String#unpack format to big or little.
     # @param format [String] the format string being converted
     # @param endianness [Symbol] either `:big` or `:little`
     # @return [String] the converted string
@@ -27,10 +30,11 @@ module MachO
       format.tr("=", modifier)
     end
 
+    # Packs tagged strings into an aligned payload.
     # @param fixed_offset [Fixnum] the baseline offset for the first packed string
     # @param alignment [Fixnum] the alignment value to use for packing
     # @param strings [Hash] the labeled strings to pack
-    # @return Array<String, Hash> the packed string and labeled offsets
+    # @return [Array<String, Hash>] the packed string and labeled offsets
     def self.pack_strings(fixed_offset, alignment, strings = {})
       offsets = {}
       next_offset = fixed_offset
@@ -47,36 +51,42 @@ module MachO
       [payload, offsets]
     end
 
+    # Compares the given number to valid Mach-O magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid Mach-O magic number, false otherwise
     def self.magic?(num)
       MH_MAGICS.has_key?(num)
     end
 
+    # Compares the given number to valid Fat magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid Fat magic number, false otherwise
     def self.fat_magic?(num)
       num == FAT_MAGIC
     end
 
+    # Compares the given number to valid 32-bit Mach-O magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid 32-bit magic number, false otherwise
     def self.magic32?(num)
       num == MH_MAGIC || num == MH_CIGAM
     end
 
+    # Compares the given number to valid 64-bit Mach-O magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid 64-bit magic number, false otherwise
     def self.magic64?(num)
       num == MH_MAGIC_64 || num == MH_CIGAM_64
     end
 
+    # Compares the given number to valid little-endian magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid little-endian magic number, false otherwise
     def self.little_magic?(num)
       num == MH_CIGAM || num == MH_CIGAM_64
     end
 
+    # Compares the given number to valid big-endian magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid big-endian magic number, false otherwise
     def self.big_magic?(num)

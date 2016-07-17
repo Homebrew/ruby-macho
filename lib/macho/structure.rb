@@ -3,9 +3,13 @@ module MachO
   # @abstract
   class MachOStructure
     # The String#unpack format of the data structure.
+    # @return [String] the unpacking format
+    # @api private
     FORMAT = ""
 
     # The size of the data structure, in bytes.
+    # @return [Fixnum] the size, in bytes
+    # @api private
     SIZEOF = 0
 
     # @return [Fixnum] the size, in bytes, of the represented structure.

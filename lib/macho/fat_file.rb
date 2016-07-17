@@ -39,6 +39,8 @@ module MachO
       @machos = get_machos
     end
 
+    # Initializes a new FatFile instance from a binary string.
+    # @see MachO::FatFile.new_from_bin
     # @api private
     def initialize_from_bin(bin)
       @filename = nil
@@ -260,7 +262,7 @@ module MachO
     # @raise [MachO::MagicError] if the magic is not valid Mach-O magic
     # @raise [MachO::MachOBinaryError] if the magic is for a non-fat Mach-O file
     # @raise [MachO::JavaClassFileError] if the file is a Java classfile
-    # @private
+    # @api private
     def get_fat_header
       # the smallest fat Mach-O header is 8 bytes
       raise TruncatedFileError.new if @raw_data.size < 8
@@ -284,7 +286,7 @@ module MachO
 
     # Obtain an array of fat architectures from raw file data.
     # @return [Array<MachO::FatArch>] an array of fat architectures
-    # @private
+    # @api private
     def get_fat_archs
       archs = []
 
@@ -299,7 +301,7 @@ module MachO
 
     # Obtain an array of Mach-O blobs from raw file data.
     # @return [Array<MachO::MachOFile>] an array of Mach-Os
-    # @private
+    # @api private
     def get_machos
       machos = []
 
@@ -310,9 +312,9 @@ module MachO
       machos
     end
 
-    # @todo this needs to be redesigned. arch[:offset] and arch[:size] are
-    # already out-of-date, and the header needs to be synchronized as well.
-    # @private
+    # Synchronize the raw file data with each internal Mach-O object.
+    # @return [void]
+    # @api private
     def synchronize_raw_data
       machos.each_with_index do |macho, i|
         arch = fat_archs[i]

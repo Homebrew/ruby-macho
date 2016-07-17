@@ -40,6 +40,8 @@ module MachO
       @load_commands = get_load_commands
     end
 
+    # Initializes a new MachOFile instance from a binary string.
+    # @see MachO::MachOFile.new_from_bin
     # @api private
     def initialize_from_bin(bin)
       @filename = nil
@@ -64,6 +66,7 @@ module MachO
       Utils.magic64?(header.magic)
     end
 
+    # @return [Fixnum] the file's internal alignment
     def alignment
       magic32? ? 4 : 8
     end
@@ -394,7 +397,7 @@ module MachO
     # @return [MachO::MachHeader] if the Mach-O is 32-bit
     # @return [MachO::MachHeader64] if the Mach-O is 64-bit
     # @raise [MachO::TruncatedFileError] if the file is too small to have a valid header
-    # @private
+    # @api private
     def get_mach_header
       # the smallest Mach-O header is 28 bytes
       raise TruncatedFileError.new if @raw_data.size < 28
@@ -414,7 +417,7 @@ module MachO
     # @return [Fixnum] the magic
     # @raise [MachO::MagicError] if the magic is not valid Mach-O magic
     # @raise [MachO::FatBinaryError] if the magic is for a Fat file
-    # @private
+    # @api private
     def get_and_check_magic
       magic = @raw_data[0..3].unpack("N").first
 
@@ -429,7 +432,7 @@ module MachO
     # Check the file's CPU type.
     # @param cputype [Fixnum] the CPU type
     # @raise [MachO::CPUTypeError] if the CPU type is unknown
-    # @private
+    # @api private
     def check_cputype(cputype)
       raise CPUTypeError.new(cputype) unless CPU_TYPES.key?(cputype)
     end
@@ -437,7 +440,7 @@ module MachO
     # Check the file's CPU type/subtype pair.
     # @param cpusubtype [Fixnum] the CPU subtype
     # @raise [MachO::CPUSubtypeError] if the CPU sub-type is unknown
-    # @private
+    # @api private
     def check_cpusubtype(cputype, cpusubtype)
       # Only check sub-type w/o capability bits (see `get_mach_header`).
       raise CPUSubtypeError.new(cputype, cpusubtype) unless CPU_SUBTYPES[cputype].key?(cpusubtype)
@@ -446,7 +449,7 @@ module MachO
     # Check the file's type.
     # @param filetype [Fixnum] the file type
     # @raise [MachO::FiletypeError] if the file type is unknown
-    # @private
+    # @api private
     def check_filetype(filetype)
       raise FiletypeError.new(filetype) unless MH_FILETYPES.key?(filetype)
     end
@@ -454,7 +457,7 @@ module MachO
     # All load commands in the file.
     # @return [Array<MachO::LoadCommand>] an array of load commands
     # @raise [MachO::LoadCommandError] if an unknown load command is encountered
-    # @private
+    # @api private
     def get_load_commands
       offset = header.class.bytesize
       load_commands = []
@@ -481,7 +484,7 @@ module MachO
 
     # The low file offset (offset to first section data).
     # @return [Fixnum] the offset
-    # @private
+    # @api private
     def low_fileoff
       offset = @raw_data.size
 
@@ -502,7 +505,7 @@ module MachO
     # Updates the number of load commands in the raw data.
     # @param ncmds [Fixnum] the new number of commands
     # @return [void]
-    # @private
+    # @api private
     def set_ncmds(ncmds)
       fmt = Utils.specialize_format("L=", endianness)
       ncmds_raw = [ncmds].pack(fmt)
@@ -512,7 +515,7 @@ module MachO
     # Updates the size of all load commands in the raw data.
     # @param size [Fixnum] the new size, in bytes
     # @return [void]
-    # @private
+    # @api private
     def set_sizeofcmds(size)
       fmt = Utils.specialize_format("L=", endianness)
       size_raw = [size].pack(fmt)

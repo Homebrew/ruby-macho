@@ -100,7 +100,10 @@ module MachO
     # @return [void] reserved (for count or sizeof)
     attr_reader :reserved2
 
+    # @see MachOStructure::FORMAT
     FORMAT = "a16a16L=9"
+
+    # @see MachOStructure::SIZEOF
     SIZEOF = 68
 
     # @api private
@@ -145,7 +148,10 @@ module MachO
     # @return [void] reserved
     attr_reader :reserved3
 
+    # @see MachOStructure::FORMAT
     FORMAT = "a16a16Q=2L=8"
+
+    # @see MachOStructure::SIZEOF
     SIZEOF = 80
 
     # @api private
