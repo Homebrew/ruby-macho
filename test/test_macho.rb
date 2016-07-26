@@ -282,6 +282,14 @@ class MachOFileTest < Minitest::Test
       file.write(actual)
 
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::MachOFile.new(actual)
+      exp = MachO::MachOFile.new(expected)
+
+      assert_equal file.ncmds, act.ncmds
+      assert_equal exp.ncmds, act.ncmds
+
+      assert_equal exp.dylib_id, act.dylib_id
     end
   ensure
     groups.each do |_, actual, _|
@@ -313,8 +321,17 @@ class MachOFileTest < Minitest::Test
 
       file.write(actual)
 
-      # compare actual and expected file hashes, to ensure file correctness
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::MachOFile.new(actual)
+      exp = MachO::MachOFile.new(expected)
+
+      assert_equal file.linked_dylibs.size, act.linked_dylibs.size
+      assert_equal file.ncmds, act.ncmds
+      assert_equal exp.linked_dylibs.size, act.linked_dylibs.size
+      assert_equal exp.ncmds, act.ncmds
+
+      assert_equal exp.linked_dylibs.first, act.linked_dylibs.first
     end
   ensure
     groups.each do |_, actual, _|
@@ -359,8 +376,17 @@ class MachOFileTest < Minitest::Test
 
       file.write(actual)
 
-      # compare actual and expected file hashes, to ensure file correctness
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::MachOFile.new(actual)
+      exp = MachO::MachOFile.new(expected)
+
+      assert_equal file.rpaths.size, act.rpaths.size
+      assert_equal file.ncmds, act.ncmds
+      assert_equal exp.rpaths.size, act.rpaths.size
+      assert_equal exp.ncmds, act.ncmds
+
+      assert_equal exp.rpaths.first, act.rpaths.first
     end
   ensure
     groups.each do |_, actual, _|

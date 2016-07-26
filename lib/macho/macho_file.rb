@@ -36,8 +36,7 @@ module MachO
 
       @filename = filename
       @raw_data = File.open(@filename, "rb") { |f| f.read }
-      @header = get_mach_header
-      @load_commands = get_load_commands
+      populate_fields
     end
 
     # Initializes a new MachOFile instance from a binary string.
@@ -46,8 +45,7 @@ module MachO
     def initialize_from_bin(bin)
       @filename = nil
       @raw_data = bin
-      @header = get_mach_header
-      @load_commands = get_load_commands
+      populate_fields
     end
 
     # The file's raw Mach-O data.
@@ -173,26 +171,104 @@ module MachO
 
     alias :[] :command
 
-    # Add a new load command to the Mach-O.
-    # @param lc [MachO::LoadCommand] the load command being added
-    # @return [void]
+    # Inserts a load command at the given offset.
+    # @param offset [Fixnum] the offset to insert at
+    # @param lc [MachO::LoadCommand] the load command to insert
+    # @param options [Hash]
+    # @option options [Boolean] :repopulate (true) whether or not to repopulate
+    #  the instance fields
+    # @raise [MachO::OffsetInsertionError] if the offset is not in the load command region
     # @raise [MachO::HeaderPadError] if the new command exceeds the header pad buffer
-    # @note This is public, but methods like {#add_rpath} should be preferred.
-    def add_command(lc)
+    # @note Calling this method with an arbitrary offset in the load command
+    #  region **will leave the object in an inconsistent state**.
+    def insert_command(offset, lc, options = {})
       context = LoadCommand::SerializationContext.context_for(self)
       cmd_raw = lc.serialize(context)
+
+      if offset < header.class.bytesize || offset + cmd_raw.bytesize > low_fileoff
+        raise OffsetInsertionError.new(offset)
+      end
+
       new_sizeofcmds = sizeofcmds + cmd_raw.bytesize
 
       if header.class.bytesize + new_sizeofcmds > low_fileoff
         raise HeaderPadError.new(@filename)
       end
 
-      # update the raw data to reflect the new command
+      # update Mach-O header fields to account for inserted load command
       set_ncmds(ncmds + 1)
       set_sizeofcmds(new_sizeofcmds)
-      @raw_data[header.class.bytesize + sizeofcmds, cmd_raw.bytesize] = cmd_raw
 
-      # synchronize fields with the raw data
+      @raw_data.insert(offset, cmd_raw)
+      @raw_data.slice!(header.class.bytesize + new_sizeofcmds, cmd_raw.bytesize)
+
+      populate_fields if options.fetch(:repopulate, true)
+    end
+
+    # Replace a load command with another command in the Mach-O, preserving location.
+    # @param old_lc [MachO::LoadCommand] the load command being replaced
+    # @param new_lc [MachO::LoadCommand] the load command being added
+    # @return [void]
+    # @raise [MachO::HeaderPadError] if the new command exceeds the header pad buffer
+    # @see {#insert_command}
+    # @note This is public, but methods like {#dylib_id=} should be preferred.
+    def replace_command(old_lc, new_lc)
+      context = LoadCommand::SerializationContext.context_for(self)
+      cmd_raw = new_lc.serialize(context)
+      new_sizeofcmds = sizeofcmds + cmd_raw.bytesize - old_lc.cmdsize
+      if header.class.bytesize + new_sizeofcmds > low_fileoff
+        raise HeaderPadError.new(@filename)
+      end
+
+      delete_command(old_lc)
+      insert_command(old_lc.view.offset, new_lc)
+    end
+
+    # Appends a new load command to the Mach-O.
+    # @param lc [MachO::LoadCommand] the load command being added
+    # @param options [Hash]
+    # @option options [Boolean] :repopulate (true) whether or not to repopulate
+    #  the instance fields
+    # @return [void]
+    # @see {#insert_command}
+    # @note This is public, but methods like {#add_rpath} should be preferred.
+    #  Setting `repopulate` to false **will leave the instance in an
+    #  inconsistent state** unless {#populate_fields} is called **immediately**
+    #  afterwards.
+    def add_command(lc, options = {})
+      insert_command(header.class.bytesize + sizeofcmds, lc, options)
+    end
+
+    # Delete a load command from the Mach-O.
+    # @param lc [MachO::LoadCommand] the load command being deleted
+    # @param options [Hash]
+    # @option options [Boolean] :repopulate (true) whether or not to repopulate
+    #  the instance fields
+    # @return [void]
+    # @note This is public, but methods like {#delete_rpath} should be preferred.
+    #  Setting `repopulate` to false **will leave the instance in an
+    #  inconsistent state** unless {#populate_fields} is called **immediately**
+    #  afterwards.
+    def delete_command(lc, options = {})
+      @raw_data.slice!(lc.view.offset, lc.cmdsize)
+
+      # update Mach-O header fields to account for deleted load command
+      set_ncmds(ncmds - 1)
+      set_sizeofcmds(sizeofcmds - lc.cmdsize)
+
+      # pad the space after the load commands to preserve offsets
+      null_pad = "\x00" * lc.cmdsize
+      @raw_data.insert(header.class.bytesize + sizeofcmds - lc.cmdsize, null_pad)
+
+      populate_fields if options.fetch(:repopulate, true)
+    end
+
+    # Populate the instance's fields with the raw Mach-O data.
+    # @return [void]
+    # @note This method is public, but should (almost) never need to be called.
+    #  The exception to this rule is when methods like {#add_command} and
+    #  {#delete_command} have been called with `repopulate = false`.
+    def populate_fields
       @header = get_mach_header
       @load_commands = get_load_commands
     end
@@ -236,10 +312,13 @@ module MachO
       raise ArgumentError.new("new ID must be a String") unless new_id.is_a?(String)
       return unless dylib?
 
-      dylib_cmd = command(:LC_ID_DYLIB).first
-      old_id = dylib_id
+      old_lc = command(:LC_ID_DYLIB).first
+      raise DylibIdMissingError.new unless old_lc
 
-      set_name_in_dylib(dylib_cmd, old_id, new_id)
+      new_lc = LoadCommand.create(:LC_ID_DYLIB, new_id, old_lc.timestamp,
+        old_lc.current_version, old_lc.compatibility_version)
+
+      replace_command(old_lc, new_lc)
     end
 
     # All shared libraries linked to the Mach-O.
@@ -260,10 +339,13 @@ module MachO
     # @return [void]
     # @raise [MachO::DylibUnknownError] if no shared library has the old name
     def change_install_name(old_name, new_name)
-      dylib_cmd = dylib_load_commands.find { |d| d.name.to_s == old_name }
-      raise DylibUnknownError.new(old_name) if dylib_cmd.nil?
+      old_lc = dylib_load_commands.find { |d| d.name.to_s == old_name }
+      raise DylibUnknownError.new(old_name) if old_lc.nil?
 
-      set_name_in_dylib(dylib_cmd, old_name, new_name)
+      new_lc = LoadCommand.create(:LC_LOAD_DYLIB, new_name,
+        old_lc.timestamp, old_lc.current_version, old_lc.compatibility_version)
+
+      replace_command(old_lc, new_lc)
     end
 
     alias :change_dylib :change_install_name
@@ -282,10 +364,12 @@ module MachO
     # @return [void]
     # @raise [MachO::RpathUnknownError] if no such old runtime path exists
     def change_rpath(old_path, new_path)
-      rpath_cmd = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
-      raise RpathUnknownError.new(old_path) if rpath_cmd.nil?
+      old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
+      raise RpathUnknownError.new(old_path) if old_lc.nil?
 
-      set_path_in_rpath(rpath_cmd, old_path, new_path)
+      new_lc = LoadCommand.create(:LC_RPATH, new_path)
+
+      replace_command(old_lc, new_lc)
     end
 
     # Add the given runtime path to the Mach-O.
@@ -319,29 +403,11 @@ module MachO
       # sequential order, but let's not rely on this behavior
       rpath_cmds.sort_by! { |lc| lc.view.offset }
 
-      # calculate the size of all commands pending deletion
-      deleted_size = rpath_cmds.map(&:cmdsize).inject(0, :+)
+      # delete the commands in reverse order, offset descending. this
+      # allows us to defer (expensive) field population until the very end
+      rpath_cmds.reverse_each { |cmd| delete_command(cmd, repopulate: false) }
 
-      # this behavior differs from that of install_name_tool, which
-      # will only delete the first matching rpath, instead of all matching ones
-      rpath_cmds.reverse_each do |rpath_cmd|
-        # slice the rpath out of the raw data
-        @raw_data.slice!(rpath_cmd.view.offset, rpath_cmd.cmdsize)
-      end
-
-      # decrease the number of load commands by the number deleted
-      set_ncmds(ncmds - rpath_cmds.size)
-
-      # decrease the total size of commands by the size of the deleted commands
-      set_sizeofcmds(sizeofcmds - deleted_size)
-
-      # pad the space after the load commands to preserve offsets
-      null_pad = "\x00" * deleted_size
-      @raw_data.insert(header.class.bytesize + sizeofcmds, null_pad)
-
-      # synchronize fields with the raw data
-      @header = get_mach_header
-      @load_commands = get_load_commands
+      populate_fields
     end
 
     # All sections of the segment `segment`.
@@ -520,89 +586,6 @@ module MachO
       fmt = Utils.specialize_format("L=", endianness)
       size_raw = [size].pack(fmt)
       @raw_data[20..23] = size_raw
-    end
-
-    # Updates the `name` field in a DylibCommand.
-    # @param dylib_cmd [MachO::DylibCommand] the dylib command
-    # @param old_name [String] the old dylib name
-    # @param new_name [String] the new dylib name
-    # @return [void]
-    # @private
-    def set_name_in_dylib(dylib_cmd, old_name, new_name)
-      set_lc_str_in_cmd(dylib_cmd, dylib_cmd.name, old_name, new_name)
-    end
-
-    # Updates the `path` field in an RpathCommand.
-    # @param rpath_cmd [MachO::RpathCommand] the rpath command
-    # @param old_path [String] the old runtime name
-    # @param new_path [String] the new runtime name
-    # @return [void]
-    # @private
-    def set_path_in_rpath(rpath_cmd, old_path, new_path)
-      set_lc_str_in_cmd(rpath_cmd, rpath_cmd.path, old_path, new_path)
-    end
-
-    # Updates a generic LCStr field in any LoadCommand.
-    # @param cmd [MachO::LoadCommand] the load command
-    # @param lc_str [MachO::LoadCommand::LCStr] the load command string
-    # @param old_str [String] the old string
-    # @param new_str [String] the new string
-    # @raise [MachO::HeaderPadError] if the new name exceeds the header pad buffer
-    # @private
-    # @todo This needs to be replaced.
-    # @see https://github.com/Homebrew/ruby-macho/pull/35
-    def set_lc_str_in_cmd(cmd, lc_str, old_str, new_str)
-      new_sizeofcmds = header.sizeofcmds
-      old_str = old_str.dup
-      new_str = new_str.dup
-
-      old_prepad = cmd.class.bytesize + old_str.bytesize + 1
-      new_prepad = cmd.class.bytesize + new_str.bytesize + 1
-
-      # calculate the original and new padded sizes of the strings
-      old_padded_size = Utils.round(old_prepad, alignment)
-      new_padded_size = Utils.round(new_prepad, alignment)
-
-      # calculate the number of pad bytes used in the old and new strings
-      old_pad = old_padded_size - (old_prepad)
-      new_pad = new_padded_size - (new_prepad)
-
-      # pad the old and new strings with null bytes to meet command bounds
-      old_str << "\x00" * old_pad
-      new_str << "\x00" * new_pad
-
-      # calculate the new sizeofcmds in MH
-      new_sizeofcmds += new_padded_size - cmd.cmdsize
-
-      if new_sizeofcmds + header.class.bytesize > low_fileoff
-        raise HeaderPadError.new(@filename)
-      end
-
-      # update sizeofcmds in mach_header
-      set_sizeofcmds(new_sizeofcmds)
-
-      # update cmdsize in the cmd
-      fmt = Utils.specialize_format("L=", endianness)
-      @raw_data[cmd.view.offset + 4, 4] = [new_padded_size].pack(fmt)
-
-      # delete the old str
-      @raw_data.slice!(cmd.view.offset + lc_str.to_i, old_str.bytesize)
-
-      # insert the new str
-      @raw_data.insert(cmd.view.offset + lc_str.to_i, new_str)
-
-      # pad/unpad after new_sizeofcmds until offsets are corrected
-      null_pad = old_str.bytesize - new_str.bytesize
-
-      if null_pad < 0
-        @raw_data.slice!(new_sizeofcmds + header.class.bytesize, null_pad.abs)
-      else
-        @raw_data.insert(new_sizeofcmds + header.class.bytesize, "\x00" * null_pad)
-      end
-
-      # synchronize fields with the raw data
-      @header = get_mach_header
-      @load_commands = get_load_commands
     end
   end
 end

@@ -106,6 +106,14 @@ module MachO
     end
   end
 
+  # Raised when a change at an offset is not valid.
+  class OffsetInsertionError < MachOError
+    # @param offset [Fixnum] the invalid offset
+    def initialize(offset)
+      super "Insertion at offset #{offset} is not valid"
+    end
+  end
+
   # Raised when load commands are too large to fit in the current file.
   class HeaderPadError < MachOError
     # @param filename [String] the filename
@@ -121,6 +129,13 @@ module MachO
     # @param dylib [String] the unknown shared library name
     def initialize(dylib)
       super "No such dylib name: #{dylib}"
+    end
+  end
+
+  # Raised when a dylib is missing an ID
+  class DylibIdMissingError < MachOError
+    def initialize
+      super "Dylib is missing a dylib ID"
     end
   end
 

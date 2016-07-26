@@ -278,6 +278,11 @@ class FatFileTest < Minitest::Test
       file.write(actual)
 
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::FatFile.new(actual)
+      exp = MachO::FatFile.new(expected)
+
+      assert_equal exp.dylib_id, act.dylib_id
     end
   ensure
     groups.each do |_, actual, _|
@@ -300,17 +305,21 @@ class FatFileTest < Minitest::Test
       # there should be at least one dylib linked to the binary
       refute_empty dylibs
 
-      file.change_install_name(dylibs[0], "test")
+      file.change_install_name(dylibs.first, "test")
       new_dylibs = file.linked_dylibs
 
       # the new dylib name should reflect the changes we've made
-      assert_equal "test", new_dylibs[0]
-      refute_equal dylibs[0], new_dylibs[0]
+      assert_equal "test", new_dylibs.first
+      refute_equal dylibs.first, new_dylibs.first
 
       file.write(actual)
 
-      # compare actual and expected file hashes, to ensure file correctness
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::FatFile.new(actual)
+      exp = MachO::FatFile.new(expected)
+
+      assert_equal exp.linked_dylibs.first, act.linked_dylibs.first
     end
   ensure
     groups.each do |_, actual, _|
@@ -358,8 +367,15 @@ class FatFileTest < Minitest::Test
 
       file.write(actual)
 
-      # compare actual and expected file hashes, to ensure file correctness
       assert equal_sha1_hashes(actual, expected)
+
+      act = MachO::FatFile.new(actual)
+      exp = MachO::FatFile.new(expected)
+
+      assert_equal file.rpaths.size, act.rpaths.size
+      assert_equal exp.rpaths.size, act.rpaths.size
+
+      assert_equal exp.rpaths.first, act.rpaths.first
     end
   ensure
     groups.each do |_, actual, _|
