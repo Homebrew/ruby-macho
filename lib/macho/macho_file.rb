@@ -16,6 +16,7 @@ module MachO
     attr_reader :header
 
     # @return [Array<MachO::LoadCommand>] an array of the file's load commands
+    # @note load commands are provided in order of ascending offset.
     attr_reader :load_commands
 
     # Creates a new MachOFile instance from a binary string.
@@ -363,13 +364,16 @@ module MachO
     # @param new_path [String] the new runtime path
     # @return [void]
     # @raise [MachO::RpathUnknownError] if no such old runtime path exists
+    # @raise [MachO::RpathExistsError] if the new runtime path already exists
     def change_rpath(old_path, new_path)
       old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
       raise RpathUnknownError.new(old_path) if old_lc.nil?
+      raise RpathExistsError.new(new_path) if rpaths.include?(new_path)
 
       new_lc = LoadCommand.create(:LC_RPATH, new_path)
 
-      replace_command(old_lc, new_lc)
+      delete_rpath(old_path)
+      insert_command(old_lc.view.offset, new_lc)
     end
 
     # Add the given runtime path to the Mach-O.
@@ -397,11 +401,7 @@ module MachO
     # @raise [MachO::RpathUnknownError] if no such runtime path exists
     def delete_rpath(path)
       rpath_cmds = command(:LC_RPATH).select { |r| r.path.to_s == path }
-      raise RpathUnknownError.new(old_path) if rpath_cmds.empty?
-
-      # sort_by! should be unnecessary since load commands are read in
-      # sequential order, but let's not rely on this behavior
-      rpath_cmds.sort_by! { |lc| lc.view.offset }
+      raise RpathUnknownError.new(path) if rpath_cmds.empty?
 
       # delete the commands in reverse order, offset descending. this
       # allows us to defer (expensive) field population until the very end
