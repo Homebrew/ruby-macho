@@ -305,11 +305,12 @@ module MachO
 
     # Changes the Mach-O's dylib ID to `new_id`. Does nothing if not a dylib.
     # @example
-    #  file.dylib_id = "libFoo.dylib"
+    #  file.change_dylib_id("libFoo.dylib")
     # @param new_id [String] the dylib's new ID
+    # @param options [Hash]
     # @return [void]
     # @raise [ArgumentError] if `new_id` is not a String
-    def dylib_id=(new_id)
+    def change_dylib_id(new_id, options = {})
       raise ArgumentError.new("new ID must be a String") unless new_id.is_a?(String)
       return unless dylib?
 
@@ -321,6 +322,8 @@ module MachO
 
       replace_command(old_lc, new_lc)
     end
+
+    alias :dylib_id= :change_dylib_id
 
     # All shared libraries linked to the Mach-O.
     # @return [Array<String>] an array of all shared libraries
@@ -337,11 +340,12 @@ module MachO
     #  file.change_install_name("/usr/lib/libWhatever.dylib", "/usr/local/lib/libWhatever2.dylib")
     # @param old_name [String] the shared library's old name
     # @param new_name [String] the shared library's new name
+    # @param options [Hash]
     # @return [void]
     # @raise [MachO::DylibUnknownError] if no shared library has the old name
-    def change_install_name(old_name, new_name)
+    def change_install_name(old_name, new_name, options = {})
       old_lc = dylib_load_commands.find { |d| d.name.to_s == old_name }
-      raise DylibUnknownError.new(old_name) if old_lc.nil?
+      raise DylibUnknownError.new(old_name) unless old_lc
 
       new_lc = LoadCommand.create(old_lc.type, new_name,
         old_lc.timestamp, old_lc.current_version, old_lc.compatibility_version)
@@ -362,12 +366,13 @@ module MachO
     #  file.change_rpath("/usr/lib", "/usr/local/lib")
     # @param old_path [String] the old runtime path
     # @param new_path [String] the new runtime path
+    # @param options [Hash]
     # @return [void]
     # @raise [MachO::RpathUnknownError] if no such old runtime path exists
     # @raise [MachO::RpathExistsError] if the new runtime path already exists
-    def change_rpath(old_path, new_path)
+    def change_rpath(old_path, new_path, options = {})
       old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
-      raise RpathUnknownError.new(old_path) if old_lc.nil?
+      raise RpathUnknownError.new(old_path) unless old_lc
       raise RpathExistsError.new(new_path) if rpaths.include?(new_path)
 
       new_lc = LoadCommand.create(:LC_RPATH, new_path)
@@ -382,9 +387,10 @@ module MachO
     #  file.add_rpath("/usr/lib")
     #  file.rpaths # => ["/lib", "/usr/lib"]
     # @param path [String] the new runtime path
+    # @param options [Hash]
     # @return [void]
     # @raise [MachO::RpathExistsError] if the runtime path already exists
-    def add_rpath(path)
+    def add_rpath(path, options = {})
       raise RpathExistsError.new(path) if rpaths.include?(path)
 
       rpath_cmd = LoadCommand.create(:LC_RPATH, path)
@@ -397,9 +403,10 @@ module MachO
     #  file.delete_rpath("/lib")
     #  file.rpaths # => []
     # @param path [String] the runtime path to delete
+    # @param options [Hash]
     # @return void
     # @raise [MachO::RpathUnknownError] if no such runtime path exists
-    def delete_rpath(path)
+    def delete_rpath(path, options = {})
       rpath_cmds = command(:LC_RPATH).select { |r| r.path.to_s == path }
       raise RpathUnknownError.new(path) if rpath_cmds.empty?
 

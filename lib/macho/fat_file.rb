@@ -133,12 +133,15 @@ module MachO
 
     # Changes the file's dylib ID to `new_id`. If the file is not a dylib, does nothing.
     # @example
-    #  file.dylib_id = 'libFoo.dylib'
+    #  file.change_dylib_id('libFoo.dylib')
     # @param new_id [String] the new dylib ID
+    # @param options [Hash]
+    # @option options [Boolean] :strict (true) if true, fail if one slice fails.
+    #  if false, fail only if all slices fail.
     # @return [void]
     # @raise [ArgumentError] if `new_id` is not a String
     # @see MachO::MachOFile#linked_dylibs
-    def dylib_id=(new_id)
+    def change_dylib_id(new_id, options = {})
       if !new_id.is_a?(String)
         raise ArgumentError.new("argument must be a String")
       end
@@ -147,12 +150,14 @@ module MachO
         return nil
       end
 
-      machos.each do |macho|
-        macho.dylib_id = new_id
+      each_macho(options) do |macho|
+        macho.change_dylib_id(new_id, options)
       end
 
       synchronize_raw_data
     end
+
+    alias :dylib_id= :change_dylib_id
 
     # All shared libraries linked to the file's Mach-Os.
     # @return [Array<String>] an array of all shared libraries
@@ -170,11 +175,14 @@ module MachO
     #  file.change_install_name('/usr/lib/libFoo.dylib', '/usr/lib/libBar.dylib')
     # @param old_name [String] the shared library name being changed
     # @param new_name [String] the new name
-    # @todo incomplete
+    # @param options [Hash]
+    # @option options [Boolean] :strict (true) if true, fail if one slice fails.
+    #  if false, fail only if all slices fail.
+    # @return [void]
     # @see MachO::MachOFile#change_install_name
-    def change_install_name(old_name, new_name)
-      machos.each do |macho|
-        macho.change_install_name(old_name, new_name)
+    def change_install_name(old_name, new_name, options = {})
+      each_macho(options) do |macho|
+        macho.change_install_name(old_name, new_name, options)
       end
 
       synchronize_raw_data
@@ -193,11 +201,14 @@ module MachO
     # Change the runtime path `old_path` to `new_path` in the file's Mach-Os.
     # @param old_path [String] the old runtime path
     # @param new_path [String] the new runtime path
+    # @param options [Hash]
+    # @option options [Boolean] :strict (true) if true, fail if one slice fails.
+    #  if false, fail only if all slices fail.
     # @return [void]
     # @see MachO::MachOFile#change_rpath
-    def change_rpath(old_path, new_path)
-      machos.each do |macho|
-        macho.change_rpath(old_path, new_path)
+    def change_rpath(old_path, new_path, options = {})
+      each_macho(options) do |macho|
+        macho.change_rpath(old_path, new_path, options)
       end
 
       synchronize_raw_data
@@ -205,11 +216,14 @@ module MachO
 
     # Add the given runtime path to the file's Mach-Os.
     # @param path [String] the new runtime path
+    # @param options [Hash]
+    # @option options [Boolean] :strict (true) if true, fail if one slice fails.
+    #  if false, fail only if all slices fail.
     # @return [void]
     # @see MachO::MachOFile#add_rpath
-    def add_rpath(path)
-      machos.each do |macho|
-        macho.add_rpath(path)
+    def add_rpath(path, options = {})
+      each_macho(options) do |macho|
+        macho.add_rpath(path, options)
       end
 
       synchronize_raw_data
@@ -217,11 +231,14 @@ module MachO
 
     # Delete the given runtime path from the file's Mach-Os.
     # @param path [String] the runtime path to delete
+    # @param options [Hash]
+    # @option options [Boolean] :strict (true) if true, fail if one slice fails.
+    #  if false, fail only if all slices fail.
     # @return void
     # @see MachO::MachOFile#delete_rpath
-    def delete_rpath(path)
-      machos.each do |macho|
-        macho.delete_rpath(path)
+    def delete_rpath(path, options = {})
+      each_macho(options) do |macho|
+        macho.delete_rpath(path, options)
       end
 
       synchronize_raw_data
@@ -310,6 +327,34 @@ module MachO
       end
 
       machos
+    end
+
+    # Yield each Mach-O object in the file, rescuing and accumulating errors.
+    # @param options [Hash]
+    # @option options [Boolean] :strict (true) whether or not to fail loudly
+    #  with an exception if at least one Mach-O raises an exception. If false,
+    #  only raises an exception if *all* Mach-Os raise exceptions.
+    # @raise [MachO::RecoverableModificationError] under the conditions of
+    #  the `:strict` option above.
+    # @api private
+    def each_macho(options = {})
+      strict = options.fetch(:strict, true)
+      errors = []
+
+      machos.each_with_index do |macho, index|
+        begin
+          yield macho
+        rescue RecoverableModificationError => error
+          error.macho_slice = index
+
+          # Strict mode: Immediately re-raise. Otherwise: Retain, check later.
+          raise error if strict
+          errors << error
+        end
+      end
+
+      # Non-strict mode: Raise first error if *all* Mach-O slices failed.
+      raise errors.first if errors.size == machos.size
     end
 
     # Synchronize the raw file data with each internal Mach-O object.
