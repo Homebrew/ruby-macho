@@ -339,6 +339,18 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_change_install_name_preserves_type
+    filename = fixture(:i386, "libextrahello.dylib")
+
+    file = MachO::MachOFile.new(filename)
+    old_dylib_types = file.dylib_load_commands.map(&:type)
+    # this particular dylib is an LC_LOAD_UPWARD_DYLIB
+    file.change_install_name("/usr/lib/libz.1.dylib", "test")
+    new_dylib_types = file.dylib_load_commands.map(&:type)
+
+    assert_equal old_dylib_types, new_dylib_types
+  end
+
   def test_get_rpaths
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 
