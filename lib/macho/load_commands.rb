@@ -258,6 +258,7 @@ module MachO
       # @param lc [MachO::LoadCommand] the load command
       # @param lc_str [Fixnum, String] the offset to the beginning of the string,
       #  or the string itself if not being initialized with a view.
+      # @raise [MachO::LCStrMalformedError] if the string is malformed
       # @todo devise a solution such that the `lc_str` parameter is not
       #  interpreted differently depending on `lc.view`. The current behavior
       #  is a hack to allow viewless load command creation.
@@ -268,7 +269,9 @@ module MachO
         if view
           lc_str_abs = view.offset + lc_str
           lc_end = view.offset + lc.cmdsize - 1
-          @string = view.raw_data.slice(lc_str_abs..lc_end).delete("\x00")
+          raw_string = view.raw_data.slice(lc_str_abs..lc_end)
+          @string, null_byte, _ = raw_string.partition("\x00")
+          raise LCStrMalformedError.new(lc) if null_byte.empty?
           @string_offset = lc_str
         else
           @string = lc_str

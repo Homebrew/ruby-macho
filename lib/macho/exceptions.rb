@@ -106,6 +106,14 @@ module MachO
     end
   end
 
+  # Raised when a load command string is malformed in some way.
+  class LCStrMalformedError < MachOError
+    # @param lc [MachO::LoadCommand] the load command containing the string
+    def initialize(lc)
+      super "Load command #{lc.type} at offset #{lc.view.offset} contains a malformed string"
+    end
+  end
+
   # Raised when a change at an offset is not valid.
   class OffsetInsertionError < MachOError
     # @param offset [Fixnum] the invalid offset
