@@ -46,6 +46,16 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_load_commands_well_ordered
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "libhello.dylib") }
+
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+      offsets = file.load_commands.map { |lc| lc.view.offset }
+      assert_equal offsets.sort, offsets
+    end
+  end
+
   def test_mach_header
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "libhello.dylib") }
 
@@ -476,6 +486,27 @@ class MachOFileTest < Minitest::Test
   ensure
     groups.each do |_, actual|
       delete_if_exists(actual)
+    end
+  end
+
+  def test_rpath_exceptions
+    filename = fixture(:i386, "hello.bin")
+    file = MachO::MachOFile.new(filename)
+
+    assert_raises MachO::RpathUnknownError do
+      file.change_rpath("/this/rpath/doesn't/exist", "/lib")
+    end
+
+    assert_raises MachO::RpathExistsError do
+      file.change_rpath(file.rpaths.first, file.rpaths.first)
+    end
+
+    assert_raises MachO::RpathExistsError do
+      file.add_rpath(file.rpaths.first)
+    end
+
+    assert_raises MachO::RpathUnknownError do
+      file.delete_rpath("/this/rpath/doesn't/exist")
     end
   end
 end
