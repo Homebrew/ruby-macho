@@ -172,7 +172,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2"
+    FORMAT = "L=2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -186,16 +186,16 @@ module MachO
       bin = view.raw_data.slice(view.offset, bytesize)
       format = Utils.specialize_format(self::FORMAT, view.endianness)
 
-      self.new(view, *bin.unpack(format))
+      new(view, *bin.unpack(format))
     end
 
     # Creates a new (viewless) command corresponding to the symbol provided
     # @param cmd_sym [Symbol] the symbol of the load command being created
     # @param args [Array] the arguments for the load command being created
     def self.create(cmd_sym, *args)
-      raise LoadCommandNotCreatableError.new(cmd_sym) unless CREATABLE_LOAD_COMMANDS.include?(cmd_sym)
+      raise LoadCommandNotCreatableError, cmd_sym unless CREATABLE_LOAD_COMMANDS.include?(cmd_sym)
 
-      klass = MachO.const_get "#{LC_STRUCTURES[cmd_sym]}"
+      klass = MachO.const_get LC_STRUCTURES[cmd_sym]
       cmd = LOAD_COMMAND_CONSTANTS[cmd_sym]
 
       # cmd will be filled in, view and cmdsize will be left unpopulated
@@ -227,7 +227,7 @@ module MachO
     #  if the load command can't be serialized
     # @api private
     def serialize(context)
-      raise LoadCommandNotSerializableError.new(LOAD_COMMANDS[cmd]) unless serializable?
+      raise LoadCommandNotSerializableError, LOAD_COMMANDS[cmd] unless serializable?
       format = Utils.specialize_format(FORMAT, context.endianness)
       [cmd, SIZEOF].pack(format)
     end
@@ -243,7 +243,7 @@ module MachO
       LOAD_COMMANDS[cmd]
     end
 
-    alias :to_sym :type
+    alias to_sym type
 
     # @return [String] a string representation of the load command's identifying number
     def to_s
@@ -270,8 +270,8 @@ module MachO
           lc_str_abs = view.offset + lc_str
           lc_end = view.offset + lc.cmdsize - 1
           raw_string = view.raw_data.slice(lc_str_abs..lc_end)
-          @string, null_byte, _ = raw_string.partition("\x00")
-          raise LCStrMalformedError.new(lc) if null_byte.empty?
+          @string, null_byte, _padding = raw_string.partition("\x00")
+          raise LCStrMalformedError, lc if null_byte.empty?
           @string_offset = lc_str
         else
           @string = lc_str
@@ -302,7 +302,7 @@ module MachO
       # @param macho [MachO::MachOFile] the file to contextualize
       # @return [MachO::LoadCommand::SerializationContext] the resulting context
       def self.context_for(macho)
-        self.new(macho.endianness, macho.alignment)
+        new(macho.endianness, macho.alignment)
       end
 
       # @param endianness [Symbol] the endianness of the context
@@ -323,7 +323,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2a16"
+    FORMAT = "L=2a16".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -379,7 +379,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2a16L=4l=2L=2"
+    FORMAT = "L=2a16L=4l=2L=2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -387,7 +387,7 @@ module MachO
 
     # @api private
     def initialize(view, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
-        filesize, maxprot, initprot, nsects, flags)
+                   filesize, maxprot, initprot, nsects, flags)
       super(view, cmd, cmdsize)
       @segname = segname.delete("\x00")
       @vmaddr = vmaddr
@@ -399,7 +399,6 @@ module MachO
       @nsects = nsects
       @flags = flags
     end
-
 
     # All sections referenced within this segment.
     # @return [Array<MachO::Section>] if the Mach-O is 32-bit
@@ -434,7 +433,7 @@ module MachO
   class SegmentCommand64 < SegmentCommand
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2a16Q=4l=2L=2"
+    FORMAT = "L=2a16Q=4l=2L=2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -459,7 +458,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=6"
+    FORMAT = "L=6".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -482,7 +481,7 @@ module MachO
       string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :name => name.to_s)
       cmdsize = SIZEOF + string_payload.bytesize
       [cmd, cmdsize, string_offsets[:name], timestamp, current_version,
-        compatibility_version].pack(format) + string_payload
+       compatibility_version].pack(format) + string_payload
     end
   end
 
@@ -495,7 +494,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -532,7 +531,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=5"
+    FORMAT = "L=5".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -552,7 +551,7 @@ module MachO
   class ThreadCommand < LoadCommand
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2"
+    FORMAT = "L=2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -589,7 +588,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=10"
+    FORMAT = "L=10".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -597,7 +596,7 @@ module MachO
 
     # @api private
     def initialize(view, cmd, cmdsize, init_address, init_module, reserved1,
-        reserved2, reserved3, reserved4, reserved5, reserved6)
+                   reserved2, reserved3, reserved4, reserved5, reserved6)
       super(view, cmd, cmdsize)
       @init_address = init_address
       @init_module = init_module
@@ -640,7 +639,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2Q=8"
+    FORMAT = "L=2Q=8".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -648,7 +647,7 @@ module MachO
 
     # @api private
     def initialize(view, cmd, cmdsize, init_address, init_module, reserved1,
-        reserved2, reserved3, reserved4, reserved5, reserved6)
+                   reserved2, reserved3, reserved4, reserved5, reserved6)
       super(view, cmd, cmdsize)
       @init_address = init_address
       @init_module = init_module
@@ -669,7 +668,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -690,7 +689,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -711,7 +710,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -732,7 +731,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -762,7 +761,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=6"
+    FORMAT = "L=6".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -835,10 +834,9 @@ module MachO
     # @return [Fixnum] the number of local relocation entries
     attr_reader :nlocrel
 
-
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=20"
+    FORMAT = "L=20".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -847,9 +845,9 @@ module MachO
     # ugh
     # @api private
     def initialize(view, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
-        nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff, nmodtab,
-        extrefsymoff, nextrefsyms, indirectsymoff, nindirectsyms, extreloff,
-        nextrel, locreloff, nlocrel)
+                   nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff,
+                   nmodtab, extrefsymoff, nextrefsyms, indirectsymoff,
+                   nindirectsyms, extreloff, nextrel, locreloff, nlocrel)
       super(view, cmd, cmdsize)
       @ilocalsym = ilocalsym
       @nlocalsym = nlocalsym
@@ -886,7 +884,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=4"
+    FORMAT = "L=4".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -944,7 +942,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -966,7 +964,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1001,7 +999,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=4"
+    FORMAT = "L=4".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1029,7 +1027,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=5"
+    FORMAT = "L=5".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1061,7 +1059,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=6"
+    FORMAT = "L=6".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1088,7 +1086,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=4"
+    FORMAT = "L=4".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1160,7 +1158,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=12"
+    FORMAT = "L=12".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1168,8 +1166,8 @@ module MachO
 
     # @api private
     def initialize(view, cmd, cmdsize, rebase_off, rebase_size, bind_off,
-        bind_size, weak_bind_off, weak_bind_size, lazy_bind_off, lazy_bind_size,
-        export_off, export_size)
+                   bind_size, weak_bind_off, weak_bind_size, lazy_bind_off,
+                   lazy_bind_size, export_off, export_size)
       super(view, cmd, cmdsize)
       @rebase_off = rebase_off
       @rebase_size = rebase_size
@@ -1192,7 +1190,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=3"
+    FORMAT = "L=3".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1215,7 +1213,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2Q=2"
+    FORMAT = "L=2Q=2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1237,7 +1235,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2Q=1"
+    FORMAT = "L=2Q=1".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1273,7 +1271,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=4"
+    FORMAT = "L=4".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1293,7 +1291,7 @@ module MachO
   class IdentCommand < LoadCommand
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=2"
+    FORMAT = "L=2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1311,7 +1309,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=4"
+    FORMAT = "L=4".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -1338,7 +1336,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=5"
+    FORMAT = "L=5".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private

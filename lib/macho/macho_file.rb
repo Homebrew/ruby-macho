@@ -33,10 +33,10 @@ module MachO
     # @param filename [String] the Mach-O file to load from
     # @raise [ArgumentError] if the given file does not exist
     def initialize(filename)
-      raise ArgumentError.new("#{filename}: no such file") unless File.file?(filename)
+      raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
       @filename = filename
-      @raw_data = File.open(@filename, "rb") { |f| f.read }
+      @raw_data = File.open(@filename, "rb", &:read)
       populate_fields
     end
 
@@ -170,7 +170,7 @@ module MachO
       load_commands.select { |lc| lc.type == name.to_sym }
     end
 
-    alias :[] :command
+    alias [] command
 
     # Inserts a load command at the given offset.
     # @param offset [Fixnum] the offset to insert at
@@ -187,18 +187,18 @@ module MachO
       cmd_raw = lc.serialize(context)
 
       if offset < header.class.bytesize || offset + cmd_raw.bytesize > low_fileoff
-        raise OffsetInsertionError.new(offset)
+        raise OffsetInsertionError, offset
       end
 
       new_sizeofcmds = sizeofcmds + cmd_raw.bytesize
 
       if header.class.bytesize + new_sizeofcmds > low_fileoff
-        raise HeaderPadError.new(@filename)
+        raise HeaderPadError, @filename
       end
 
       # update Mach-O header fields to account for inserted load command
-      set_ncmds(ncmds + 1)
-      set_sizeofcmds(new_sizeofcmds)
+      update_ncmds(ncmds + 1)
+      update_sizeofcmds(new_sizeofcmds)
 
       @raw_data.insert(offset, cmd_raw)
       @raw_data.slice!(header.class.bytesize + new_sizeofcmds, cmd_raw.bytesize)
@@ -218,7 +218,7 @@ module MachO
       cmd_raw = new_lc.serialize(context)
       new_sizeofcmds = sizeofcmds + cmd_raw.bytesize - old_lc.cmdsize
       if header.class.bytesize + new_sizeofcmds > low_fileoff
-        raise HeaderPadError.new(@filename)
+        raise HeaderPadError, @filename
       end
 
       delete_command(old_lc)
@@ -254,8 +254,8 @@ module MachO
       @raw_data.slice!(lc.view.offset, lc.cmdsize)
 
       # update Mach-O header fields to account for deleted load command
-      set_ncmds(ncmds - 1)
-      set_sizeofcmds(sizeofcmds - lc.cmdsize)
+      update_ncmds(ncmds - 1)
+      update_sizeofcmds(sizeofcmds - lc.cmdsize)
 
       # pad the space after the load commands to preserve offsets
       null_pad = "\x00" * lc.cmdsize
@@ -270,8 +270,8 @@ module MachO
     #  The exception to this rule is when methods like {#add_command} and
     #  {#delete_command} have been called with `repopulate = false`.
     def populate_fields
-      @header = get_mach_header
-      @load_commands = get_load_commands
+      @header = populate_mach_header
+      @load_commands = populate_load_commands
     end
 
     # All load commands responsible for loading dylibs.
@@ -307,23 +307,27 @@ module MachO
     # @example
     #  file.change_dylib_id("libFoo.dylib")
     # @param new_id [String] the dylib's new ID
-    # @param options [Hash]
+    # @param _options [Hash]
     # @return [void]
     # @raise [ArgumentError] if `new_id` is not a String
-    def change_dylib_id(new_id, options = {})
-      raise ArgumentError.new("new ID must be a String") unless new_id.is_a?(String)
+    # @note `_options` is currently unused and is provided for signature
+    #  compatibility with {MachO::FatFile#change_dylib_id}
+    def change_dylib_id(new_id, _options = {})
+      raise ArgumentError, "new ID must be a String" unless new_id.is_a?(String)
       return unless dylib?
 
       old_lc = command(:LC_ID_DYLIB).first
-      raise DylibIdMissingError.new unless old_lc
+      raise DylibIdMissingError unless old_lc
 
-      new_lc = LoadCommand.create(:LC_ID_DYLIB, new_id, old_lc.timestamp,
-        old_lc.current_version, old_lc.compatibility_version)
+      new_lc = LoadCommand.create(:LC_ID_DYLIB, new_id,
+                                  old_lc.timestamp,
+                                  old_lc.current_version,
+                                  old_lc.compatibility_version)
 
       replace_command(old_lc, new_lc)
     end
 
-    alias :dylib_id= :change_dylib_id
+    alias dylib_id= change_dylib_id
 
     # All shared libraries linked to the Mach-O.
     # @return [Array<String>] an array of all shared libraries
@@ -340,20 +344,24 @@ module MachO
     #  file.change_install_name("/usr/lib/libWhatever.dylib", "/usr/local/lib/libWhatever2.dylib")
     # @param old_name [String] the shared library's old name
     # @param new_name [String] the shared library's new name
-    # @param options [Hash]
+    # @param _options [Hash]
     # @return [void]
     # @raise [MachO::DylibUnknownError] if no shared library has the old name
-    def change_install_name(old_name, new_name, options = {})
+    # @note `_options` is currently unused and is provided for signature
+    #  compatibility with {MachO::FatFile#change_install_name}
+    def change_install_name(old_name, new_name, _options = {})
       old_lc = dylib_load_commands.find { |d| d.name.to_s == old_name }
-      raise DylibUnknownError.new(old_name) unless old_lc
+      raise DylibUnknownError, old_name if old_lc.nil?
 
       new_lc = LoadCommand.create(old_lc.type, new_name,
-        old_lc.timestamp, old_lc.current_version, old_lc.compatibility_version)
+                                  old_lc.timestamp,
+                                  old_lc.current_version,
+                                  old_lc.compatibility_version)
 
       replace_command(old_lc, new_lc)
     end
 
-    alias :change_dylib :change_install_name
+    alias change_dylib change_install_name
 
     # All runtime paths searched by the dynamic linker for the Mach-O.
     # @return [Array<String>] an array of all runtime paths
@@ -366,14 +374,16 @@ module MachO
     #  file.change_rpath("/usr/lib", "/usr/local/lib")
     # @param old_path [String] the old runtime path
     # @param new_path [String] the new runtime path
-    # @param options [Hash]
+    # @param _options [Hash]
     # @return [void]
     # @raise [MachO::RpathUnknownError] if no such old runtime path exists
     # @raise [MachO::RpathExistsError] if the new runtime path already exists
-    def change_rpath(old_path, new_path, options = {})
+    # @note `_options` is currently unused and is provided for signature
+    #  compatibility with {MachO::FatFile#change_rpath}
+    def change_rpath(old_path, new_path, _options = {})
       old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
-      raise RpathUnknownError.new(old_path) unless old_lc
-      raise RpathExistsError.new(new_path) if rpaths.include?(new_path)
+      raise RpathUnknownError, old_path if old_lc.nil?
+      raise RpathExistsError, new_path if rpaths.include?(new_path)
 
       new_lc = LoadCommand.create(:LC_RPATH, new_path)
 
@@ -387,11 +397,13 @@ module MachO
     #  file.add_rpath("/usr/lib")
     #  file.rpaths # => ["/lib", "/usr/lib"]
     # @param path [String] the new runtime path
-    # @param options [Hash]
+    # @param _options [Hash]
     # @return [void]
     # @raise [MachO::RpathExistsError] if the runtime path already exists
-    def add_rpath(path, options = {})
-      raise RpathExistsError.new(path) if rpaths.include?(path)
+    # @note `_options` is currently unused and is provided for signature
+    #  compatibility with {MachO::FatFile#add_rpath}
+    def add_rpath(path, _options = {})
+      raise RpathExistsError, path if rpaths.include?(path)
 
       rpath_cmd = LoadCommand.create(:LC_RPATH, path)
       add_command(rpath_cmd)
@@ -403,16 +415,18 @@ module MachO
     #  file.delete_rpath("/lib")
     #  file.rpaths # => []
     # @param path [String] the runtime path to delete
-    # @param options [Hash]
+    # @param _options [Hash]
     # @return void
     # @raise [MachO::RpathUnknownError] if no such runtime path exists
-    def delete_rpath(path, options = {})
+    # @note `_options` is currently unused and is provided for signature
+    #  compatibility with {MachO::FatFile#delete_rpath}
+    def delete_rpath(path, _options = {})
       rpath_cmds = command(:LC_RPATH).select { |r| r.path.to_s == path }
-      raise RpathUnknownError.new(path) if rpath_cmds.empty?
+      raise RpathUnknownError, path if rpath_cmds.empty?
 
       # delete the commands in reverse order, offset descending. this
       # allows us to defer (expensive) field population until the very end
-      rpath_cmds.reverse_each { |cmd| delete_command(cmd, repopulate: false) }
+      rpath_cmds.reverse_each { |cmd| delete_command(cmd, :repopulate => false) }
 
       populate_fields
     end
@@ -439,7 +453,7 @@ module MachO
     # @note Overwrites all data in the file!
     def write!
       if @filename.nil?
-        raise MachOError.new("cannot write to a default file when initialized from a binary string")
+        raise MachOError, "cannot write to a default file when initialized from a binary string"
       else
         File.open(@filename, "wb") { |f| f.write(@raw_data) }
       end
@@ -452,11 +466,11 @@ module MachO
     # @return [MachO::MachHeader64] if the Mach-O is 64-bit
     # @raise [MachO::TruncatedFileError] if the file is too small to have a valid header
     # @api private
-    def get_mach_header
+    def populate_mach_header
       # the smallest Mach-O header is 28 bytes
-      raise TruncatedFileError.new if @raw_data.size < 28
+      raise TruncatedFileError if @raw_data.size < 28
 
-      magic = get_and_check_magic
+      magic = populate_and_check_magic
       mh_klass = Utils.magic32?(magic) ? MachHeader : MachHeader64
       mh = mh_klass.new_from_bin(endianness, @raw_data[0, mh_klass.bytesize])
 
@@ -472,11 +486,11 @@ module MachO
     # @raise [MachO::MagicError] if the magic is not valid Mach-O magic
     # @raise [MachO::FatBinaryError] if the magic is for a Fat file
     # @api private
-    def get_and_check_magic
+    def populate_and_check_magic
       magic = @raw_data[0..3].unpack("N").first
 
-      raise MagicError.new(magic) unless Utils.magic?(magic)
-      raise FatBinaryError.new if Utils.fat_magic?(magic)
+      raise MagicError, magic unless Utils.magic?(magic)
+      raise FatBinaryError if Utils.fat_magic?(magic)
 
       @endianness = Utils.little_magic?(magic) ? :little : :big
 
@@ -488,7 +502,7 @@ module MachO
     # @raise [MachO::CPUTypeError] if the CPU type is unknown
     # @api private
     def check_cputype(cputype)
-      raise CPUTypeError.new(cputype) unless CPU_TYPES.key?(cputype)
+      raise CPUTypeError, cputype unless CPU_TYPES.key?(cputype)
     end
 
     # Check the file's CPU type/subtype pair.
@@ -496,7 +510,7 @@ module MachO
     # @raise [MachO::CPUSubtypeError] if the CPU sub-type is unknown
     # @api private
     def check_cpusubtype(cputype, cpusubtype)
-      # Only check sub-type w/o capability bits (see `get_mach_header`).
+      # Only check sub-type w/o capability bits (see `populate_mach_header`).
       raise CPUSubtypeError.new(cputype, cpusubtype) unless CPU_SUBTYPES[cputype].key?(cpusubtype)
     end
 
@@ -505,14 +519,14 @@ module MachO
     # @raise [MachO::FiletypeError] if the file type is unknown
     # @api private
     def check_filetype(filetype)
-      raise FiletypeError.new(filetype) unless MH_FILETYPES.key?(filetype)
+      raise FiletypeError, filetype unless MH_FILETYPES.key?(filetype)
     end
 
     # All load commands in the file.
     # @return [Array<MachO::LoadCommand>] an array of load commands
     # @raise [MachO::LoadCommandError] if an unknown load command is encountered
     # @api private
-    def get_load_commands
+    def populate_load_commands
       offset = header.class.bytesize
       load_commands = []
 
@@ -521,11 +535,11 @@ module MachO
         cmd = @raw_data.slice(offset, 4).unpack(fmt).first
         cmd_sym = LOAD_COMMANDS[cmd]
 
-        raise LoadCommandError.new(cmd) if cmd_sym.nil?
+        raise LoadCommandError, cmd if cmd_sym.nil?
 
         # why do I do this? i don't like declaring constants below
         # classes, and i need them to resolve...
-        klass = MachO.const_get "#{LC_STRUCTURES[cmd_sym]}"
+        klass = MachO.const_get LC_STRUCTURES[cmd_sym]
         view = MachOView.new(@raw_data, endianness, offset)
         command = klass.new_from_bin(view)
 
@@ -544,7 +558,7 @@ module MachO
 
       segments.each do |seg|
         seg.sections.each do |sect|
-          next if sect.size == 0
+          next if sect.empty?
           next if sect.flag?(:S_ZEROFILL)
           next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
           next unless sect.offset < offset
@@ -560,7 +574,7 @@ module MachO
     # @param ncmds [Fixnum] the new number of commands
     # @return [void]
     # @api private
-    def set_ncmds(ncmds)
+    def update_ncmds(ncmds)
       fmt = Utils.specialize_format("L=", endianness)
       ncmds_raw = [ncmds].pack(fmt)
       @raw_data[16..19] = ncmds_raw
@@ -570,7 +584,7 @@ module MachO
     # @param size [Fixnum] the new size, in bytes
     # @return [void]
     # @api private
-    def set_sizeofcmds(size)
+    def update_sizeofcmds(size)
       fmt = Utils.specialize_format("L=", endianness)
       size_raw = [size].pack(fmt)
       @raw_data[20..23] = size_raw

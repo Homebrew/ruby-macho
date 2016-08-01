@@ -45,7 +45,7 @@ module MachO
     :S_ATTR_DEBUG => 0x02000000,
     :S_ATTR_SOME_INSTRUCTIONS => 0x00000400,
     :S_ATTR_EXT_RELOC => 0x00000200,
-    :S_ATTR_LOC_RELOC => 0x00000100
+    :S_ATTR_LOC_RELOC => 0x00000100,
   }.freeze
 
   # association of section name symbols to names
@@ -62,7 +62,7 @@ module MachO
     :SECT_OBJC_STRINGS => "__selector_strs",
     :SECT_OBJC_REFS => "__selector_refs",
     :SECT_ICON_HEADER => "__header",
-    :SECT_ICON_TIFF => "__tiff"
+    :SECT_ICON_TIFF => "__tiff",
   }.freeze
 
   # Represents a section of a segment for 32-bit architectures.
@@ -101,14 +101,14 @@ module MachO
     attr_reader :reserved2
 
     # @see MachOStructure::FORMAT
-    FORMAT = "a16a16L=9"
+    FORMAT = "a16a16L=9".freeze
 
     # @see MachOStructure::SIZEOF
     SIZEOF = 68
 
     # @api private
     def initialize(sectname, segname, addr, size, offset, align, reloff,
-        nreloc, flags, reserved1, reserved2)
+                   nreloc, flags, reserved1, reserved2)
       @sectname = sectname
       @segname = segname
       @addr = addr
@@ -124,12 +124,17 @@ module MachO
 
     # @return [String] the section's name, with any trailing NULL characters removed
     def section_name
-      @sectname.delete("\x00")
+      sectname.delete("\x00")
     end
 
     # @return [String] the parent segment's name, with any trailing NULL characters removed
     def segment_name
-      @segname.delete("\x00")
+      segname.delete("\x00")
+    end
+
+    # @return [Boolean] true if the section has no contents (i.e, `size` is 0)
+    def empty?
+      size.zero?
     end
 
     # @example
@@ -149,14 +154,14 @@ module MachO
     attr_reader :reserved3
 
     # @see MachOStructure::FORMAT
-    FORMAT = "a16a16Q=2L=8"
+    FORMAT = "a16a16Q=2L=8".freeze
 
     # @see MachOStructure::SIZEOF
     SIZEOF = 80
 
     # @api private
     def initialize(sectname, segname, addr, size, offset, align, reloff,
-        nreloc, flags, reserved1, reserved2, reserved3)
+                   nreloc, flags, reserved1, reserved2, reserved3)
       super(sectname, segname, addr, size, offset, align, reloff,
         nreloc, flags, reserved1, reserved2)
       @reserved3 = reserved3

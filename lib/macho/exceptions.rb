@@ -146,9 +146,9 @@ module MachO
   class HeaderPadError < ModificationError
     # @param filename [String] the filename
     def initialize(filename)
-      super "Updated load commands do not fit in the header of " +
-      "#{filename}. #{filename} needs to be relinked, possibly with " +
-      "-headerpad or -headerpad_max_install_names"
+      super "Updated load commands do not fit in the header of " \
+        "#{filename}. #{filename} needs to be relinked, possibly with " \
+        "-headerpad or -headerpad_max_install_names"
     end
   end
 

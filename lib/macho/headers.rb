@@ -32,8 +32,8 @@ module MachO
     MH_MAGIC => "MH_MAGIC",
     MH_CIGAM => "MH_CIGAM",
     MH_MAGIC_64 => "MH_MAGIC_64",
-    MH_CIGAM_64 => "MH_CIGAM_64"
-  }
+    MH_CIGAM_64 => "MH_CIGAM_64",
+  }.freeze
 
   # mask for CPUs with 64-bit architectures (when running a 64-bit ABI?)
   # @api private
@@ -85,7 +85,7 @@ module MachO
     CPU_TYPE_ARM64 => :arm64,
     CPU_TYPE_POWERPC => :ppc,
     CPU_TYPE_POWERPC64 => :ppc64,
-  }
+  }.freeze
 
   # mask for CPU subtype capabilities
   # @api private
@@ -114,7 +114,7 @@ module MachO
 
   # @see CPU_SUBTYPE_586
   # @api private
-  CPU_SUBTYPE_PENT  = CPU_SUBTYPE_586
+  CPU_SUBTYPE_PENT = CPU_SUBTYPE_586
 
   # the Pentium Pro (P6) sub-type for `CPU_TYPE_I386`
   # @api private
@@ -412,7 +412,7 @@ module MachO
     MH_DYLIB_STUB => :dylib_stub,
     MH_DSYM => :dsym,
     MH_KEXT_BUNDLE => :kext_bundle,
-  }
+  }.freeze
 
   # association of mach header flag symbols to values
   # @api private
@@ -442,8 +442,8 @@ module MachO
     :MH_DEAD_STRIPPABLE_DYLIB => 0x400000,
     :MH_HAS_TLV_DESCRIPTORS => 0x800000,
     :MH_NO_HEAP_EXECUTION => 0x1000000,
-    :MH_APP_EXTENSION_SAFE => 0x02000000
-  }
+    :MH_APP_EXTENSION_SAFE => 0x02000000,
+  }.freeze
 
   # Fat binary header structure
   # @see MachO::FatArch
@@ -457,7 +457,7 @@ module MachO
     # always big-endian
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "N2"
+    FORMAT = "N2".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -492,7 +492,7 @@ module MachO
     # always big-endian
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "N5"
+    FORMAT = "N5".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -533,7 +533,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=7"
+    FORMAT = "L=7".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -541,7 +541,7 @@ module MachO
 
     # @api private
     def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
-        flags)
+                   flags)
       @magic = magic
       @cputype = cputype
       # For now we're not interested in additional capability bits also to be
@@ -571,7 +571,7 @@ module MachO
 
     # @see MachOStructure::FORMAT
     # @api private
-    FORMAT = "L=8"
+    FORMAT = "L=8".freeze
 
     # @see MachOStructure::SIZEOF
     # @api private
@@ -579,7 +579,7 @@ module MachO
 
     # @api private
     def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
-        flags, reserved)
+                   flags, reserved)
       super(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags)
       @reserved = reserved
     end
