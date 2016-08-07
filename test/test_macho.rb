@@ -35,7 +35,7 @@ class MachOFileTest < Minitest::Test
 
       file.load_commands.each do |lc|
         assert lc
-        assert_equal MachO::LoadCommand, lc.class.superclass
+        assert_kind_of MachO::LoadCommand, lc
         assert_kind_of Fixnum, lc.offset
         assert_kind_of Fixnum, lc.cmd
         assert_kind_of Fixnum, lc.cmdsize
@@ -103,7 +103,7 @@ class MachOFileTest < Minitest::Test
         assert_kind_of Fixnum, seg.flags
         refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
 
-        sections = file.sections(seg)
+        sections = seg.sections
 
         assert_kind_of Array, sections
 
