@@ -3,6 +3,26 @@ module MachO
   class MachOError < RuntimeError
   end
 
+  # Raised when a Mach-O file modification fails.
+  class ModificationError < MachOError
+  end
+
+  # Raised when a Mach-O file modification fails but can be recovered when
+  # operating on multiple Mach-O slices of a fat binary in non-strict mode.
+  class RecoverableModificationError < ModificationError
+    # @return [Fixnum, nil] The index of the Mach-O slice of a fat binary for
+    #   which modification failed or `nil` if not a fat binary. This is used to
+    #   make the error message more useful.
+    attr_accessor :macho_slice
+
+    # @return [String] The exception message.
+    def to_s
+      s = super.to_s
+      s = "While modifying Mach-O slice #{@macho_slice}: #{s}" if @macho_slice
+      s
+    end
+  end
+
   # Raised when a file is not a Mach-O.
   class NotAMachOError < MachOError
     # @param error [String] the error in question
@@ -115,7 +135,7 @@ module MachO
   end
 
   # Raised when a change at an offset is not valid.
-  class OffsetInsertionError < MachOError
+  class OffsetInsertionError < ModificationError
     # @param offset [Fixnum] the invalid offset
     def initialize(offset)
       super "Insertion at offset #{offset} is not valid"
@@ -123,7 +143,7 @@ module MachO
   end
 
   # Raised when load commands are too large to fit in the current file.
-  class HeaderPadError < MachOError
+  class HeaderPadError < ModificationError
     # @param filename [String] the filename
     def initialize(filename)
       super "Updated load commands do not fit in the header of " +
@@ -133,7 +153,7 @@ module MachO
   end
 
   # Raised when attempting to change a dylib name that doesn't exist.
-  class DylibUnknownError < MachOError
+  class DylibUnknownError < RecoverableModificationError
     # @param dylib [String] the unknown shared library name
     def initialize(dylib)
       super "No such dylib name: #{dylib}"
@@ -141,14 +161,14 @@ module MachO
   end
 
   # Raised when a dylib is missing an ID
-  class DylibIdMissingError < MachOError
+  class DylibIdMissingError < RecoverableModificationError
     def initialize
       super "Dylib is missing a dylib ID"
     end
   end
 
   # Raised when attempting to change an rpath that doesn't exist.
-  class RpathUnknownError < MachOError
+  class RpathUnknownError < RecoverableModificationError
     # @param path [String] the unknown runtime path
     def initialize(path)
       super "No such runtime path: #{path}"
@@ -156,7 +176,7 @@ module MachO
   end
 
   # Raised when attempting to add an rpath that already exists.
-  class RpathExistsError < MachOError
+  class RpathExistsError < RecoverableModificationError
     # @param path [String] the extant path
     def initialize(path)
       super "#{path} already exists"
