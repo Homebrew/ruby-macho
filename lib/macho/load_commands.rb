@@ -400,6 +400,24 @@ module MachO
       @flags = flags
     end
 
+
+    # All sections referenced within this segment.
+    # @return [Array<MachO::Section>] if the Mach-O is 32-bit
+    # @return [Array<MachO::Section64>] if the Mach-O is 64-bit
+    def sections
+      klass = case self
+      when MachO::SegmentCommand64
+        MachO::Section64
+      when MachO::SegmentCommand
+        MachO::Section
+      end
+
+      bins = view.raw_data[view.offset + self.class.bytesize, nsects * klass.bytesize]
+      bins.unpack("a#{klass.bytesize}" * nsects).map do |bin|
+        klass.new_from_bin(view.endianness, bin)
+      end
+    end
+
     # @example
     #  puts "this segment relocated in/to it" if sect.flag?(:SG_NORELOC)
     # @param flag [Symbol] a segment flag symbol
@@ -413,34 +431,7 @@ module MachO
 
   # A load command indicating that part of this file is to be mapped into
   # the task's address space. Corresponds to LC_SEGMENT_64.
-  class SegmentCommand64 < LoadCommand
-    # @return [String] the name of the segment
-    attr_reader :segname
-
-    # @return [Fixnum] the memory address of the segment
-    attr_reader :vmaddr
-
-    # @return [Fixnum] the memory size of the segment
-    attr_reader :vmsize
-
-    # @return [Fixnum] the file offset of the segment
-    attr_reader :fileoff
-
-    # @return [Fixnum] the amount to map from the file
-    attr_reader :filesize
-
-    # @return [Fixnum] the maximum VM protection
-    attr_reader :maxprot
-
-    # @return [Fixnum] the initial VM protection
-    attr_reader :initprot
-
-    # @return [Fixnum] the number of sections in the segment
-    attr_reader :nsects
-
-    # @return [Fixnum] any flags associated with the segment
-    attr_reader :flags
-
+  class SegmentCommand64 < SegmentCommand
     # @see MachOStructure::FORMAT
     # @api private
     FORMAT = "L=2a16Q=4l=2L=2"
@@ -448,31 +439,6 @@ module MachO
     # @see MachOStructure::SIZEOF
     # @api private
     SIZEOF = 72
-
-    # @api private
-    def initialize(view, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
-        filesize, maxprot, initprot, nsects, flags)
-      super(view, cmd, cmdsize)
-      @segname = segname.delete("\x00")
-      @vmaddr = vmaddr
-      @vmsize = vmsize
-      @fileoff = fileoff
-      @filesize = filesize
-      @maxprot = maxprot
-      @initprot = initprot
-      @nsects = nsects
-      @flags = flags
-    end
-
-    # @example
-    #  puts "this segment relocated in/to it" if sect.flag?(:SG_NORELOC)
-    # @param flag [Symbol] a segment flag symbol
-    # @return [Boolean] true if `flag` is present in the segment's flag field
-    def flag?(flag)
-      flag = SEGMENT_FLAGS[flag]
-      return false if flag.nil?
-      flags & flag == flag
-    end
   end
 
   # A load command representing some aspect of shared libraries, depending
