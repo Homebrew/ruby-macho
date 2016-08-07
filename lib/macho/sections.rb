@@ -91,7 +91,7 @@ module MachO
     # @return [Fixnum] the number of relocation entries
     attr_reader :nreloc
 
-    # @return [Fixnum] flags for type and addrributes of the section
+    # @return [Fixnum] flags for type and attributes of the section
     attr_reader :flags
 
     # @return [void] reserved (for offset or index)

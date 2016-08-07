@@ -414,28 +414,9 @@ module MachO
     # @param segment [MachO::SegmentCommand, MachO::SegmentCommand64] the segment being inspected
     # @return [Array<MachO::Section>] if the Mach-O is 32-bit
     # @return [Array<MachO::Section64>] if the Mach-O is 64-bit
+    # @deprecated use {MachO::SegmentCommand#sections} instead
     def sections(segment)
-      section_klass = case segment
-      when MachO::SegmentCommand
-        MachO::Section
-      when MachO::SegmentCommand64
-        MachO::Section64
-      else
-        raise ArgumentError.new("not a valid segment")
-      end
-
-      sections = []
-      return sections if segment.nsects.zero?
-
-      offset = segment.view.offset + segment.class.bytesize
-
-      segment.nsects.times do
-        section_bin = @raw_data[offset, section_klass.bytesize]
-        sections << section_klass.new_from_bin(endianness, section_bin)
-        offset += section_klass.bytesize
-      end
-
-      sections
+      segment.sections
     end
 
     # Write all Mach-O data to the given filename.
@@ -555,7 +536,7 @@ module MachO
       offset = @raw_data.size
 
       segments.each do |seg|
-        sections(seg).each do |sect|
+        seg.sections.each do |sect|
           next if sect.size == 0
           next if sect.flag?(:S_ZEROFILL)
           next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
