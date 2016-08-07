@@ -30,13 +30,13 @@ module MachO
     # @param filename [String] the fat file to load from
     # @raise [ArgumentError] if the given file does not exist
     def initialize(filename)
-      raise ArgumentError.new("#{filename}: no such file") unless File.file?(filename)
+      raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
       @filename = filename
-      @raw_data = File.open(@filename, "rb") { |f| f.read }
-      @header = get_fat_header
-      @fat_archs = get_fat_archs
-      @machos = get_machos
+      @raw_data = File.open(@filename, "rb", &:read)
+      @header = populate_fat_header
+      @fat_archs = populate_fat_archs
+      @machos = populate_machos
     end
 
     # Initializes a new FatFile instance from a binary string.
@@ -45,9 +45,9 @@ module MachO
     def initialize_from_bin(bin)
       @filename = nil
       @raw_data = bin
-      @header = get_fat_header
-      @fat_archs = get_fat_archs
-      @machos = get_machos
+      @header = populate_fat_header
+      @fat_archs = populate_fat_archs
+      @machos = populate_machos
     end
 
     # The file's raw fat data.
@@ -142,13 +142,8 @@ module MachO
     # @raise [ArgumentError] if `new_id` is not a String
     # @see MachO::MachOFile#linked_dylibs
     def change_dylib_id(new_id, options = {})
-      if !new_id.is_a?(String)
-        raise ArgumentError.new("argument must be a String")
-      end
-
-      if !machos.all?(&:dylib?)
-        return nil
-      end
+      raise ArgumentError, "argument must be a String" unless new_id.is_a?(String)
+      return unless machos.all?(&:dylib?)
 
       each_macho(options) do |macho|
         macho.change_dylib_id(new_id, options)
@@ -157,7 +152,7 @@ module MachO
       synchronize_raw_data
     end
 
-    alias :dylib_id= :change_dylib_id
+    alias dylib_id= change_dylib_id
 
     # All shared libraries linked to the file's Mach-Os.
     # @return [Array<String>] an array of all shared libraries
@@ -188,7 +183,7 @@ module MachO
       synchronize_raw_data
     end
 
-    alias :change_dylib :change_install_name
+    alias change_dylib change_install_name
 
     # All runtime paths associated with the file's Mach-Os.
     # @return [Array<String>] an array of all runtime paths
@@ -265,7 +260,7 @@ module MachO
     # @note Overwrites all data in the file!
     def write!
       if filename.nil?
-        raise MachOError.new("cannot write to a default file when initialized from a binary string")
+        raise MachOError, "cannot write to a default file when initialized from a binary string"
       else
         File.open(@filename, "wb") { |f| f.write(@raw_data) }
       end
@@ -280,14 +275,14 @@ module MachO
     # @raise [MachO::MachOBinaryError] if the magic is for a non-fat Mach-O file
     # @raise [MachO::JavaClassFileError] if the file is a Java classfile
     # @api private
-    def get_fat_header
+    def populate_fat_header
       # the smallest fat Mach-O header is 8 bytes
-      raise TruncatedFileError.new if @raw_data.size < 8
+      raise TruncatedFileError if @raw_data.size < 8
 
       fh = FatHeader.new_from_bin(:big, @raw_data[0, FatHeader.bytesize])
 
-      raise MagicError.new(fh.magic) unless Utils.magic?(fh.magic)
-      raise MachOBinaryError.new unless Utils.fat_magic?(fh.magic)
+      raise MagicError, fh.magic unless Utils.magic?(fh.magic)
+      raise MachOBinaryError unless Utils.fat_magic?(fh.magic)
 
       # Rationale: Java classfiles have the same magic as big-endian fat
       # Mach-Os. Classfiles encode their version at the same offset as
@@ -296,7 +291,7 @@ module MachO
       # technically possible for a fat Mach-O to have over 30 architectures,
       # but this is extremely unlikely and in practice distinguishes the two
       # formats.
-      raise JavaClassFileError.new if fh.nfat_arch > 30
+      raise JavaClassFileError if fh.nfat_arch > 30
 
       fh
     end
@@ -304,7 +299,7 @@ module MachO
     # Obtain an array of fat architectures from raw file data.
     # @return [Array<MachO::FatArch>] an array of fat architectures
     # @api private
-    def get_fat_archs
+    def populate_fat_archs
       archs = []
 
       fa_off = FatHeader.bytesize
@@ -319,7 +314,7 @@ module MachO
     # Obtain an array of Mach-O blobs from raw file data.
     # @return [Array<MachO::MachOFile>] an array of Mach-Os
     # @api private
-    def get_machos
+    def populate_machos
       machos = []
 
       fat_archs.each do |arch|

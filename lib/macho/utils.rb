@@ -26,7 +26,7 @@ module MachO
     # @param endianness [Symbol] either `:big` or `:little`
     # @return [String] the converted string
     def self.specialize_format(format, endianness)
-      modifier = (endianness == :big) ? ">" : "<"
+      modifier = endianness == :big ? ">" : "<"
       format.tr("=", modifier)
     end
 
@@ -55,7 +55,7 @@ module MachO
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid Mach-O magic number, false otherwise
     def self.magic?(num)
-      MH_MAGICS.has_key?(num)
+      MH_MAGICS.key?(num)
     end
 
     # Compares the given number to valid Fat magic numbers.

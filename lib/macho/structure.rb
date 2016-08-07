@@ -5,7 +5,7 @@ module MachO
     # The String#unpack format of the data structure.
     # @return [String] the unpacking format
     # @api private
-    FORMAT = ""
+    FORMAT = "".freeze
 
     # The size of the data structure, in bytes.
     # @return [Fixnum] the size, in bytes
@@ -24,7 +24,7 @@ module MachO
     def self.new_from_bin(endianness, bin)
       format = Utils.specialize_format(self::FORMAT, endianness)
 
-      self.new(*bin.unpack(format))
+      new(*bin.unpack(format))
     end
   end
 end
