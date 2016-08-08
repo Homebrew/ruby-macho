@@ -18,43 +18,43 @@ class MachOLoadCommandSerializationTest < Minitest::Test
   end
 
   def test_serialize_segment
-    pass
+    skip
   end
 
   def test_serialize_symtab
-    pass
+    skip
   end
 
   def test_serialize_symseg
-    pass
+    skip
   end
 
   def test_serialize_thread
-    pass
+    skip
   end
 
   def test_serialize_unixthread
-    pass
+    skip
   end
 
   def test_serialize_loadfvmlib
-    pass
+    skip
   end
 
   def test_serialize_ident
-    pass
+    skip
   end
 
   def test_serialize_fvmfile
-    pass
+    skip
   end
 
   def test_serialize_prepage
-    pass
+    skip
   end
 
   def test_serialize_dysymtab
-    pass
+    skip
   end
 
   def test_serialize_load_dylib
@@ -105,55 +105,55 @@ class MachOLoadCommandSerializationTest < Minitest::Test
   end
 
   def test_serialize_id_dylinker
-    pass
+    skip
   end
 
   def test_serialize_prebound_dylib
-    pass
+    skip
   end
 
   def test_serialize_routines
-    pass
+    skip
   end
 
   def test_serialize_sub_framework
-    pass
+    skip
   end
 
   def test_serialize_sub_umbrella
-    pass
+    skip
   end
 
   def test_serialize_sub_client
-    pass
+    skip
   end
 
   def test_serialize_sub_library
-    pass
+    skip
   end
 
   def test_serialize_twolevel_hints
-    pass
+    skip
   end
 
   def test_serialize_prebind_cksum
-    pass
+    skip
   end
 
   def test_serialize_load_weak_dylib
-    pass
+    skip
   end
 
   def test_serialize_segment_64
-    pass
+    skip
   end
 
   def test_serialize_routines_64
-    pass
+    skip
   end
 
   def test_serialize_uuid
-    pass
+    skip
   end
 
   def test_serialize_rpath
@@ -172,86 +172,86 @@ class MachOLoadCommandSerializationTest < Minitest::Test
   end
 
   def test_serialize_code_signature
-    pass
+    skip
   end
 
   def test_serialize_segment_split_info
-    pass
+    skip
   end
 
   def test_serialize_reexport_dylib
-    pass
+    skip
   end
 
   def test_serialize_lazy_load_dylib
-    pass
+    skip
   end
 
   def test_serialize_encryption_info
-    pass
+    skip
   end
 
   def test_serialize_dyld_info
-    pass
+    skip
   end
 
   def test_serialize_dyld_info_only
-    pass
+    skip
   end
 
   def test_serialize_load_upward_dylib
-    pass
+    skip
   end
 
   def test_serialize_version_min_macosx
-    pass
+    skip
   end
 
   def test_serialize_version_min_iphoneos
-    pass
+    skip
   end
 
   def test_serialize_function_starts
-    pass
+    skip
   end
 
   def test_serialize_dyld_environment
-    pass
+    skip
   end
 
   def test_serialize_main
-    pass
+    skip
   end
 
   def test_serialize_data_in_code
-    pass
+    skip
   end
 
   def test_serialize_source_version
-    pass
+    skip
   end
 
   def test_serialize_dylib_code_sign_drs
-    pass
+    skip
   end
 
   def test_serialize_encryption_info_64
-    pass
+    skip
   end
 
   def test_serialize_linker_option
-    pass
+    skip
   end
 
   def test_serialize_linker_optimization_hint
-    pass
+    skip
   end
 
   def test_serialize_version_min_tvos
-    pass
+    skip
   end
 
   def test_serialize_version_min_watchos
-    pass
+    skip
   end
 end
