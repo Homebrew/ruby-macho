@@ -72,7 +72,7 @@ endif
 
 # Setup default target (used subset).
 .PHONY: all
-all: $(USE_TARGETS)
+all: $(USE_TARGETS) inconsistent
 
 # Setup targets that build all files for a given architecture (`all-<arch>`).
 .PHONY: $(ALL_TARGETS)
@@ -109,6 +109,11 @@ $(ALL_DIRS):
 
 %/hellobundle.so: $(LIBHELLO_SRC) %
 	$(CC) $(ARCH_FLAGS) -bundle $< -o $@
+
+# build inconsistent binaries
+.PHONY: inconsistent
+inconsistent: $(USE_TARGETS)
+	./make-inconsistent.sh $(USE_DIRS)
 
 # Remove all build products, even those not selected in the current run.
 .PHONY: clean
