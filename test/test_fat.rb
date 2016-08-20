@@ -443,4 +443,34 @@ class FatFileTest < Minitest::Test
       delete_if_exists(actual)
     end
   end
+
+  def test_inconsistent_slices
+    filename = fixture([:i386, :x86_64], "libinconsistent.dylib")
+
+    file = MachO::FatFile.new(filename)
+
+    # the individual slices should have different sets of dylibs
+    refute_equal file.machos[0].linked_dylibs, file.machos[1].linked_dylibs
+
+    # modifications are strict by default
+    assert_raises MachO::DylibUnknownError do
+      # libz only exists in one of the slices
+      file.change_install_name("/usr/lib/libz.1.dylib", "foo")
+    end
+
+    # completely incorrect modifications still fail with nonstrict
+    assert_raises MachO::DylibUnknownError do
+      # foo exists in none of the slices
+      file.change_install_name("foo", "bar", :strict => false)
+    end
+
+    # with nonstrict, valid modifications should succeed for the right slice(s)
+    file.change_install_name("/usr/lib/libz.1.dylib", "foo", :strict => false)
+
+    # ...but not all slices will have the modified dylib
+    refute file.machos.all? { |m| m.linked_dylibs.include?("foo") }
+
+    # ...but at least one will
+    assert file.machos.any? { |m| m.linked_dylibs.include?("foo") }
+  end
 end
