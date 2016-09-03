@@ -24,6 +24,14 @@ if ! bundle check ; then
 fi
 echo
 
+# Run rubocop.
+echo ">> Running style enforcement."
+bundle exec rubocop -DES lib/
+result="$?"
+echo
+
+echo ">> Done: ${result}."
+
 # Run the test suite.
 echo ">> Running test suite."
 bundle exec rake test
@@ -31,5 +39,5 @@ result="$?"
 echo
 
 # Be done and return result of test suite.
-echo ">> Done."
-exit "$result"
+echo ">> Done: ${result}."
+exit "${result}"

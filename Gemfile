@@ -4,4 +4,5 @@ group :test do
   gem 'rake'
   gem 'minitest'
   gem 'benchmark-ips'
+  gem 'rubocop'
 end
