@@ -127,6 +127,12 @@ module MachO
       @machos = populate_machos
     end
 
+    # All load commands responsible for loading dylibs in the file's Mach-O's.
+    # @return [Array<MachO::DylibCommand>] an array of DylibCommands
+    def dylib_load_commands
+      machos.map(&:dylib_load_commands).flatten
+    end
+
     # The file's dylib ID. If the file is not a dylib, returns `nil`.
     # @example
     #  file.dylib_id # => 'libBar.dylib'

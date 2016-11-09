@@ -473,4 +473,18 @@ class FatFileTest < Minitest::Test
     # ...but at least one will
     assert file.machos.any? { |m| m.linked_dylibs.include?("foo") }
   end
+
+  def test_dylib_load_commands
+    filenames = FAT_ARCH_PAIRS.map { |a| fixture(a, "hello.bin") }
+
+    filenames.each do |filename|
+      file = MachO::FatFile.new(filename)
+
+      assert_instance_of Array, file.dylib_load_commands
+
+      file.dylib_load_commands.each do |lc|
+        assert_kind_of MachO::DylibCommand, lc
+      end
+    end
+  end
 end
