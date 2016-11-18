@@ -55,42 +55,42 @@ module MachO
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid Mach-O magic number, false otherwise
     def self.magic?(num)
-      MH_MAGICS.key?(num)
+      Headers::MH_MAGICS.key?(num)
     end
 
     # Compares the given number to valid Fat magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid Fat magic number, false otherwise
     def self.fat_magic?(num)
-      num == FAT_MAGIC
+      num == Headers::FAT_MAGIC
     end
 
     # Compares the given number to valid 32-bit Mach-O magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid 32-bit magic number, false otherwise
     def self.magic32?(num)
-      num == MH_MAGIC || num == MH_CIGAM
+      num == Headers::MH_MAGIC || num == Headers::MH_CIGAM
     end
 
     # Compares the given number to valid 64-bit Mach-O magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid 64-bit magic number, false otherwise
     def self.magic64?(num)
-      num == MH_MAGIC_64 || num == MH_CIGAM_64
+      num == Headers::MH_MAGIC_64 || num == Headers::MH_CIGAM_64
     end
 
     # Compares the given number to valid little-endian magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid little-endian magic number, false otherwise
     def self.little_magic?(num)
-      num == MH_CIGAM || num == MH_CIGAM_64
+      num == Headers::MH_CIGAM || num == Headers::MH_CIGAM_64
     end
 
     # Compares the given number to valid big-endian magic numbers.
     # @param num [Fixnum] the number being checked
     # @return [Boolean] true if `num` is a valid big-endian magic number, false otherwise
     def self.big_magic?(num)
-      num == MH_CIGAM || num == MH_CIGAM_64
+      num == Headers::MH_CIGAM || num == Headers::MH_CIGAM_64
     end
   end
 end

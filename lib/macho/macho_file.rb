@@ -11,11 +11,11 @@ module MachO
     # @return [Symbol] the endianness of the file, :big or :little
     attr_reader :endianness
 
-    # @return [MachO::MachHeader] if the Mach-O is 32-bit
-    # @return [MachO::MachHeader64] if the Mach-O is 64-bit
+    # @return [MachO::Headers::MachHeader] if the Mach-O is 32-bit
+    # @return [MachO::Headers::MachHeader64] if the Mach-O is 64-bit
     attr_reader :header
 
-    # @return [Array<MachO::LoadCommand>] an array of the file's load commands
+    # @return [Array<MachO::LoadCommands::LoadCommand>] an array of the file's load commands
     # @note load commands are provided in order of ascending offset.
     attr_reader :load_commands
 
@@ -72,52 +72,52 @@ module MachO
 
     # @return [Boolean] true if the file is of type `MH_OBJECT`, false otherwise
     def object?
-      header.filetype == MH_OBJECT
+      header.filetype == Headers::MH_OBJECT
     end
 
     # @return [Boolean] true if the file is of type `MH_EXECUTE`, false otherwise
     def executable?
-      header.filetype == MH_EXECUTE
+      header.filetype == Headers::MH_EXECUTE
     end
 
     # @return [Boolean] true if the file is of type `MH_FVMLIB`, false otherwise
     def fvmlib?
-      header.filetype == MH_FVMLIB
+      header.filetype == Headers::MH_FVMLIB
     end
 
     # @return [Boolean] true if the file is of type `MH_CORE`, false otherwise
     def core?
-      header.filetype == MH_CORE
+      header.filetype == Headers::MH_CORE
     end
 
     # @return [Boolean] true if the file is of type `MH_PRELOAD`, false otherwise
     def preload?
-      header.filetype == MH_PRELOAD
+      header.filetype == Headers::MH_PRELOAD
     end
 
     # @return [Boolean] true if the file is of type `MH_DYLIB`, false otherwise
     def dylib?
-      header.filetype == MH_DYLIB
+      header.filetype == Headers::MH_DYLIB
     end
 
     # @return [Boolean] true if the file is of type `MH_DYLINKER`, false otherwise
     def dylinker?
-      header.filetype == MH_DYLINKER
+      header.filetype == Headers::MH_DYLINKER
     end
 
     # @return [Boolean] true if the file is of type `MH_BUNDLE`, false otherwise
     def bundle?
-      header.filetype == MH_BUNDLE
+      header.filetype == Headers::MH_BUNDLE
     end
 
     # @return [Boolean] true if the file is of type `MH_DSYM`, false otherwise
     def dsym?
-      header.filetype == MH_DSYM
+      header.filetype == Headers::MH_DSYM
     end
 
     # @return [Boolean] true if the file is of type `MH_KEXT_BUNDLE`, false otherwise
     def kext?
-      header.filetype == MH_KEXT_BUNDLE
+      header.filetype == Headers::MH_KEXT_BUNDLE
     end
 
     # @return [Fixnum] the file's magic number
@@ -127,22 +127,22 @@ module MachO
 
     # @return [String] a string representation of the file's magic number
     def magic_string
-      MH_MAGICS[magic]
+      Headers::MH_MAGICS[magic]
     end
 
     # @return [Symbol] a string representation of the Mach-O's filetype
     def filetype
-      MH_FILETYPES[header.filetype]
+      Headers::MH_FILETYPES[header.filetype]
     end
 
     # @return [Symbol] a symbol representation of the Mach-O's CPU type
     def cputype
-      CPU_TYPES[header.cputype]
+      Headers::CPU_TYPES[header.cputype]
     end
 
     # @return [Symbol] a symbol representation of the Mach-O's CPU subtype
     def cpusubtype
-      CPU_SUBTYPES[header.cputype][header.cpusubtype]
+      Headers::CPU_SUBTYPES[header.cputype][header.cpusubtype]
     end
 
     # @return [Fixnum] the number of load commands in the Mach-O's header
@@ -165,7 +165,7 @@ module MachO
     #  file.command("LC_LOAD_DYLIB")
     #  file[:LC_LOAD_DYLIB]
     # @param [String, Symbol] name the load command ID
-    # @return [Array<MachO::LoadCommand>] an array of LoadCommands corresponding to `name`
+    # @return [Array<MachO::LoadCommands::LoadCommand>] an array of load commands corresponding to `name`
     def command(name)
       load_commands.select { |lc| lc.type == name.to_sym }
     end
@@ -174,7 +174,7 @@ module MachO
 
     # Inserts a load command at the given offset.
     # @param offset [Fixnum] the offset to insert at
-    # @param lc [MachO::LoadCommand] the load command to insert
+    # @param lc [MachO::LoadCommands::LoadCommand] the load command to insert
     # @param options [Hash]
     # @option options [Boolean] :repopulate (true) whether or not to repopulate
     #  the instance fields
@@ -183,7 +183,7 @@ module MachO
     # @note Calling this method with an arbitrary offset in the load command
     #  region **will leave the object in an inconsistent state**.
     def insert_command(offset, lc, options = {})
-      context = LoadCommand::SerializationContext.context_for(self)
+      context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
       cmd_raw = lc.serialize(context)
 
       if offset < header.class.bytesize || offset + cmd_raw.bytesize > low_fileoff
@@ -207,14 +207,14 @@ module MachO
     end
 
     # Replace a load command with another command in the Mach-O, preserving location.
-    # @param old_lc [MachO::LoadCommand] the load command being replaced
-    # @param new_lc [MachO::LoadCommand] the load command being added
+    # @param old_lc [MachO::LoadCommands::LoadCommand] the load command being replaced
+    # @param new_lc [MachO::LoadCommands::LoadCommand] the load command being added
     # @return [void]
     # @raise [MachO::HeaderPadError] if the new command exceeds the header pad buffer
     # @see {#insert_command}
     # @note This is public, but methods like {#dylib_id=} should be preferred.
     def replace_command(old_lc, new_lc)
-      context = LoadCommand::SerializationContext.context_for(self)
+      context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
       cmd_raw = new_lc.serialize(context)
       new_sizeofcmds = sizeofcmds + cmd_raw.bytesize - old_lc.cmdsize
       if header.class.bytesize + new_sizeofcmds > low_fileoff
@@ -226,7 +226,7 @@ module MachO
     end
 
     # Appends a new load command to the Mach-O.
-    # @param lc [MachO::LoadCommand] the load command being added
+    # @param lc [MachO::LoadCommands::LoadCommand] the load command being added
     # @param options [Hash]
     # @option options [Boolean] :repopulate (true) whether or not to repopulate
     #  the instance fields
@@ -241,7 +241,7 @@ module MachO
     end
 
     # Delete a load command from the Mach-O.
-    # @param lc [MachO::LoadCommand] the load command being deleted
+    # @param lc [MachO::LoadCommands::LoadCommand] the load command being deleted
     # @param options [Hash]
     # @option options [Boolean] :repopulate (true) whether or not to repopulate
     #  the instance fields
@@ -275,14 +275,14 @@ module MachO
     end
 
     # All load commands responsible for loading dylibs.
-    # @return [Array<MachO::DylibCommand>] an array of DylibCommands
+    # @return [Array<MachO::LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
-      load_commands.select { |lc| DYLIB_LOAD_COMMANDS.include?(lc.type) }
+      load_commands.select { |lc| LoadCommands::DYLIB_LOAD_COMMANDS.include?(lc.type) }
     end
 
     # All segment load commands in the Mach-O.
-    # @return [Array<MachO::SegmentCommand>] if the Mach-O is 32-bit
-    # @return [Array<MachO::SegmentCommand64>] if the Mach-O is 64-bit
+    # @return [Array<MachO::LoadCommands::SegmentCommand>] if the Mach-O is 32-bit
+    # @return [Array<MachO::LoadCommands::SegmentCommand64>] if the Mach-O is 64-bit
     def segments
       if magic32?
         command(:LC_SEGMENT)
@@ -319,10 +319,10 @@ module MachO
       old_lc = command(:LC_ID_DYLIB).first
       raise DylibIdMissingError unless old_lc
 
-      new_lc = LoadCommand.create(:LC_ID_DYLIB, new_id,
-                                  old_lc.timestamp,
-                                  old_lc.current_version,
-                                  old_lc.compatibility_version)
+      new_lc = LoadCommands::LoadCommand.create(:LC_ID_DYLIB, new_id,
+                                                old_lc.timestamp,
+                                                old_lc.current_version,
+                                                old_lc.compatibility_version)
 
       replace_command(old_lc, new_lc)
     end
@@ -353,10 +353,10 @@ module MachO
       old_lc = dylib_load_commands.find { |d| d.name.to_s == old_name }
       raise DylibUnknownError, old_name if old_lc.nil?
 
-      new_lc = LoadCommand.create(old_lc.type, new_name,
-                                  old_lc.timestamp,
-                                  old_lc.current_version,
-                                  old_lc.compatibility_version)
+      new_lc = LoadCommands::LoadCommand.create(old_lc.type, new_name,
+                                                old_lc.timestamp,
+                                                old_lc.current_version,
+                                                old_lc.compatibility_version)
 
       replace_command(old_lc, new_lc)
     end
@@ -385,7 +385,7 @@ module MachO
       raise RpathUnknownError, old_path if old_lc.nil?
       raise RpathExistsError, new_path if rpaths.include?(new_path)
 
-      new_lc = LoadCommand.create(:LC_RPATH, new_path)
+      new_lc = LoadCommands::LoadCommand.create(:LC_RPATH, new_path)
 
       delete_rpath(old_path)
       insert_command(old_lc.view.offset, new_lc)
@@ -405,7 +405,7 @@ module MachO
     def add_rpath(path, _options = {})
       raise RpathExistsError, path if rpaths.include?(path)
 
-      rpath_cmd = LoadCommand.create(:LC_RPATH, path)
+      rpath_cmd = LoadCommands::LoadCommand.create(:LC_RPATH, path)
       add_command(rpath_cmd)
     end
 
@@ -432,10 +432,10 @@ module MachO
     end
 
     # All sections of the segment `segment`.
-    # @param segment [MachO::SegmentCommand, MachO::SegmentCommand64] the segment being inspected
-    # @return [Array<MachO::Section>] if the Mach-O is 32-bit
-    # @return [Array<MachO::Section64>] if the Mach-O is 64-bit
-    # @deprecated use {MachO::SegmentCommand#sections} instead
+    # @param segment [MachO::LoadCommands::SegmentCommand, MachO::LoadCommands::SegmentCommand64] the segment being inspected
+    # @return [Array<MachO::Sections::Section>] if the Mach-O is 32-bit
+    # @return [Array<MachO::Sections::Section64>] if the Mach-O is 64-bit
+    # @deprecated use {MachO::LoadCommands::SegmentCommand#sections} instead
     def sections(segment)
       segment.sections
     end
@@ -462,8 +462,8 @@ module MachO
     private
 
     # The file's Mach-O header structure.
-    # @return [MachO::MachHeader] if the Mach-O is 32-bit
-    # @return [MachO::MachHeader64] if the Mach-O is 64-bit
+    # @return [MachO::Headers::MachHeader] if the Mach-O is 32-bit
+    # @return [MachO::Headers::MachHeader64] if the Mach-O is 64-bit
     # @raise [MachO::TruncatedFileError] if the file is too small to have a valid header
     # @api private
     def populate_mach_header
@@ -471,7 +471,7 @@ module MachO
       raise TruncatedFileError if @raw_data.size < 28
 
       magic = populate_and_check_magic
-      mh_klass = Utils.magic32?(magic) ? MachHeader : MachHeader64
+      mh_klass = Utils.magic32?(magic) ? Headers::MachHeader : Headers::MachHeader64
       mh = mh_klass.new_from_bin(endianness, @raw_data[0, mh_klass.bytesize])
 
       check_cputype(mh.cputype)
@@ -502,7 +502,7 @@ module MachO
     # @raise [MachO::CPUTypeError] if the CPU type is unknown
     # @api private
     def check_cputype(cputype)
-      raise CPUTypeError, cputype unless CPU_TYPES.key?(cputype)
+      raise CPUTypeError, cputype unless Headers::CPU_TYPES.key?(cputype)
     end
 
     # Check the file's CPU type/subtype pair.
@@ -511,7 +511,7 @@ module MachO
     # @api private
     def check_cpusubtype(cputype, cpusubtype)
       # Only check sub-type w/o capability bits (see `populate_mach_header`).
-      raise CPUSubtypeError.new(cputype, cpusubtype) unless CPU_SUBTYPES[cputype].key?(cpusubtype)
+      raise CPUSubtypeError.new(cputype, cpusubtype) unless Headers::CPU_SUBTYPES[cputype].key?(cpusubtype)
     end
 
     # Check the file's type.
@@ -519,11 +519,11 @@ module MachO
     # @raise [MachO::FiletypeError] if the file type is unknown
     # @api private
     def check_filetype(filetype)
-      raise FiletypeError, filetype unless MH_FILETYPES.key?(filetype)
+      raise FiletypeError, filetype unless Headers::MH_FILETYPES.key?(filetype)
     end
 
     # All load commands in the file.
-    # @return [Array<MachO::LoadCommand>] an array of load commands
+    # @return [Array<MachO::LoadCommands::LoadCommand>] an array of load commands
     # @raise [MachO::LoadCommandError] if an unknown load command is encountered
     # @api private
     def populate_load_commands
@@ -533,13 +533,13 @@ module MachO
       header.ncmds.times do
         fmt = Utils.specialize_format("L=", endianness)
         cmd = @raw_data.slice(offset, 4).unpack(fmt).first
-        cmd_sym = LOAD_COMMANDS[cmd]
+        cmd_sym = LoadCommands::LOAD_COMMANDS[cmd]
 
         raise LoadCommandError, cmd if cmd_sym.nil?
 
         # why do I do this? i don't like declaring constants below
         # classes, and i need them to resolve...
-        klass = MachO.const_get LC_STRUCTURES[cmd_sym]
+        klass = MachO::LoadCommands.const_get LoadCommands::LC_STRUCTURES[cmd_sym]
         view = MachOView.new(@raw_data, endianness, offset)
         command = klass.new_from_bin(view)
 

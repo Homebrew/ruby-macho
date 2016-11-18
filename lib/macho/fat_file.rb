@@ -7,10 +7,10 @@ module MachO
     # @return [String] the filename loaded from, or nil if loaded from a binary string
     attr_accessor :filename
 
-    # @return [MachO::FatHeader] the file's header
+    # @return [MachO::Headers::FatHeader] the file's header
     attr_reader :header
 
-    # @return [Array<MachO::FatArch>] an array of fat architectures
+    # @return [Array<MachO::Headers::FatArch>] an array of fat architectures
     attr_reader :fat_archs
 
     # @return [Array<MachO::MachOFile>] an array of Mach-O binaries
@@ -109,7 +109,7 @@ module MachO
 
     # @return [String] a string representation of the file's magic number
     def magic_string
-      MH_MAGICS[magic]
+      Headers::MH_MAGICS[magic]
     end
 
     # The file's type. Assumed to be the same for every Mach-O within.
@@ -128,7 +128,7 @@ module MachO
     end
 
     # All load commands responsible for loading dylibs in the file's Mach-O's.
-    # @return [Array<MachO::DylibCommand>] an array of DylibCommands
+    # @return [Array<MachO::LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
       machos.map(&:dylib_load_commands).flatten
     end
@@ -280,7 +280,7 @@ module MachO
     private
 
     # Obtain the fat header from raw file data.
-    # @return [MachO::FatHeader] the fat header
+    # @return [MachO::Headers::FatHeader] the fat header
     # @raise [MachO::TruncatedFileError] if the file is too small to have a valid header
     # @raise [MachO::MagicError] if the magic is not valid Mach-O magic
     # @raise [MachO::MachOBinaryError] if the magic is for a non-fat Mach-O file
@@ -290,7 +290,7 @@ module MachO
       # the smallest fat Mach-O header is 8 bytes
       raise TruncatedFileError if @raw_data.size < 8
 
-      fh = FatHeader.new_from_bin(:big, @raw_data[0, FatHeader.bytesize])
+      fh = Headers::FatHeader.new_from_bin(:big, @raw_data[0, Headers::FatHeader.bytesize])
 
       raise MagicError, fh.magic unless Utils.magic?(fh.magic)
       raise MachOBinaryError unless Utils.fat_magic?(fh.magic)
@@ -308,15 +308,15 @@ module MachO
     end
 
     # Obtain an array of fat architectures from raw file data.
-    # @return [Array<MachO::FatArch>] an array of fat architectures
+    # @return [Array<MachO::Headers::FatArch>] an array of fat architectures
     # @api private
     def populate_fat_archs
       archs = []
 
-      fa_off = FatHeader.bytesize
-      fa_len = FatArch.bytesize
+      fa_off = Headers::FatHeader.bytesize
+      fa_len = Headers::FatArch.bytesize
       header.nfat_arch.times do |i|
-        archs << FatArch.new_from_bin(:big, @raw_data[fa_off + (fa_len * i), fa_len])
+        archs << Headers::FatArch.new_from_bin(:big, @raw_data[fa_off + (fa_len * i), fa_len])
       end
 
       archs
