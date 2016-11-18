@@ -35,7 +35,7 @@ class MachOFileTest < Minitest::Test
 
       file.load_commands.each do |lc|
         assert lc
-        assert_kind_of MachO::LoadCommand, lc
+        assert_kind_of MachO::LoadCommands::LoadCommand, lc
         assert_kind_of Fixnum, lc.offset
         assert_kind_of Fixnum, lc.cmd
         assert_kind_of Fixnum, lc.cmdsize
@@ -65,8 +65,8 @@ class MachOFileTest < Minitest::Test
       header = file.header
 
       assert header
-      assert_kind_of MachO::MachHeader, header if file.magic32?
-      assert_kind_of MachO::MachHeader64, header if file.magic64?
+      assert_kind_of MachO::Headers::MachHeader, header if file.magic32?
+      assert_kind_of MachO::Headers::MachHeader64, header if file.magic64?
       assert_kind_of Fixnum, header.magic
       assert_kind_of Fixnum, header.cputype
       assert_kind_of Fixnum, header.cpusubtype
@@ -90,8 +90,8 @@ class MachOFileTest < Minitest::Test
 
       segments.each do |seg|
         assert seg
-        assert_kind_of MachO::SegmentCommand, seg if file.magic32?
-        assert_kind_of MachO::SegmentCommand64, seg if file.magic64?
+        assert_kind_of MachO::LoadCommands::SegmentCommand, seg if file.magic32?
+        assert_kind_of MachO::LoadCommands::SegmentCommand64, seg if file.magic64?
         assert_kind_of String, seg.segname
         assert_kind_of Fixnum, seg.vmaddr
         assert_kind_of Fixnum, seg.vmsize
@@ -109,8 +109,8 @@ class MachOFileTest < Minitest::Test
 
         sections.each do |sect|
           assert sect
-          assert_kind_of MachO::Section, sect if seg.is_a? MachO::SegmentCommand
-          assert_kind_of MachO::Section64, sect if seg.is_a? MachO::SegmentCommand64
+          assert_kind_of MachO::Sections::Section, sect if seg.is_a? MachO::LoadCommands::SegmentCommand
+          assert_kind_of MachO::Sections::Section64, sect if seg.is_a? MachO::LoadCommands::SegmentCommand64
           assert_kind_of String, sect.sectname
           assert_kind_of String, sect.segname
           assert_kind_of Fixnum, sect.addr
@@ -123,7 +123,7 @@ class MachOFileTest < Minitest::Test
           refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
           assert_kind_of Fixnum, sect.reserved1
           assert_kind_of Fixnum, sect.reserved2
-          assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Section64
+          assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Sections::Section64
         end
       end
     end
@@ -228,12 +228,12 @@ class MachOFileTest < Minitest::Test
         # the ones that don't exist
         # https://github.com/Homebrew/ruby-macho/pull/24#issuecomment-226287121
         if lc
-          assert_kind_of MachO::DylibCommand, lc
+          assert_kind_of MachO::LoadCommands::DylibCommand, lc
 
           dylib_name = lc.name
 
           assert dylib_name
-          assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+          assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, dylib_name
         end
       end
     end

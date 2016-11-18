@@ -45,7 +45,7 @@ class FatFileTest < Minitest::Test
       header = file.header
 
       assert header
-      assert_kind_of MachO::FatHeader, header
+      assert_kind_of MachO::Headers::FatHeader, header
       assert_kind_of Fixnum, header.magic
       assert_kind_of Fixnum, header.nfat_arch
     end
@@ -63,7 +63,7 @@ class FatFileTest < Minitest::Test
 
       archs.each do |arch|
         assert arch
-        assert_kind_of MachO::FatArch, arch
+        assert_kind_of MachO::Headers::FatArch, arch
         assert_kind_of Fixnum, arch.cputype
         assert_kind_of Fixnum, arch.cpusubtype
         assert_kind_of Fixnum, arch.offset
@@ -176,12 +176,12 @@ class FatFileTest < Minitest::Test
           # the ones that don't exist
           # https://github.com/Homebrew/ruby-macho/pull/24#issuecomment-226287121
           if lc
-            assert_kind_of MachO::DylibCommand, lc
+            assert_kind_of MachO::LoadCommands::DylibCommand, lc
 
             dylib_name = lc.name
 
             assert dylib_name
-            assert_kind_of MachO::LoadCommand::LCStr, dylib_name
+            assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, dylib_name
           end
         end
       end
@@ -483,7 +483,7 @@ class FatFileTest < Minitest::Test
       assert_instance_of Array, file.dylib_load_commands
 
       file.dylib_load_commands.each do |lc|
-        assert_kind_of MachO::DylibCommand, lc
+        assert_kind_of MachO::LoadCommands::DylibCommand, lc
       end
     end
   end

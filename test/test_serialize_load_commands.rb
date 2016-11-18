@@ -13,7 +13,7 @@ class MachOLoadCommandSerializationTest < Minitest::Test
     refute lc.serializable?
 
     assert_raises MachO::LoadCommandNotSerializableError do
-      lc.serialize(MachO::LoadCommand::SerializationContext.context_for(file))
+      lc.serialize(MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file))
     end
   end
 
@@ -62,9 +62,9 @@ class MachOLoadCommandSerializationTest < Minitest::Test
 
     filenames.each do |filename|
       file = MachO::MachOFile.new(filename)
-      ctx = MachO::LoadCommand::SerializationContext.context_for(file)
+      ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
       lc = file[:LC_LOAD_DYLIB].first
-      lc2 = MachO::LoadCommand.create(:LC_LOAD_DYLIB, lc.name.to_s,
+      lc2 = MachO::LoadCommands::LoadCommand.create(:LC_LOAD_DYLIB, lc.name.to_s,
         lc.timestamp, lc.current_version, lc.compatibility_version)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
@@ -78,9 +78,9 @@ class MachOLoadCommandSerializationTest < Minitest::Test
 
     filenames.each do |filename|
       file = MachO::MachOFile.new(filename)
-      ctx = MachO::LoadCommand::SerializationContext.context_for(file)
+      ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
       lc = file[:LC_ID_DYLIB].first
-      lc2 = MachO::LoadCommand.create(:LC_ID_DYLIB, lc.name.to_s,
+      lc2 = MachO::LoadCommands::LoadCommand.create(:LC_ID_DYLIB, lc.name.to_s,
         lc.timestamp, lc.current_version, lc.compatibility_version)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
@@ -94,9 +94,9 @@ class MachOLoadCommandSerializationTest < Minitest::Test
 
     filenames.each do |filename|
       file = MachO::MachOFile.new(filename)
-      ctx = MachO::LoadCommand::SerializationContext.context_for(file)
+      ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
       lc = file[:LC_LOAD_DYLINKER].first
-      lc2 = MachO::LoadCommand.create(:LC_LOAD_DYLINKER, lc.name.to_s)
+      lc2 = MachO::LoadCommands::LoadCommand.create(:LC_LOAD_DYLINKER, lc.name.to_s)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
       assert_equal blob, lc.serialize(ctx)
@@ -161,9 +161,9 @@ class MachOLoadCommandSerializationTest < Minitest::Test
 
     filenames.each do |filename|
       file = MachO::MachOFile.new(filename)
-      ctx = MachO::LoadCommand::SerializationContext.context_for(file)
+      ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
       lc = file[:LC_RPATH].first
-      lc2 = MachO::LoadCommand.create(:LC_RPATH, lc.path.to_s)
+      lc2 = MachO::LoadCommands::LoadCommand.create(:LC_RPATH, lc.path.to_s)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
       assert_equal blob, lc.serialize(ctx)
