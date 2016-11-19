@@ -2,7 +2,7 @@
 
 $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 
-require 'macho'
+require "macho"
 
 file = MachO::MachOFile.new(ARGV.shift)
 

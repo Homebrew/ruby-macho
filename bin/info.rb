@@ -2,17 +2,17 @@
 
 $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 
-require 'macho'
+require "macho"
 
 # Usage: bin/info.rb [--fat|--macho] <file>
 arg1 = ARGV.shift
-case arg1
+file = case arg1
 when "--fat"
-  file = MachO::FatFile.new(ARGV.shift) # Force fat binary.
+  MachO::FatFile.new(ARGV.shift) # Force fat binary.
 when "--macho"
-  file = MachO::MachOFile.new(ARGV.shift) # Force Mach-O binary.
+  MachO::MachOFile.new(ARGV.shift) # Force Mach-O binary.
 else
-  file = MachO.open(arg1) # Auto-detect fat/Mach-O binary.
+  MachO.open(arg1) # Auto-detect fat/Mach-O binary.
 end
 
 if file.is_a?(MachO::FatFile)
