@@ -26,7 +26,7 @@ echo
 
 # Run rubocop.
 echo ">> Running style enforcement."
-bundle exec rubocop -DES lib/
+bundle exec rubocop -DES
 result="$?"
 echo
 
