@@ -147,8 +147,8 @@ class MachOFileTest < Minitest::Test
       assert_kind_of Fixnum, file.sizeofcmds
       assert_kind_of Fixnum, file.flags
 
-      assert file.segments.size > 0
-      assert file.linked_dylibs.size > 0
+      refute_predicate file.segments, :empty?
+      refute_predicate file.linked_dylibs, :empty?
     end
   end
 
@@ -159,7 +159,7 @@ class MachOFileTest < Minitest::Test
       file = MachO::MachOFile.new(fn)
 
       assert file.object?
-      filechecks(except = :object?).each do |check|
+      filechecks(:object?).each do |check|
         refute file.send(check)
       end
 
@@ -177,7 +177,7 @@ class MachOFileTest < Minitest::Test
       file = MachO::MachOFile.new(fn)
 
       assert file.executable?
-      filechecks(except = :executable?).each do |check|
+      filechecks(:executable?).each do |check|
         refute file.send(check)
       end
 
@@ -195,7 +195,7 @@ class MachOFileTest < Minitest::Test
       file = MachO::MachOFile.new(fn)
 
       assert file.dylib?
-      filechecks(except = :dylib?).each do |check|
+      filechecks(:dylib?).each do |check|
         refute file.send(check)
       end
 
@@ -212,7 +212,7 @@ class MachOFileTest < Minitest::Test
       :LC_LOAD_UPWARD_DYLIB,
       :LC_LAZY_LOAD_DYLIB,
       :LC_LOAD_WEAK_DYLIB,
-      :LC_REEXPORT_DYLIB
+      :LC_REEXPORT_DYLIB,
     ]
 
     filenames.each do |fn|
@@ -227,14 +227,14 @@ class MachOFileTest < Minitest::Test
         # PPC and x86-family binaries don't have the same dylib LCs, so ignore
         # the ones that don't exist
         # https://github.com/Homebrew/ruby-macho/pull/24#issuecomment-226287121
-        if lc
-          assert_kind_of MachO::LoadCommands::DylibCommand, lc
+        next unless lc
 
-          dylib_name = lc.name
+        assert_kind_of MachO::LoadCommands::DylibCommand, lc
 
-          assert dylib_name
-          assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, dylib_name
-        end
+        dylib_name = lc.name
+
+        assert dylib_name
+        assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, dylib_name
       end
     end
   end
@@ -247,7 +247,7 @@ class MachOFileTest < Minitest::Test
 
       # a file can only be ONE of these
       assert file.bundle?
-      filechecks(except = :bundle?).each do |check|
+      filechecks(:bundle?).each do |check|
         refute file.send(check)
       end
 
@@ -277,8 +277,8 @@ class MachOFileTest < Minitest::Test
       file.dylib_id = old_id
       assert_equal old_id, file.dylib_id
 
-      assert file.segments.size > 0
-      assert file.linked_dylibs.size > 0
+      refute_predicate file.segments, :empty?
+      refute_predicate file.linked_dylibs, :empty?
 
       really_big_id = "x" * 4096
 

@@ -65,7 +65,8 @@ class MachOLoadCommandSerializationTest < Minitest::Test
       ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
       lc = file[:LC_LOAD_DYLIB].first
       lc2 = MachO::LoadCommands::LoadCommand.create(:LC_LOAD_DYLIB, lc.name.to_s,
-        lc.timestamp, lc.current_version, lc.compatibility_version)
+                                                    lc.timestamp, lc.current_version,
+                                                    lc.compatibility_version)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
       assert_equal blob, lc.serialize(ctx)
@@ -81,7 +82,8 @@ class MachOLoadCommandSerializationTest < Minitest::Test
       ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
       lc = file[:LC_ID_DYLIB].first
       lc2 = MachO::LoadCommands::LoadCommand.create(:LC_ID_DYLIB, lc.name.to_s,
-        lc.timestamp, lc.current_version, lc.compatibility_version)
+                                                    lc.timestamp, lc.current_version,
+                                                    lc.compatibility_version)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
       assert_equal blob, lc.serialize(ctx)

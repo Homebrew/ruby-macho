@@ -23,7 +23,7 @@ module Helpers
   # architecture pairs used in testing fat binaries
   FAT_ARCH_PAIRS = [
     [:i386, :x86_64],
-    [:i386, :ppc]
+    [:i386, :ppc],
   ].freeze
 
   def fixture(archs, name)
@@ -36,9 +36,7 @@ module Helpers
   end
 
   def delete_if_exists(file)
-    if File.exist?(file)
-      File.delete(file)
-    end
+    File.delete(file) if File.exist?(file)
   end
 
   def equal_sha1_hashes(file1, file2)

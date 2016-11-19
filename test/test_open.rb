@@ -32,7 +32,7 @@ class MachOOpenTest < Minitest::Test
   end
 
   def test_open
-    file = MachO.open(fixture(:x86_64, 'libhello.dylib'))
+    file = MachO.open(fixture(:x86_64, "libhello.dylib"))
 
     assert_kind_of MachO::MachOFile, file
 

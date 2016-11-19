@@ -77,7 +77,7 @@ class RubyMachOBenchmark
       i = 0
 
       bm.report("ruby_set_id") do
-        MachO::Tools.change_dylib_id(benchfile, "#{i += 1}")
+        MachO::Tools.change_dylib_id(benchfile, (i += 1).to_s)
       end
 
       bm.compare!
@@ -99,11 +99,11 @@ class RubyMachOBenchmark
         `install_name_tool -change #{i} #{i += 1} #{benchfile}`
       end
 
-      MachO::Tools.change_install_name(benchfile, "#{i}", "0")
+      MachO::Tools.change_install_name(benchfile, i.to_s, "0")
       i = 0
 
       bm.report("ruby_set_dylib") do
-        MachO::Tools.change_install_name(benchfile, "#{i}", "#{i += 1}")
+        MachO::Tools.change_install_name(benchfile, i.to_s, (i += 1).to_s)
       end
 
       bm.compare!
@@ -126,7 +126,7 @@ class RubyMachOBenchmark
 
       bm.report("ruby_add_rpath") do
         FileUtils.cp(filename, benchfile)
-        MachO::Tools.add_rpath(benchfile, "#{i += 1}")
+        MachO::Tools.add_rpath(benchfile, (i += 1).to_s)
         FileUtils.rm(benchfile)
       end
 
@@ -167,7 +167,7 @@ class RubyMachOBenchmark
     rpath = MachO.open(filename).rpaths.first
     i = 0
 
-    MachO::Tools.change_rpath(benchfile, rpath, "#{i}")
+    MachO::Tools.change_rpath(benchfile, rpath, i.to_s)
 
     Benchmark.ips do |bm|
       bm.report("int_change_rpath") do
@@ -175,7 +175,7 @@ class RubyMachOBenchmark
       end
 
       bm.report("ruby_change_rpath") do
-        MachO::Tools.change_rpath(benchfile, "#{i}", "#{i += 1}")
+        MachO::Tools.change_rpath(benchfile, i.to_s, (i += 1).to_s)
       end
 
       bm.compare!
@@ -234,7 +234,7 @@ class RubyMachOBenchmark
       i = 0
 
       bm.report("ruby_fat_set_id") do
-        MachO::Tools.change_dylib_id(benchfile, "#{i += 1}")
+        MachO::Tools.change_dylib_id(benchfile, (i += 1).to_s)
       end
 
       bm.compare!
@@ -256,11 +256,11 @@ class RubyMachOBenchmark
         `install_name_tool -change #{i} #{i += 1} #{benchfile}`
       end
 
-      MachO::Tools.change_install_name(benchfile, "#{i}", "0")
+      MachO::Tools.change_install_name(benchfile, i.to_s, "0")
       i = 0
 
       bm.report("ruby_fat_set_dylib") do
-        MachO::Tools.change_install_name(benchfile, "#{i}", "#{i += 1}")
+        MachO::Tools.change_install_name(benchfile, i.to_s, (i += 1).to_s)
       end
 
       bm.compare!
@@ -283,7 +283,7 @@ class RubyMachOBenchmark
 
       bm.report("ruby_fat_add_rpath") do
         FileUtils.cp(filename, benchfile)
-        MachO::Tools.add_rpath(benchfile, "#{i += 1}")
+        MachO::Tools.add_rpath(benchfile, (i += 1).to_s)
         FileUtils.rm(benchfile)
       end
 
@@ -324,7 +324,7 @@ class RubyMachOBenchmark
     rpath = MachO.open(filename).rpaths.first
     i = 0
 
-    MachO::Tools.change_rpath(benchfile, rpath, "#{i}")
+    MachO::Tools.change_rpath(benchfile, rpath, i.to_s)
 
     Benchmark.ips do |bm|
       bm.report("int_fat_change_rpath") do
@@ -332,7 +332,7 @@ class RubyMachOBenchmark
       end
 
       bm.report("ruby_fat_change_rpath") do
-        MachO::Tools.change_rpath(benchfile, "#{i}", "#{i += 1}")
+        MachO::Tools.change_rpath(benchfile, i.to_s, (i += 1).to_s)
       end
 
       bm.compare!
