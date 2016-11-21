@@ -14,9 +14,6 @@ executables, dynamic libraries, and so forth.
 
 ### Documentation
 
-**Important**: ruby-macho does not have a stable API (yet). Use it with this
-in mind.
-
 Full documentation is available on [RubyDoc](http://www.rubydoc.info/gems/ruby-macho/).
 
 A quick example of what ruby-macho can do:
