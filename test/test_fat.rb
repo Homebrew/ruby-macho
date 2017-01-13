@@ -247,6 +247,35 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_new_from_machos
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
+    machos = filenames.map { |f| MachO::MachOFile.new(f) }
+
+    file = MachO::FatFile.new_from_machos(*machos)
+
+    assert file
+    assert_instance_of MachO::FatFile, file
+
+    # the number of machos inside the new fat file should be the number
+    # of individual machos we gave it
+    assert machos.size, file.machos.size
+
+    # the order of machos within the fat file should be preserved
+    machos.each_with_index do |macho, i|
+      assert_equal macho.cputype, file.machos[i].cputype
+    end
+
+    # we should be able to dump the newly created fat file
+    file.write("merged_machos.bin")
+
+    # ...and load it back as a new object without errors
+    file = MachO::FatFile.new("merged_machos.bin")
+
+    assert file
+  ensure
+    delete_if_exists("merged_machos.bin")
+  end
+
   def test_change_dylib_id
     groups = FAT_ARCH_PAIRS.map do |arch|
       ["libhello.dylib", "libhello_actual.dylib", "libhello_expected.dylib"].map do |fn|
