@@ -16,6 +16,28 @@ module MachO
     # @return [Array<MachO::MachOFile>] an array of Mach-O binaries
     attr_reader :machos
 
+    # Creates a new FatFile from the given (single-arch) Mach-Os
+    # @param machos [Array<MachO::MachOFile>] the machos to combine
+    # @return [MachO::FatFile] a new FatFile containing the give machos
+    def self.new_from_machos(*machos)
+      header = Headers::FatHeader.new(Headers::FAT_MAGIC, machos.size)
+      offset = Headers::FatHeader.bytesize + (machos.size * Headers::FatArch.bytesize)
+      fat_archs = []
+      machos.each do |macho|
+        fat_archs << Headers::FatArch.new(macho.header.cputype,
+                                          macho.header.cpusubtype,
+                                          offset, macho.serialize.bytesize,
+                                          macho.alignment)
+        offset += macho.serialize.bytesize
+      end
+
+      bin = header.serialize
+      bin << fat_archs.map(&:serialize).join
+      bin << machos.map(&:serialize).join
+
+      new_from_bin(bin)
+    end
+
     # Creates a new FatFile instance from a binary string.
     # @param bin [String] a binary string containing raw Mach-O data
     # @return [MachO::FatFile] a new FatFile
