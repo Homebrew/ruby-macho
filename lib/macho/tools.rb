@@ -80,5 +80,24 @@ module MachO
       file.delete_rpath(old_path, options)
       file.write!
     end
+
+    # Merge multiple Mach-Os into one universal (Fat) binary.
+    # @param filename [String] the fat binary to create
+    # @param files [Array<MachO::MachOFile, MachO::FatFile>] the files to merge
+    # @return [void]
+    def self.merge_machos(filename, *files)
+      machos = files.map do |file|
+        macho = MachO.open(file)
+        case macho
+        when MachO::MachOFile
+          macho
+        else
+          macho.machos
+        end
+      end.flatten
+
+      fat_macho = MachO::FatFile.new_from_machos(*machos)
+      fat_macho.write(filename)
+    end
   end
 end
