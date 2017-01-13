@@ -283,4 +283,37 @@ class MachOToolsTest < Minitest::Test
       delete_if_exists(actual)
     end
   end
+
+  def test_merge_machos
+    filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
+    merged_filename = "merged_machos.bin"
+
+    # merge a bunch of single-arch Mach-Os and save them as a universal
+    MachO::Tools.merge_machos(merged_filename, *filenames)
+
+    # ensure that we can load the merged machos
+    file = MachO::FatFile.new(merged_filename)
+
+    assert file
+    assert_instance_of MachO::FatFile, file
+    assert_equal filenames.size, file.machos.size
+  ensure
+    delete_if_exists(merged_filename)
+  end
+
+  def test_merge_machos_fat
+    filenames = FAT_ARCH_PAIRS.map { |a| fixture(a, "hello.bin") }
+    merged_filename = "merged_universals.bin"
+
+    # merge a bunch of universal Mach-Os and save them as one universal
+    MachO::Tools.merge_machos(merged_filename, *filenames)
+
+    # ensure that we can load the merged machos
+    file = MachO::FatFile.new(merged_filename)
+
+    assert file
+    assert_instance_of MachO::FatFile, file
+  ensure
+    delete_if_exists(merged_filename)
+  end
 end
