@@ -470,6 +470,11 @@ module MachO
         @magic = magic
         @nfat_arch = nfat_arch
       end
+
+      # @return [String] the serialized fields of the fat header
+      def serialize
+        [magic, nfat_arch].pack(FORMAT)
+      end
     end
 
     # Fat binary header architecture structure. A Fat binary has one or more of
@@ -507,6 +512,11 @@ module MachO
         @offset = offset
         @size = size
         @align = align
+      end
+
+      # @return [String] the serialized fields of the fat arch
+      def serialize
+        [cputype, cpusubtype, offset, size, align].pack(FORMAT)
       end
     end
 
