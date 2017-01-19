@@ -72,7 +72,8 @@ module MachO
       # @return [String] the name of the section, including null pad bytes
       attr_reader :sectname
 
-      # @return [String] the name of the segment's section, including null pad bytes
+      # @return [String] the name of the segment's section, including null
+      #  pad bytes
       attr_reader :segname
 
       # @return [Fixnum] the memory address of the section
@@ -124,17 +125,19 @@ module MachO
         @reserved2 = reserved2
       end
 
-      # @return [String] the section's name, with any trailing NULL characters removed
+      # @return [String] the section's name, with any trailing NULL characters
+      #  removed
       def section_name
         sectname.delete("\x00")
       end
 
-      # @return [String] the parent segment's name, with any trailing NULL characters removed
+      # @return [String] the parent segment's name, with any trailing NULL
+      #  characters removed
       def segment_name
         segname.delete("\x00")
       end
 
-      # @return [Boolean] true if the section has no contents (i.e, `size` is 0)
+      # @return [Boolean] whether the section is empty (i.e, {size} is 0)
       def empty?
         size.zero?
       end
@@ -142,7 +145,7 @@ module MachO
       # @example
       #  puts "this section is regular" if sect.flag?(:S_REGULAR)
       # @param flag [Symbol] a section flag symbol
-      # @return [Boolean] true if `flag` is present in the section's flag field
+      # @return [Boolean] whether the flag is present in the section's {flags}
       def flag?(flag)
         flag = SECTION_FLAGS[flag]
         return false if flag.nil?

@@ -87,14 +87,21 @@ module MachO
     LC_STRUCTURES = {
       :LC_SEGMENT => "SegmentCommand",
       :LC_SYMTAB => "SymtabCommand",
-      :LC_SYMSEG => "SymsegCommand", # obsolete
-      :LC_THREAD => "ThreadCommand", # seems obsolete, but not documented as such
+      # "obsolete"
+      :LC_SYMSEG => "SymsegCommand",
+      # seems obsolete, but not documented as such
+      :LC_THREAD => "ThreadCommand",
       :LC_UNIXTHREAD => "ThreadCommand",
-      :LC_LOADFVMLIB => "FvmlibCommand", # obsolete
-      :LC_IDFVMLIB => "FvmlibCommand", # obsolete
-      :LC_IDENT => "IdentCommand", # obsolete
-      :LC_FVMFILE => "FvmfileCommand", # reserved for internal use only
-      :LC_PREPAGE => "LoadCommand", # reserved for internal use only, no public struct
+      # "obsolete"
+      :LC_LOADFVMLIB => "FvmlibCommand",
+      # "obsolete"
+      :LC_IDFVMLIB => "FvmlibCommand",
+      # "obsolete"
+      :LC_IDENT => "IdentCommand",
+      # "reserved for internal use only"
+      :LC_FVMFILE => "FvmfileCommand",
+      # "reserved for internal use only", no public struct
+      :LC_PREPAGE => "LoadCommand",
       :LC_DYSYMTAB => "DysymtabCommand",
       :LC_LOAD_DYLIB => "DylibCommand",
       :LC_ID_DYLIB => "DylibCommand",
@@ -182,7 +189,7 @@ module MachO
 
       # Instantiates a new LoadCommand given a view into its origin Mach-O
       # @param view [MachO::MachOView] the load command's raw view
-      # @return [MachO::LoadCommands::LoadCommand] the new load command
+      # @return [LoadCommand] the new load command
       # @api private
       def self.new_from_bin(view)
         bin = view.raw_data.slice(view.offset, bytesize)
@@ -218,12 +225,12 @@ module MachO
         @cmdsize = cmdsize
       end
 
-      # @return [Boolean] true if the load command can be serialized, false otherwise
+      # @return [Boolean] whether the load command can be serialized
       def serializable?
         CREATABLE_LOAD_COMMANDS.include?(LOAD_COMMANDS[cmd])
       end
 
-      # @param context [MachO::LoadCommands::LoadCommand::SerializationContext] the context
+      # @param context [SerializationContext] the context
       #  to serialize into
       # @return [String, nil] the serialized fields of the load command, or nil
       #  if the load command can't be serialized
@@ -240,14 +247,16 @@ module MachO
         view.offset
       end
 
-      # @return [Symbol] a symbol representation of the load command's identifying number
+      # @return [Symbol] a symbol representation of the load command's
+      #  identifying number
       def type
         LOAD_COMMANDS[cmd]
       end
 
       alias to_sym type
 
-      # @return [String] a string representation of the load command's identifying number
+      # @return [String] a string representation of the load command's
+      #  identifying number
       def to_s
         type.to_s
       end
@@ -257,9 +266,9 @@ module MachO
       # pretend that strings stored in LCs are immediately available without
       # explicit operations on the raw Mach-O data.
       class LCStr
-        # @param lc [MachO::LoadCommands::LoadCommand] the load command
-        # @param lc_str [Fixnum, String] the offset to the beginning of the string,
-        #  or the string itself if not being initialized with a view.
+        # @param lc [LoadCommand] the load command
+        # @param lc_str [Fixnum, String] the offset to the beginning of the
+        #  string, or the string itself if not being initialized with a view.
         # @raise [MachO::LCStrMalformedError] if the string is malformed
         # @todo devise a solution such that the `lc_str` parameter is not
         #  interpreted differently depending on `lc.view`. The current behavior
@@ -286,7 +295,8 @@ module MachO
           @string
         end
 
-        # @return [Fixnum] the offset to the beginning of the string in the load command
+        # @return [Fixnum] the offset to the beginning of the string in the
+        #  load command
         def to_i
           @string_offset
         end
@@ -298,11 +308,13 @@ module MachO
         # @return [Symbol] the endianness of the serialized load command
         attr_reader :endianness
 
-        # @return [Fixnum] the constant alignment value used to pad the serialized load command
+        # @return [Fixnum] the constant alignment value used to pad the
+        #  serialized load command
         attr_reader :alignment
 
         # @param macho [MachO::MachOFile] the file to contextualize
-        # @return [MachO::LoadCommands::LoadCommand::SerializationContext] the resulting context
+        # @return [SerializationContext] the
+        #  resulting context
         def self.context_for(macho)
           new(macho.endianness, macho.alignment)
         end
@@ -317,8 +329,9 @@ module MachO
       end
     end
 
-    # A load command containing a single 128-bit unique random number identifying
-    # an object produced by static link editor. Corresponds to LC_UUID.
+    # A load command containing a single 128-bit unique random number
+    # identifying an object produced by static link editor. Corresponds to
+    # LC_UUID.
     class UUIDCommand < LoadCommand
       # @return [Array<Fixnum>] the UUID
       attr_reader :uuid
@@ -413,7 +426,10 @@ module MachO
           MachO::Sections::Section
         end
 
-        bins = view.raw_data[view.offset + self.class.bytesize, nsects * klass.bytesize]
+        offset = view.offset + self.class.bytesize
+        length = nsects * klass.bytesize
+
+        bins = view.raw_data[offset, length]
         bins.unpack("a#{klass.bytesize}" * nsects).map do |bin|
           klass.new_from_bin(view.endianness, bin)
         end
@@ -443,10 +459,11 @@ module MachO
     end
 
     # A load command representing some aspect of shared libraries, depending
-    # on filetype. Corresponds to LC_ID_DYLIB, LC_LOAD_DYLIB, LC_LOAD_WEAK_DYLIB,
-    # and LC_REEXPORT_DYLIB.
+    # on filetype. Corresponds to LC_ID_DYLIB, LC_LOAD_DYLIB,
+    # LC_LOAD_WEAK_DYLIB, and LC_REEXPORT_DYLIB.
     class DylibCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the library's path name as an LCStr
+      # @return [LCStr] the library's path
+      #  name as an LCStr
       attr_reader :name
 
       # @return [Fixnum] the library's build time stamp
@@ -467,7 +484,8 @@ module MachO
       SIZEOF = 24
 
       # @api private
-      def initialize(view, cmd, cmdsize, name, timestamp, current_version, compatibility_version)
+      def initialize(view, cmd, cmdsize, name, timestamp, current_version,
+                     compatibility_version)
         super(view, cmd, cmdsize)
         @name = LCStr.new(self, name)
         @timestamp = timestamp
@@ -475,12 +493,15 @@ module MachO
         @compatibility_version = compatibility_version
       end
 
-      # @param context [MachO::LoadCommands::LoadCommand::SerializationContext] the context
+      # @param context [SerializationContext]
+      #  the context
       # @return [String] the serialized fields of the load command
       # @api private
       def serialize(context)
         format = Utils.specialize_format(FORMAT, context.endianness)
-        string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :name => name.to_s)
+        string_payload, string_offsets = Utils.pack_strings(SIZEOF,
+                                                            context.alignment,
+                                                            :name => name.to_s)
         cmdsize = SIZEOF + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:name], timestamp, current_version,
          compatibility_version].pack(format) + string_payload
@@ -491,7 +512,8 @@ module MachO
     # on filetype. Corresponds to LC_ID_DYLINKER, LC_LOAD_DYLINKER, and
     # LC_DYLD_ENVIRONMENT.
     class DylinkerCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the dynamic linker's path name as an LCStr
+      # @return [LCStr] the dynamic linker's
+      #  path name as an LCStr
       attr_reader :name
 
       # @see MachOStructure::FORMAT
@@ -508,12 +530,15 @@ module MachO
         @name = LCStr.new(self, name)
       end
 
-      # @param context [MachO::LoadCommands::LoadCommand::SerializationContext] the context
+      # @param context [SerializationContext]
+      #  the context
       # @return [String] the serialized fields of the load command
       # @api private
       def serialize(context)
         format = Utils.specialize_format(FORMAT, context.endianness)
-        string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :name => name.to_s)
+        string_payload, string_offsets = Utils.pack_strings(SIZEOF,
+                                                            context.alignment,
+                                                            :name => name.to_s)
         cmdsize = SIZEOF + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:name]].pack(format) + string_payload
       end
@@ -522,7 +547,8 @@ module MachO
     # A load command used to indicate dynamic libraries used in prebinding.
     # Corresponds to LC_PREBOUND_DYLIB.
     class PreboundDylibCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the library's path name as an LCStr
+      # @return [LCStr] the library's path
+      #  name as an LCStr
       attr_reader :name
 
       # @return [Fixnum] the number of modules in the library
@@ -549,7 +575,8 @@ module MachO
     end
 
     # A load command used to represent threads.
-    # @note cctools-870 has all fields of thread_command commented out except common ones (cmd, cmdsize)
+    # @note cctools-870 and onwards have all fields of thread_command commented
+    # out except the common ones (cmd, cmdsize)
     class ThreadCommand < LoadCommand
       # @see MachOStructure::FORMAT
       # @api private
@@ -567,7 +594,8 @@ module MachO
       # @return [Fixnum] the address of the initialization routine
       attr_reader :init_address
 
-      # @return [Fixnum] the index into the module table that the init routine is defined in
+      # @return [Fixnum] the index into the module table that the init routine
+      #  is defined in
       attr_reader :init_module
 
       # @return [void]
@@ -627,7 +655,7 @@ module MachO
     # A load command signifying membership of a subframework containing the name
     # of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
     class SubFrameworkCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the umbrella framework name as an LCStr
+      # @return [LCStr] the umbrella framework name as an LCStr
       attr_reader :umbrella
 
       # @see MachOStructure::FORMAT
@@ -648,7 +676,7 @@ module MachO
     # A load command signifying membership of a subumbrella containing the name
     # of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
     class SubUmbrellaCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the subumbrella framework name as an LCStr
+      # @return [LCStr] the subumbrella framework name as an LCStr
       attr_reader :sub_umbrella
 
       # @see MachOStructure::FORMAT
@@ -669,7 +697,7 @@ module MachO
     # A load command signifying a sublibrary of a shared library. Corresponds
     # to LC_SUB_LIBRARY.
     class SubLibraryCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the sublibrary name as an LCStr
+      # @return [LCStr] the sublibrary name as an LCStr
       attr_reader :sub_library
 
       # @see MachOStructure::FORMAT
@@ -690,7 +718,7 @@ module MachO
     # A load command signifying a shared library that is a subframework of
     # an umbrella framework. Corresponds to LC_SUB_CLIENT.
     class SubClientCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the subclient name as an LCStr
+      # @return [LCStr] the subclient name as an LCStr
       attr_reader :sub_client
 
       # @see MachOStructure::FORMAT
@@ -843,7 +871,8 @@ module MachO
       # @return [Fixnum] the number of hints in the hint table
       attr_reader :nhints
 
-      # @return [MachO::LoadCommands::TwolevelHintsCommand::TwolevelHintTable] the hint table
+      # @return [TwolevelHintsTable]
+      #  the hint table
       attr_reader :table
 
       # @see MachOStructure::FORMAT
@@ -865,7 +894,7 @@ module MachO
       # A representation of the two-level namespace lookup hints table exposed
       # by a {TwolevelHintsCommand} (`LC_TWOLEVEL_HINTS`).
       class TwolevelHintsTable
-        # @return [Array<MachO::LoadCommands::TwoLevelHintsCommand::TwoLevelHintsTable::TwoLevelHint>] all hints in the table
+        # @return [Array<TwolevelHint>] all hints in the table
         attr_reader :hints
 
         # @param view [MachO::MachOView] the view into the current Mach-O
@@ -923,7 +952,7 @@ module MachO
     # be added to the current run path used to find @rpath prefixed dylibs.
     # Corresponds to LC_RPATH.
     class RpathCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the path to add to the run path as an LCStr
+      # @return [LCStr] the path to add to the run path as an LCStr
       attr_reader :path
 
       # @see MachOStructure::FORMAT
@@ -940,20 +969,23 @@ module MachO
         @path = LCStr.new(self, path)
       end
 
-      # @param context [MachO::LoadCommands::LoadCommand::SerializationContext] the context
+      # @param context [SerializationContext] the context
       # @return [String] the serialized fields of the load command
       # @api private
       def serialize(context)
         format = Utils.specialize_format(FORMAT, context.endianness)
-        string_payload, string_offsets = Utils.pack_strings(SIZEOF, context.alignment, :path => path.to_s)
+        string_payload, string_offsets = Utils.pack_strings(SIZEOF,
+                                                            context.alignment,
+                                                            :path => path.to_s)
         cmdsize = SIZEOF + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:path]].pack(format) + string_payload
       end
     end
 
     # A load command representing the offsets and sizes of a blob of data in
-    # the __LINKEDIT segment. Corresponds to LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
-    # LC_FUNCTION_STARTS, LC_DATA_IN_CODE, LC_DYLIB_CODE_SIGN_DRS, and LC_LINKER_OPTIMIZATION_HINT.
+    # the __LINKEDIT segment. Corresponds to LC_CODE_SIGNATURE,
+    # LC_SEGMENT_SPLIT_INFO, LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
+    # LC_DYLIB_CODE_SIGN_DRS, and LC_LINKER_OPTIMIZATION_HINT.
     class LinkeditDataCommand < LoadCommand
       # @return [Fixnum] offset to the data in the __LINKEDIT segment
       attr_reader :dataoff
@@ -1040,7 +1072,8 @@ module MachO
     end
 
     # A load command containing the minimum OS version on which the binary
-    # was built to run. Corresponds to LC_VERSION_MIN_MACOSX and LC_VERSION_MIN_IPHONEOS.
+    # was built to run. Corresponds to LC_VERSION_MIN_MACOSX and
+    # LC_VERSION_MIN_IPHONEOS.
     class VersionMinCommand < LoadCommand
       # @return [Fixnum] the version X.Y.Z packed as x16.y8.z8
       attr_reader :version
@@ -1249,9 +1282,9 @@ module MachO
       end
     end
 
-    # An obsolete load command containing a free format string table. Each string
-    # is null-terminated and the command is zero-padded to a multiple of 4.
-    # Corresponds to LC_IDENT.
+    # An obsolete load command containing a free format string table. Each
+    # string is null-terminated and the command is zero-padded to a multiple of
+    # 4. Corresponds to LC_IDENT.
     class IdentCommand < LoadCommand
       # @see MachOStructure::FORMAT
       # @api private
@@ -1265,7 +1298,7 @@ module MachO
     # An obsolete load command containing the path to a file to be loaded into
     # memory. Corresponds to LC_FVMFILE.
     class FvmfileCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the pathname of the file being loaded
+      # @return [LCStr] the pathname of the file being loaded
       attr_reader :name
 
       # @return [Fixnum] the virtual address being loaded at
@@ -1286,10 +1319,10 @@ module MachO
       end
     end
 
-    # An obsolete load command containing the path to a library to be loaded into
-    # memory. Corresponds to LC_LOADFVMLIB and LC_IDFVMLIB.
+    # An obsolete load command containing the path to a library to be loaded
+    # into memory. Corresponds to LC_LOADFVMLIB and LC_IDFVMLIB.
     class FvmlibCommand < LoadCommand
-      # @return [MachO::LoadCommands::LoadCommand::LCStr] the library's target pathname
+      # @return [LCStr] the library's target pathname
       attr_reader :name
 
       # @return [Fixnum] the library's minor version number
