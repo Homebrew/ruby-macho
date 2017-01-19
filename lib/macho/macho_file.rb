@@ -59,70 +59,44 @@ module MachO
       @raw_data
     end
 
-    # @return [Boolean] true if the Mach-O has 32-bit magic, false otherwise
-    def magic32?
-      Utils.magic32?(header.magic)
-    end
-
-    # @return [Boolean] true if the Mach-O has 64-bit magic, false otherwise
-    def magic64?
-      Utils.magic64?(header.magic)
-    end
-
-    # @return [Fixnum] the file's internal alignment
-    def alignment
-      magic32? ? 4 : 8
-    end
-
-    # @return [Boolean] true if the file is of type `MH_OBJECT`, false otherwise
-    def object?
-      header.filetype == Headers::MH_OBJECT
-    end
-
-    # @return [Boolean] true if the file is of type `MH_EXECUTE`, false otherwise
-    def executable?
-      header.filetype == Headers::MH_EXECUTE
-    end
-
-    # @return [Boolean] true if the file is of type `MH_FVMLIB`, false otherwise
-    def fvmlib?
-      header.filetype == Headers::MH_FVMLIB
-    end
-
-    # @return [Boolean] true if the file is of type `MH_CORE`, false otherwise
-    def core?
-      header.filetype == Headers::MH_CORE
-    end
-
-    # @return [Boolean] true if the file is of type `MH_PRELOAD`, false otherwise
-    def preload?
-      header.filetype == Headers::MH_PRELOAD
-    end
-
-    # @return [Boolean] true if the file is of type `MH_DYLIB`, false otherwise
-    def dylib?
-      header.filetype == Headers::MH_DYLIB
-    end
-
-    # @return [Boolean] true if the file is of type `MH_DYLINKER`, false otherwise
-    def dylinker?
-      header.filetype == Headers::MH_DYLINKER
-    end
-
-    # @return [Boolean] true if the file is of type `MH_BUNDLE`, false otherwise
-    def bundle?
-      header.filetype == Headers::MH_BUNDLE
-    end
-
-    # @return [Boolean] true if the file is of type `MH_DSYM`, false otherwise
-    def dsym?
-      header.filetype == Headers::MH_DSYM
-    end
-
-    # @return [Boolean] true if the file is of type `MH_KEXT_BUNDLE`, false otherwise
-    def kext?
-      header.filetype == Headers::MH_KEXT_BUNDLE
-    end
+    # @!method magic
+    #  @return (see MachO::Headers::MachHeader#magic)
+    # @!method ncmds
+    #  @return (see MachO::Headers::MachHeader#ncmds)
+    # @!method sizeofcmds
+    #  @return (see MachO::Headers::MachHeader#sizeofcmds)
+    # @!method flags
+    #  @return (see MachO::Headers::MachHeader#flags)
+    # @!method object?
+    #  @return (see MachO::Headers::MachHeader#object?)
+    # @!method executable?
+    #  @return (see MachO::Headers::MachHeader#executable?)
+    # @!method fvmlib?
+    #  @return (see MachO::Headers::MachHeader#fvmlib?)
+    # @!method core?
+    #  @return (see MachO::Headers::MachHeader#core?)
+    # @!method preload?
+    #  @return (see MachO::Headers::MachHeader#preload?)
+    # @!method dylib?
+    #  @return (see MachO::Headers::MachHeader#dylib?)
+    # @!method dylinker?
+    #  @return (see MachO::Headers::MachHeader#dylinker?)
+    # @!method bundle?
+    #  @return (see MachO::Headers::MachHeader#bundle?)
+    # @!method dsym?
+    #  @return (see MachO::Headers::MachHeader#dsym?)
+    # @!method kext?
+    #  @return (see MachO::Headers::MachHeader#kext?)
+    # @!method magic32?
+    #  @return (see MachO::Headers::MachHeader#magic32?)
+    # @!method magic64?
+    #  @return (see MachO::Headers::MachHeader#magic64?)
+    # @!method alignment
+    #  @return (see MachO::Headers::MachHeader#alignment)
+    def_delegators :header, :magic, :ncmds, :sizeofcmds, :flags, :object?,
+                   :executable?, :fvmlib?, :core?, :preload?, :dylib?,
+                   :dylinker?, :bundle?, :dsym?, :kext?, :magic32?, :magic64?,
+                   :alignment
 
     # @return [String] a string representation of the file's magic number
     def magic_string
@@ -143,16 +117,6 @@ module MachO
     def cpusubtype
       Headers::CPU_SUBTYPES[header.cputype][header.cpusubtype]
     end
-
-    # @!method magic
-    #  @return (see MachO::Headers::MachHeader#magic)
-    # @!method ncmds
-    #  @return (see MachO::Headers::MachHeader#ncmds)
-    # @!method sizeofcmds
-    #  @return (see MachO::Headers::MachHeader#sizeofcmds)
-    # @!method flags
-    #  @return (see MachO::Headers::MachHeader#flags)
-    def_delegators :header, :magic, :ncmds, :sizeofcmds, :flags
 
     # All load commands of a given name.
     # @example

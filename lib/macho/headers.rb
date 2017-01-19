@@ -574,6 +574,71 @@ module MachO
         return false if flag.nil?
         flags & flag == flag
       end
+
+      # @return [Boolean] whether or not the file is of type `MH_OBJECT`
+      def object?
+        filetype == Headers::MH_OBJECT
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_EXECUTE`
+      def executable?
+        filetype == Headers::MH_EXECUTE
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_FVMLIB`
+      def fvmlib?
+        filetype == Headers::MH_FVMLIB
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_CORE`
+      def core?
+        filetype == Headers::MH_CORE
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_PRELOAD`
+      def preload?
+        filetype == Headers::MH_PRELOAD
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_DYLIB`
+      def dylib?
+        filetype == Headers::MH_DYLIB
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_DYLINKER`
+      def dylinker?
+        filetype == Headers::MH_DYLINKER
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_BUNDLE`
+      def bundle?
+        filetype == Headers::MH_BUNDLE
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_DSYM`
+      def dsym?
+        filetype == Headers::MH_DSYM
+      end
+
+      # @return [Boolean] whether or not the file is of type `MH_KEXT_BUNDLE`
+      def kext?
+        filetype == Headers::MH_KEXT_BUNDLE
+      end
+
+      # @return [Boolean] true if the Mach-O has 32-bit magic, false otherwise
+      def magic32?
+        Utils.magic32?(magic)
+      end
+
+      # @return [Boolean] true if the Mach-O has 64-bit magic, false otherwise
+      def magic64?
+        Utils.magic64?(magic)
+      end
+
+      # @return [Fixnum] the file's internal alignment
+      def alignment
+        magic32? ? 4 : 8
+      end
     end
 
     # 64-bit Mach-O file header structure
