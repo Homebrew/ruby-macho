@@ -1,9 +1,13 @@
+require "forwardable"
+
 module MachO
   # Represents a "Fat" file, which contains a header, a listing of available
   # architectures, and one or more Mach-O binaries.
   # @see https://en.wikipedia.org/wiki/Mach-O#Multi-architecture_binaries
   # @see MachO::MachOFile
   class FatFile
+    extend Forwardable
+
     # @return [String] the filename loaded from, or nil if loaded from a binary string
     attr_accessor :filename
 
@@ -74,70 +78,41 @@ module MachO
       @raw_data
     end
 
-    # @return [Boolean] true if the file is of type `MH_OBJECT`, false otherwise
-    def object?
-      machos.first.object?
-    end
+    # @!method object?
+    #  @return (see MachO::MachOFile#object?)
+    # @!method executable?
+    #  @return (see MachO::MachOFile#executable?)
+    # @!method fvmlib?
+    #  @return (see MachO::MachOFile#fvmlib?)
+    # @!method core?
+    #  @return (see MachO::MachOFile#core?)
+    # @!method preload?
+    #  @return (see MachO::MachOFile#preload?)
+    # @!method dylib?
+    #  @return (see MachO::MachOFile#dylib?)
+    # @!method dylinker?
+    #  @return (see MachO::MachOFile#dylinker?)
+    # @!method bundle?
+    #  @return (see MachO::MachOFile#bundle?)
+    # @!method dsym?
+    #  @return (see MachO::MachOFile#dsym?)
+    # @!method kext?
+    #  @return (see MachO::MachOFile#kext?)
+    # @!method filetype
+    #  @return (see MachO::MachOFile#filetype)
+    # @!method dylib_id
+    #  @return (see MachO::MachOFile#dylib_id)
+    def_delegators :canonical_macho, :object?, :executable?, :fvmlib?,
+                   :core?, :preload?, :dylib?, :dylinker?, :bundle?,
+                   :dsym?, :kext?, :filetype, :dylib_id
 
-    # @return [Boolean] true if the file is of type `MH_EXECUTE`, false otherwise
-    def executable?
-      machos.first.executable?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_FVMLIB`, false otherwise
-    def fvmlib?
-      machos.first.fvmlib?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_CORE`, false otherwise
-    def core?
-      machos.first.core?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_PRELOAD`, false otherwise
-    def preload?
-      machos.first.preload?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_DYLIB`, false otherwise
-    def dylib?
-      machos.first.dylib?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_DYLINKER`, false otherwise
-    def dylinker?
-      machos.first.dylinker?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_BUNDLE`, false otherwise
-    def bundle?
-      machos.first.bundle?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_DSYM`, false otherwise
-    def dsym?
-      machos.first.dsym?
-    end
-
-    # @return [Boolean] true if the file is of type `MH_KEXT_BUNDLE`, false otherwise
-    def kext?
-      machos.first.kext?
-    end
-
-    # @return [Fixnum] the file's magic number
-    def magic
-      header.magic
-    end
+    # @!method magic
+    #  @return (see MachO::Headers::FatHeader#magic)
+    def_delegators :header, :magic
 
     # @return [String] a string representation of the file's magic number
     def magic_string
       Headers::MH_MAGICS[magic]
-    end
-
-    # The file's type. Assumed to be the same for every Mach-O within.
-    # @return [Symbol] the filetype
-    def filetype
-      machos.first.filetype
     end
 
     # Populate the instance's fields with the raw Fat Mach-O data.
@@ -153,15 +128,6 @@ module MachO
     # @return [Array<MachO::LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
       machos.map(&:dylib_load_commands).flatten
-    end
-
-    # The file's dylib ID. If the file is not a dylib, returns `nil`.
-    # @example
-    #  file.dylib_id # => 'libBar.dylib'
-    # @return [String, nil] the file's dylib ID
-    # @see MachO::MachOFile#linked_dylibs
-    def dylib_id
-      machos.first.dylib_id
     end
 
     # Changes the file's dylib ID to `new_id`. If the file is not a dylib, does nothing.
@@ -394,6 +360,14 @@ module MachO
 
       # Non-strict mode: Raise first error if *all* Mach-O slices failed.
       raise errors.first if errors.size == machos.size
+    end
+
+    # Return a single-arch Mach-O that represents this fat Mach-O for purposes
+    #  of delegation.
+    # @return [MachO::MachOFile] the Mach-O file
+    # @api private
+    def canonical_macho
+      machos.first
     end
   end
 end

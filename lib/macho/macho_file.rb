@@ -1,3 +1,5 @@
+require "forwardable"
+
 module MachO
   # Represents a Mach-O file, which contains a header and load commands
   # as well as binary executable instructions. Mach-O binaries are
@@ -5,6 +7,8 @@ module MachO
   # @see https://en.wikipedia.org/wiki/Mach-O
   # @see MachO::FatFile
   class MachOFile
+    extend Forwardable
+
     # @return [String] the filename loaded from, or nil if loaded from a binary string
     attr_accessor :filename
 
@@ -120,11 +124,6 @@ module MachO
       header.filetype == Headers::MH_KEXT_BUNDLE
     end
 
-    # @return [Fixnum] the file's magic number
-    def magic
-      header.magic
-    end
-
     # @return [String] a string representation of the file's magic number
     def magic_string
       Headers::MH_MAGICS[magic]
@@ -145,20 +144,15 @@ module MachO
       Headers::CPU_SUBTYPES[header.cputype][header.cpusubtype]
     end
 
-    # @return [Fixnum] the number of load commands in the Mach-O's header
-    def ncmds
-      header.ncmds
-    end
-
-    # @return [Fixnum] the size of all load commands, in bytes
-    def sizeofcmds
-      header.sizeofcmds
-    end
-
-    # @return [Fixnum] execution flags set by the linker
-    def flags
-      header.flags
-    end
+    # @!method magic
+    #  @return (see MachO::Headers::MachHeader#magic)
+    # @!method ncmds
+    #  @return (see MachO::Headers::MachHeader#ncmds)
+    # @!method sizeofcmds
+    #  @return (see MachO::Headers::MachHeader#sizeofcmds)
+    # @!method flags
+    #  @return (see MachO::Headers::MachHeader#flags)
+    def_delegators :header, :magic, :ncmds, :sizeofcmds, :flags
 
     # All load commands of a given name.
     # @example
@@ -211,7 +205,7 @@ module MachO
     # @param new_lc [MachO::LoadCommands::LoadCommand] the load command being added
     # @return [void]
     # @raise [MachO::HeaderPadError] if the new command exceeds the header pad buffer
-    # @see {#insert_command}
+    # @see #insert_command
     # @note This is public, but methods like {#dylib_id=} should be preferred.
     def replace_command(old_lc, new_lc)
       context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
@@ -231,7 +225,7 @@ module MachO
     # @option options [Boolean] :repopulate (true) whether or not to repopulate
     #  the instance fields
     # @return [void]
-    # @see {#insert_command}
+    # @see #insert_command
     # @note This is public, but methods like {#add_rpath} should be preferred.
     #  Setting `repopulate` to false **will leave the instance in an
     #  inconsistent state** unless {#populate_fields} is called **immediately**

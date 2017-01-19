@@ -2,7 +2,7 @@ module MachO
   # Classes and constants for parsing load commands in Mach-O binaries.
   module LoadCommands
     # load commands added after OS X 10.1 need to be bitwise ORed with
-    # LC_REQ_DYLD to be recognized by the dynamic linder (dyld)
+    # LC_REQ_DYLD to be recognized by the dynamic linker (dyld)
     # @api private
     LC_REQ_DYLD = 0x80000000
 
