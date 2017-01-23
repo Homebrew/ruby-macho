@@ -392,16 +392,6 @@ module MachO
       populate_fields
     end
 
-    # All sections of the segment `segment`.
-    # @param segment [LoadCommands::SegmentCommand, LoadCommands::SegmentCommand64]
-    #  the segment being inspected
-    # @return [Array<Sections::Section>] if the Mach-O is 32-bit
-    # @return [Array<Sections::Section64>] if the Mach-O is 64-bit
-    # @deprecated use {LoadCommands::SegmentCommand#sections} instead
-    def sections(segment)
-      segment.sections
-    end
-
     # Write all Mach-O data to the given filename.
     # @param filename [String] the file to write to
     # @return [void]
