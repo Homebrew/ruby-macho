@@ -46,8 +46,8 @@ class FatFileTest < Minitest::Test
 
       assert header
       assert_kind_of MachO::Headers::FatHeader, header
-      assert_kind_of Fixnum, header.magic
-      assert_kind_of Fixnum, header.nfat_arch
+      assert_kind_of Integer, header.magic
+      assert_kind_of Integer, header.nfat_arch
     end
   end
 
@@ -64,11 +64,11 @@ class FatFileTest < Minitest::Test
       archs.each do |arch|
         assert arch
         assert_kind_of MachO::Headers::FatArch, arch
-        assert_kind_of Fixnum, arch.cputype
-        assert_kind_of Fixnum, arch.cpusubtype
-        assert_kind_of Fixnum, arch.offset
-        assert_kind_of Fixnum, arch.size
-        assert_kind_of Fixnum, arch.align
+        assert_kind_of Integer, arch.cputype
+        assert_kind_of Integer, arch.cpusubtype
+        assert_kind_of Integer, arch.offset
+        assert_kind_of Integer, arch.size
+        assert_kind_of Integer, arch.align
       end
     end
   end
@@ -102,7 +102,7 @@ class FatFileTest < Minitest::Test
       assert file.serialize
       assert_kind_of String, file.serialize
 
-      assert_kind_of Fixnum, file.magic
+      assert_kind_of Integer, file.magic
       assert_kind_of String, file.magic_string
       assert_kind_of Symbol, file.filetype
     end

@@ -36,9 +36,9 @@ class MachOFileTest < Minitest::Test
       file.load_commands.each do |lc|
         assert lc
         assert_kind_of MachO::LoadCommands::LoadCommand, lc
-        assert_kind_of Fixnum, lc.offset
-        assert_kind_of Fixnum, lc.cmd
-        assert_kind_of Fixnum, lc.cmdsize
+        assert_kind_of Integer, lc.offset
+        assert_kind_of Integer, lc.cmd
+        assert_kind_of Integer, lc.cmdsize
         assert_kind_of String, lc.to_s
         assert_kind_of Symbol, lc.type
         assert_kind_of Symbol, lc.to_sym
@@ -67,13 +67,13 @@ class MachOFileTest < Minitest::Test
       assert header
       assert_kind_of MachO::Headers::MachHeader, header if file.magic32?
       assert_kind_of MachO::Headers::MachHeader64, header if file.magic64?
-      assert_kind_of Fixnum, header.magic
-      assert_kind_of Fixnum, header.cputype
-      assert_kind_of Fixnum, header.cpusubtype
-      assert_kind_of Fixnum, header.filetype
-      assert_kind_of Fixnum, header.ncmds
-      assert_kind_of Fixnum, header.sizeofcmds
-      assert_kind_of Fixnum, header.flags
+      assert_kind_of Integer, header.magic
+      assert_kind_of Integer, header.cputype
+      assert_kind_of Integer, header.cpusubtype
+      assert_kind_of Integer, header.filetype
+      assert_kind_of Integer, header.ncmds
+      assert_kind_of Integer, header.sizeofcmds
+      assert_kind_of Integer, header.flags
       refute header.flag?(:THIS_IS_A_MADE_UP_FLAG)
     end
   end
@@ -93,14 +93,14 @@ class MachOFileTest < Minitest::Test
         assert_kind_of MachO::LoadCommands::SegmentCommand, seg if file.magic32?
         assert_kind_of MachO::LoadCommands::SegmentCommand64, seg if file.magic64?
         assert_kind_of String, seg.segname
-        assert_kind_of Fixnum, seg.vmaddr
-        assert_kind_of Fixnum, seg.vmsize
-        assert_kind_of Fixnum, seg.fileoff
-        assert_kind_of Fixnum, seg.filesize
-        assert_kind_of Fixnum, seg.maxprot
-        assert_kind_of Fixnum, seg.initprot
-        assert_kind_of Fixnum, seg.nsects
-        assert_kind_of Fixnum, seg.flags
+        assert_kind_of Integer, seg.vmaddr
+        assert_kind_of Integer, seg.vmsize
+        assert_kind_of Integer, seg.fileoff
+        assert_kind_of Integer, seg.filesize
+        assert_kind_of Integer, seg.maxprot
+        assert_kind_of Integer, seg.initprot
+        assert_kind_of Integer, seg.nsects
+        assert_kind_of Integer, seg.flags
         refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
 
         sections = seg.sections
@@ -113,17 +113,17 @@ class MachOFileTest < Minitest::Test
           assert_kind_of MachO::Sections::Section64, sect if seg.is_a? MachO::LoadCommands::SegmentCommand64
           assert_kind_of String, sect.sectname
           assert_kind_of String, sect.segname
-          assert_kind_of Fixnum, sect.addr
-          assert_kind_of Fixnum, sect.size
-          assert_kind_of Fixnum, sect.offset
-          assert_kind_of Fixnum, sect.align
-          assert_kind_of Fixnum, sect.reloff
-          assert_kind_of Fixnum, sect.nreloc
-          assert_kind_of Fixnum, sect.flags
+          assert_kind_of Integer, sect.addr
+          assert_kind_of Integer, sect.size
+          assert_kind_of Integer, sect.offset
+          assert_kind_of Integer, sect.align
+          assert_kind_of Integer, sect.reloff
+          assert_kind_of Integer, sect.nreloc
+          assert_kind_of Integer, sect.flags
           refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
-          assert_kind_of Fixnum, sect.reserved1
-          assert_kind_of Fixnum, sect.reserved2
-          assert_kind_of Fixnum, sect.reserved3 if sect.is_a? MachO::Sections::Section64
+          assert_kind_of Integer, sect.reserved1
+          assert_kind_of Integer, sect.reserved2
+          assert_kind_of Integer, sect.reserved3 if sect.is_a? MachO::Sections::Section64
         end
       end
     end
@@ -138,14 +138,14 @@ class MachOFileTest < Minitest::Test
       assert file.serialize
       assert_kind_of String, file.serialize
 
-      assert_kind_of Fixnum, file.magic
+      assert_kind_of Integer, file.magic
       assert_kind_of String, file.magic_string
       assert_kind_of Symbol, file.filetype
       assert_kind_of Symbol, file.cputype
       assert_kind_of Symbol, file.cpusubtype
-      assert_kind_of Fixnum, file.ncmds
-      assert_kind_of Fixnum, file.sizeofcmds
-      assert_kind_of Fixnum, file.flags
+      assert_kind_of Integer, file.ncmds
+      assert_kind_of Integer, file.sizeofcmds
+      assert_kind_of Integer, file.flags
 
       refute_predicate file.segments, :empty?
       refute_predicate file.linked_dylibs, :empty?
