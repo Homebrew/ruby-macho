@@ -173,10 +173,10 @@ module MachO
       # @return [MachO::MachOView] the raw view associated with the load command
       attr_reader :view
 
-      # @return [Fixnum] the load command's identifying number
+      # @return [Integer] the load command's identifying number
       attr_reader :cmd
 
-      # @return [Fixnum] the size of the load command, in bytes
+      # @return [Integer] the size of the load command, in bytes
       attr_reader :cmdsize
 
       # @see MachOStructure::FORMAT
@@ -216,8 +216,8 @@ module MachO
       end
 
       # @param view [MachO::MachOView] the load command's raw view
-      # @param cmd [Fixnum] the load command's identifying number
-      # @param cmdsize [Fixnum] the size of the load command in bytes
+      # @param cmd [Integer] the load command's identifying number
+      # @param cmdsize [Integer] the size of the load command in bytes
       # @api private
       def initialize(view, cmd, cmdsize)
         @view = view
@@ -241,7 +241,7 @@ module MachO
         [cmd, SIZEOF].pack(format)
       end
 
-      # @return [Fixnum] the load command's offset in the source file
+      # @return [Integer] the load command's offset in the source file
       # @deprecated use {#view} instead
       def offset
         view.offset
@@ -267,7 +267,7 @@ module MachO
       # explicit operations on the raw Mach-O data.
       class LCStr
         # @param lc [LoadCommand] the load command
-        # @param lc_str [Fixnum, String] the offset to the beginning of the
+        # @param lc_str [Integer, String] the offset to the beginning of the
         #  string, or the string itself if not being initialized with a view.
         # @raise [MachO::LCStrMalformedError] if the string is malformed
         # @todo devise a solution such that the `lc_str` parameter is not
@@ -295,7 +295,7 @@ module MachO
           @string
         end
 
-        # @return [Fixnum] the offset to the beginning of the string in the
+        # @return [Integer] the offset to the beginning of the string in the
         #  load command
         def to_i
           @string_offset
@@ -308,7 +308,7 @@ module MachO
         # @return [Symbol] the endianness of the serialized load command
         attr_reader :endianness
 
-        # @return [Fixnum] the constant alignment value used to pad the
+        # @return [Integer] the constant alignment value used to pad the
         #  serialized load command
         attr_reader :alignment
 
@@ -320,7 +320,7 @@ module MachO
         end
 
         # @param endianness [Symbol] the endianness of the context
-        # @param alignment [Fixnum] the alignment of the context
+        # @param alignment [Integer] the alignment of the context
         # @api private
         def initialize(endianness, alignment)
           @endianness = endianness
@@ -333,7 +333,7 @@ module MachO
     # identifying an object produced by static link editor. Corresponds to
     # LC_UUID.
     class UUIDCommand < LoadCommand
-      # @return [Array<Fixnum>] the UUID
+      # @return [Array<Integer>] the UUID
       attr_reader :uuid
 
       # @see MachOStructure::FORMAT
@@ -368,28 +368,28 @@ module MachO
       # @return [String] the name of the segment
       attr_reader :segname
 
-      # @return [Fixnum] the memory address of the segment
+      # @return [Integer] the memory address of the segment
       attr_reader :vmaddr
 
-      # @return [Fixnum] the memory size of the segment
+      # @return [Integer] the memory size of the segment
       attr_reader :vmsize
 
-      # @return [Fixnum] the file offset of the segment
+      # @return [Integer] the file offset of the segment
       attr_reader :fileoff
 
-      # @return [Fixnum] the amount to map from the file
+      # @return [Integer] the amount to map from the file
       attr_reader :filesize
 
-      # @return [Fixnum] the maximum VM protection
+      # @return [Integer] the maximum VM protection
       attr_reader :maxprot
 
-      # @return [Fixnum] the initial VM protection
+      # @return [Integer] the initial VM protection
       attr_reader :initprot
 
-      # @return [Fixnum] the number of sections in the segment
+      # @return [Integer] the number of sections in the segment
       attr_reader :nsects
 
-      # @return [Fixnum] any flags associated with the segment
+      # @return [Integer] any flags associated with the segment
       attr_reader :flags
 
       # @see MachOStructure::FORMAT
@@ -466,13 +466,13 @@ module MachO
       #  name as an LCStr
       attr_reader :name
 
-      # @return [Fixnum] the library's build time stamp
+      # @return [Integer] the library's build time stamp
       attr_reader :timestamp
 
-      # @return [Fixnum] the library's current version number
+      # @return [Integer] the library's current version number
       attr_reader :current_version
 
-      # @return [Fixnum] the library's compatibility version number
+      # @return [Integer] the library's compatibility version number
       attr_reader :compatibility_version
 
       # @see MachOStructure::FORMAT
@@ -551,10 +551,10 @@ module MachO
       #  name as an LCStr
       attr_reader :name
 
-      # @return [Fixnum] the number of modules in the library
+      # @return [Integer] the number of modules in the library
       attr_reader :nmodules
 
-      # @return [Fixnum] a bit vector of linked modules
+      # @return [Integer] a bit vector of linked modules
       attr_reader :linked_modules
 
       # @see MachOStructure::FORMAT
@@ -591,10 +591,10 @@ module MachO
     # initialization routine and an index into the module table for the module
     # that defines the routine. Corresponds to LC_ROUTINES.
     class RoutinesCommand < LoadCommand
-      # @return [Fixnum] the address of the initialization routine
+      # @return [Integer] the address of the initialization routine
       attr_reader :init_address
 
-      # @return [Fixnum] the index into the module table that the init routine
+      # @return [Integer] the index into the module table that the init routine
       #  is defined in
       attr_reader :init_module
 
@@ -739,10 +739,10 @@ module MachO
     # A load command containing the offsets and sizes of the link-edit 4.3BSD
     # "stab" style symbol table information. Corresponds to LC_SYMTAB.
     class SymtabCommand < LoadCommand
-      # @return [Fixnum] the symbol table's offset
+      # @return [Integer] the symbol table's offset
       attr_reader :symoff
 
-      # @return [Fixnum] the number of symbol table entries
+      # @return [Integer] the number of symbol table entries
       attr_reader :nsyms
 
       # @return the string table's offset
@@ -772,58 +772,58 @@ module MachO
     # A load command containing symbolic information needed to support data
     # structures used by the dynamic link editor. Corresponds to LC_DYSYMTAB.
     class DysymtabCommand < LoadCommand
-      # @return [Fixnum] the index to local symbols
+      # @return [Integer] the index to local symbols
       attr_reader :ilocalsym
 
-      # @return [Fixnum] the number of local symbols
+      # @return [Integer] the number of local symbols
       attr_reader :nlocalsym
 
-      # @return [Fixnum] the index to externally defined symbols
+      # @return [Integer] the index to externally defined symbols
       attr_reader :iextdefsym
 
-      # @return [Fixnum] the number of externally defined symbols
+      # @return [Integer] the number of externally defined symbols
       attr_reader :nextdefsym
 
-      # @return [Fixnum] the index to undefined symbols
+      # @return [Integer] the index to undefined symbols
       attr_reader :iundefsym
 
-      # @return [Fixnum] the number of undefined symbols
+      # @return [Integer] the number of undefined symbols
       attr_reader :nundefsym
 
-      # @return [Fixnum] the file offset to the table of contents
+      # @return [Integer] the file offset to the table of contents
       attr_reader :tocoff
 
-      # @return [Fixnum] the number of entries in the table of contents
+      # @return [Integer] the number of entries in the table of contents
       attr_reader :ntoc
 
-      # @return [Fixnum] the file offset to the module table
+      # @return [Integer] the file offset to the module table
       attr_reader :modtaboff
 
-      # @return [Fixnum] the number of entries in the module table
+      # @return [Integer] the number of entries in the module table
       attr_reader :nmodtab
 
-      # @return [Fixnum] the file offset to the referenced symbol table
+      # @return [Integer] the file offset to the referenced symbol table
       attr_reader :extrefsymoff
 
-      # @return [Fixnum] the number of entries in the referenced symbol table
+      # @return [Integer] the number of entries in the referenced symbol table
       attr_reader :nextrefsyms
 
-      # @return [Fixnum] the file offset to the indirect symbol table
+      # @return [Integer] the file offset to the indirect symbol table
       attr_reader :indirectsymoff
 
-      # @return [Fixnum] the number of entries in the indirect symbol table
+      # @return [Integer] the number of entries in the indirect symbol table
       attr_reader :nindirectsyms
 
-      # @return [Fixnum] the file offset to the external relocation entries
+      # @return [Integer] the file offset to the external relocation entries
       attr_reader :extreloff
 
-      # @return [Fixnum] the number of external relocation entries
+      # @return [Integer] the number of external relocation entries
       attr_reader :nextrel
 
-      # @return [Fixnum] the file offset to the local relocation entries
+      # @return [Integer] the file offset to the local relocation entries
       attr_reader :locreloff
 
-      # @return [Fixnum] the number of local relocation entries
+      # @return [Integer] the number of local relocation entries
       attr_reader :nlocrel
 
       # @see MachOStructure::FORMAT
@@ -865,10 +865,10 @@ module MachO
     # A load command containing the offset and number of hints in the two-level
     # namespace lookup hints table. Corresponds to LC_TWOLEVEL_HINTS.
     class TwolevelHintsCommand < LoadCommand
-      # @return [Fixnum] the offset to the hint table
+      # @return [Integer] the offset to the hint table
       attr_reader :htoffset
 
-      # @return [Fixnum] the number of hints in the hint table
+      # @return [Integer] the number of hints in the hint table
       attr_reader :nhints
 
       # @return [TwolevelHintsTable]
@@ -898,8 +898,8 @@ module MachO
         attr_reader :hints
 
         # @param view [MachO::MachOView] the view into the current Mach-O
-        # @param htoffset [Fixnum] the offset of the hints table
-        # @param nhints [Fixnum] the number of two-level hints in the table
+        # @param htoffset [Integer] the offset of the hints table
+        # @param nhints [Integer] the number of two-level hints in the table
         # @api private
         def initialize(view, htoffset, nhints)
           format = Utils.specialize_format("L=#{nhints}", view.endianness)
@@ -911,13 +911,13 @@ module MachO
 
         # An individual two-level namespace lookup hint.
         class TwolevelHint
-          # @return [Fixnum] the index into the sub-images
+          # @return [Integer] the index into the sub-images
           attr_reader :isub_image
 
-          # @return [Fixnum] the index into the table of contents
+          # @return [Integer] the index into the table of contents
           attr_reader :itoc
 
-          # @param blob [Fixnum] the 32-bit number containing the lookup hint
+          # @param blob [Integer] the 32-bit number containing the lookup hint
           # @api private
           def initialize(blob)
             @isub_image = blob >> 24
@@ -930,7 +930,7 @@ module MachO
     # A load command containing the value of the original checksum for prebound
     # files, or zero. Corresponds to LC_PREBIND_CKSUM.
     class PrebindCksumCommand < LoadCommand
-      # @return [Fixnum] the checksum or 0
+      # @return [Integer] the checksum or 0
       attr_reader :cksum
 
       # @see MachOStructure::FORMAT
@@ -987,10 +987,10 @@ module MachO
     # LC_SEGMENT_SPLIT_INFO, LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
     # LC_DYLIB_CODE_SIGN_DRS, and LC_LINKER_OPTIMIZATION_HINT.
     class LinkeditDataCommand < LoadCommand
-      # @return [Fixnum] offset to the data in the __LINKEDIT segment
+      # @return [Integer] offset to the data in the __LINKEDIT segment
       attr_reader :dataoff
 
-      # @return [Fixnum] size of the data in the __LINKEDIT segment
+      # @return [Integer] size of the data in the __LINKEDIT segment
       attr_reader :datasize
 
       # @see MachOStructure::FORMAT
@@ -1012,13 +1012,13 @@ module MachO
     # A load command representing the offset to and size of an encrypted
     # segment. Corresponds to LC_ENCRYPTION_INFO.
     class EncryptionInfoCommand < LoadCommand
-      # @return [Fixnum] the offset to the encrypted segment
+      # @return [Integer] the offset to the encrypted segment
       attr_reader :cryptoff
 
-      # @return [Fixnum] the size of the encrypted segment
+      # @return [Integer] the size of the encrypted segment
       attr_reader :cryptsize
 
-      # @return [Fixnum] the encryption system, or 0 if not encrypted yet
+      # @return [Integer] the encryption system, or 0 if not encrypted yet
       attr_reader :cryptid
 
       # @see MachOStructure::FORMAT
@@ -1041,16 +1041,16 @@ module MachO
     # A load command representing the offset to and size of an encrypted
     # segment. Corresponds to LC_ENCRYPTION_INFO_64.
     class EncryptionInfoCommand64 < LoadCommand
-      # @return [Fixnum] the offset to the encrypted segment
+      # @return [Integer] the offset to the encrypted segment
       attr_reader :cryptoff
 
-      # @return [Fixnum] the size of the encrypted segment
+      # @return [Integer] the size of the encrypted segment
       attr_reader :cryptsize
 
-      # @return [Fixnum] the encryption system, or 0 if not encrypted yet
+      # @return [Integer] the encryption system, or 0 if not encrypted yet
       attr_reader :cryptid
 
-      # @return [Fixnum] 64-bit padding value
+      # @return [Integer] 64-bit padding value
       attr_reader :pad
 
       # @see MachOStructure::FORMAT
@@ -1075,10 +1075,10 @@ module MachO
     # was built to run. Corresponds to LC_VERSION_MIN_MACOSX and
     # LC_VERSION_MIN_IPHONEOS.
     class VersionMinCommand < LoadCommand
-      # @return [Fixnum] the version X.Y.Z packed as x16.y8.z8
+      # @return [Integer] the version X.Y.Z packed as x16.y8.z8
       attr_reader :version
 
-      # @return [Fixnum] the SDK version X.Y.Z packed as x16.y8.z8
+      # @return [Integer] the SDK version X.Y.Z packed as x16.y8.z8
       attr_reader :sdk
 
       # @see MachOStructure::FORMAT
@@ -1123,34 +1123,34 @@ module MachO
     # compressed form of the information dyld needs to load the image.
     # Corresponds to LC_DYLD_INFO and LC_DYLD_INFO_ONLY.
     class DyldInfoCommand < LoadCommand
-      # @return [Fixnum] the file offset to the rebase information
+      # @return [Integer] the file offset to the rebase information
       attr_reader :rebase_off
 
-      # @return [Fixnum] the size of the rebase information
+      # @return [Integer] the size of the rebase information
       attr_reader :rebase_size
 
-      # @return [Fixnum] the file offset to the binding information
+      # @return [Integer] the file offset to the binding information
       attr_reader :bind_off
 
-      # @return [Fixnum] the size of the binding information
+      # @return [Integer] the size of the binding information
       attr_reader :bind_size
 
-      # @return [Fixnum] the file offset to the weak binding information
+      # @return [Integer] the file offset to the weak binding information
       attr_reader :weak_bind_off
 
-      # @return [Fixnum] the size of the weak binding information
+      # @return [Integer] the size of the weak binding information
       attr_reader :weak_bind_size
 
-      # @return [Fixnum] the file offset to the lazy binding information
+      # @return [Integer] the file offset to the lazy binding information
       attr_reader :lazy_bind_off
 
-      # @return [Fixnum] the size of the lazy binding information
+      # @return [Integer] the size of the lazy binding information
       attr_reader :lazy_bind_size
 
-      # @return [Fixnum] the file offset to the export information
+      # @return [Integer] the file offset to the export information
       attr_reader :export_off
 
-      # @return [Fixnum] the size of the export information
+      # @return [Integer] the size of the export information
       attr_reader :export_size
 
       # @see MachOStructure::FORMAT
@@ -1182,7 +1182,7 @@ module MachO
     # A load command containing linker options embedded in object files.
     # Corresponds to LC_LINKER_OPTION.
     class LinkerOptionCommand < LoadCommand
-      # @return [Fixnum] the number of strings
+      # @return [Integer] the number of strings
       attr_reader :count
 
       # @see MachOStructure::FORMAT
@@ -1202,10 +1202,10 @@ module MachO
 
     # A load command specifying the offset of main(). Corresponds to LC_MAIN.
     class EntryPointCommand < LoadCommand
-      # @return [Fixnum] the file (__TEXT) offset of main()
+      # @return [Integer] the file (__TEXT) offset of main()
       attr_reader :entryoff
 
-      # @return [Fixnum] if not 0, the initial stack size.
+      # @return [Integer] if not 0, the initial stack size.
       attr_reader :stacksize
 
       # @see MachOStructure::FORMAT
@@ -1227,7 +1227,7 @@ module MachO
     # A load command specifying the version of the sources used to build the
     # binary. Corresponds to LC_SOURCE_VERSION.
     class SourceVersionCommand < LoadCommand
-      # @return [Fixnum] the version packed as a24.b10.c10.d10.e10
+      # @return [Integer] the version packed as a24.b10.c10.d10.e10
       attr_reader :version
 
       # @see MachOStructure::FORMAT
@@ -1260,10 +1260,10 @@ module MachO
     # An obsolete load command containing the offset and size of the (GNU style)
     # symbol table information. Corresponds to LC_SYMSEG.
     class SymsegCommand < LoadCommand
-      # @return [Fixnum] the offset to the symbol segment
+      # @return [Integer] the offset to the symbol segment
       attr_reader :offset
 
-      # @return [Fixnum] the size of the symbol segment in bytes
+      # @return [Integer] the size of the symbol segment in bytes
       attr_reader :size
 
       # @see MachOStructure::FORMAT
@@ -1301,7 +1301,7 @@ module MachO
       # @return [LCStr] the pathname of the file being loaded
       attr_reader :name
 
-      # @return [Fixnum] the virtual address being loaded at
+      # @return [Integer] the virtual address being loaded at
       attr_reader :header_addr
 
       # @see MachOStructure::FORMAT
@@ -1325,10 +1325,10 @@ module MachO
       # @return [LCStr] the library's target pathname
       attr_reader :name
 
-      # @return [Fixnum] the library's minor version number
+      # @return [Integer] the library's minor version number
       attr_reader :minor_version
 
-      # @return [Fixnum] the library's header address
+      # @return [Integer] the library's header address
       attr_reader :header_addr
 
       # @see MachOStructure::FORMAT
