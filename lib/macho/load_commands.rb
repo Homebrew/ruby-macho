@@ -66,20 +66,20 @@ module MachO
 
     # load commands responsible for loading dylibs
     # @api private
-    DYLIB_LOAD_COMMANDS = [
-      :LC_LOAD_DYLIB,
-      :LC_LOAD_WEAK_DYLIB,
-      :LC_REEXPORT_DYLIB,
-      :LC_LAZY_LOAD_DYLIB,
-      :LC_LOAD_UPWARD_DYLIB,
+    DYLIB_LOAD_COMMANDS = %i[
+      LC_LOAD_DYLIB
+      LC_LOAD_WEAK_DYLIB
+      LC_REEXPORT_DYLIB
+      LC_LAZY_LOAD_DYLIB
+      LC_LOAD_UPWARD_DYLIB
     ].freeze
 
     # load commands that can be created manually via {LoadCommand.create}
     # @api private
-    CREATABLE_LOAD_COMMANDS = DYLIB_LOAD_COMMANDS + [
-      :LC_ID_DYLIB,
-      :LC_RPATH,
-      :LC_LOAD_DYLINKER,
+    CREATABLE_LOAD_COMMANDS = DYLIB_LOAD_COMMANDS + %i[
+      LC_ID_DYLIB
+      LC_RPATH
+      LC_LOAD_DYLINKER
     ].freeze
 
     # association of load command symbols to string representations of classes
