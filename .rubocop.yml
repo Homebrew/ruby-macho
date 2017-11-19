@@ -12,10 +12,10 @@ Style/FormatString:
 
 # we prefer compact if-else-end/case-when-end alignment
 Lint/EndAlignment:
-  AlignWith: variable
+  EnforcedStyleAlignWith: variable
 
 Style/CaseIndentation:
-  IndentWhenRelativeTo: end
+  EnforcedStyle: end
 
 # Ruby 1.8 compatibility
 Style/DotPosition:
