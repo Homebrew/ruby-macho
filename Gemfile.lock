@@ -3,7 +3,7 @@ GEM
   specs:
     ast (2.3.0)
     benchmark-ips (2.7.2)
-    minitest (5.8.4)
+    minitest (5.10.3)
     parser (2.3.1.2)
       ast (~> 2.2)
     powerpack (0.1.1)
