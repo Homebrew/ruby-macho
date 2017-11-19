@@ -14,18 +14,18 @@ Style/FormatString:
 Lint/EndAlignment:
   EnforcedStyleAlignWith: variable
 
-Style/CaseIndentation:
-  EnforcedStyle: end
-
-# Ruby 1.8 compatibility
-Style/DotPosition:
-  EnforcedStyle: trailing
-
 Style/HashSyntax:
   EnforcedStyle: hash_rockets
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: no_comma
+
+Layout/CaseIndentation:
+  EnforcedStyle: end
+
+# Ruby 1.8 compatibility
+Layout/DotPosition:
+  EnforcedStyle: trailing
 
 # TODO: re-enable in the future
 Metrics/LineLength:
