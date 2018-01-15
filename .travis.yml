@@ -13,9 +13,10 @@ matrix:
     - rvm: 1.8.7
     - rvm: 1.9.3
     - rvm: 2.0.0 # rubocop no longer supports ruby < 2.1.0
-    - rvm: 2.5.0 # TODO debug rake failure
 cache: bundler
 sudo: false
+before_install:
+  - gem update --system # https://github.com/travis-ci/travis-ci/issues/8978
 script:
   - bundle exec rake
   - bundle exec rubocop -D lib/
