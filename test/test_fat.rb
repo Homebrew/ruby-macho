@@ -1,6 +1,4 @@
-require "minitest/autorun"
-require "helpers"
-require "macho"
+require_relative "helpers"
 
 class FatFileTest < Minitest::Test
   include Helpers

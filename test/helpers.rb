@@ -1,7 +1,15 @@
-require "macho"
+# if we're running the tests on the CI, generate a coveralls coverage report
+if ENV["CI"]
+  require "coveralls"
+  Coveralls.wear!
+end
+
 require "digest/sha1"
 require "fileutils"
+require "minitest/autorun"
 require "tempfile"
+
+require "macho"
 
 module Helpers
   OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/

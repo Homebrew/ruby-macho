@@ -1,7 +1,6 @@
 $LOAD_PATH.unshift "#{File.dirname(__FILE__)}/lib"
-$LOAD_PATH.unshift "#{File.dirname(__FILE__)}/test"
 require "rake/testtask"
-require "bench"
+require_relative "test/bench"
 
 Rake::TestTask.new do |t|
   t.libs << "test"
