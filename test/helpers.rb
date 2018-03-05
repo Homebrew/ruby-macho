@@ -1,7 +1,10 @@
-# if we're running the tests on the CI, generate a coveralls coverage report
+# if we're running the tests on the CI, generate a codecov coverage report
 if ENV["CI"]
-  require "coveralls"
-  Coveralls.wear!
+  require "simplecov"
+  SimpleCov.start
+
+  require "codecov"
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
 require "digest/sha1"
