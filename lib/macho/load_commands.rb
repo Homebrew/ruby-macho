@@ -58,6 +58,8 @@ module MachO
       0x2e => :LC_LINKER_OPTIMIZATION_HINT,
       0x2f => :LC_VERSION_MIN_TVOS,
       0x30 => :LC_VERSION_MIN_WATCHOS,
+      0x31 => :LC_NOTE,
+      0x32 => :LC_BUILD_VERSION,
     }.freeze
 
     # association of symbol representations to load command constants
@@ -141,6 +143,8 @@ module MachO
       :LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand",
       :LC_VERSION_MIN_TVOS => "VersionMinCommand",
       :LC_VERSION_MIN_WATCHOS => "VersionMinCommand",
+      :LC_NOTE => "LoadCommand",
+      :LC_BUILD_VERSION => "BuildVersionCommand",
     }.freeze
 
     # association of segment name symbols to names
@@ -1100,6 +1104,97 @@ module MachO
       # @return [String] a string representing the minimum OS version.
       def version_string
         binary = "%032b" % version
+        segs = [
+          binary[0..15], binary[16..23], binary[24..31]
+        ].map { |s| s.to_i(2) }
+
+        segs.join(".")
+      end
+
+      # A string representation of the binary's SDK version.
+      # @return [String] a string representing the SDK version.
+      def sdk_string
+        binary = "%032b" % sdk
+        segs = [
+          binary[0..15], binary[16..23], binary[24..31]
+        ].map { |s| s.to_i(2) }
+
+        segs.join(".")
+      end
+    end
+
+    # A load command containing the minimum OS version on which
+    # the binary was built for its platform.
+    # Corresponds to LC_BUILD_VERSION.
+    class BuildVersionCommand < LoadCommand
+      # @return [Integer]
+      attr_reader :platform
+
+      # @return [Integer] the minimum OS version X.Y.Z packed as x16.y8.z8
+      attr_reader :minos
+
+      # @return [Integer] the SDK version X.Y.Z packed as x16.y8.z8
+      attr_reader :sdk
+
+      # @return [ToolEntries] tool entries
+      attr_reader :tool_entries
+
+      # @see MachOStructure::FORMAT
+      # @api private
+      FORMAT = "L=6".freeze
+
+      # @see MachOStructure::SIZEOF
+      # @api private
+      SIZEOF = 24
+
+      # @api private
+      def initialize(view, cmd, cmdsize, platform, minos, sdk, ntools)
+        super(view, cmd, cmdsize)
+        @platform = platform
+        @minos = minos
+        @sdk = sdk
+        @tool_entries = ToolEntries.new(view, ntools)
+      end
+
+      # A representation of the tool versions exposed
+      # by a {BuildVersionCommand} (`LC_BUILD_VERSION`).
+      class ToolEntries
+        # @return [Array<Tool>] all tools
+        attr_reader :tools
+
+        # @param view [MachO::MachOView] the view into the current Mach-O
+        # @param nhints [Integer] the number of tools
+        # @api private
+        def initialize(view, ntools)
+          format = Utils.specialize_format("L=#{ntools * 2}", view.endianness)
+          raw_table = view.raw_data[view.offset + 24, ntools * 8]
+          blobs = raw_table.unpack(format).each_slice(2).to_a
+
+          @tools = blobs.map { |b| Tool.new(*b) }
+        end
+
+        # An individual tool.
+        class Tool
+          # @return [Integer] the enum for the tool
+          attr_reader :tool
+
+          # @return [Integer] the tool's version number
+          attr_reader :version
+
+          # @param tool 32-bit integer
+          # # @param version 32-bit integer
+          # @api private
+          def initialize(tool, version)
+            @tool = tool
+            @version = version
+          end
+        end
+      end
+
+      # A string representation of the binary's minimum OS version.
+      # @return [String] a string representing the minimum OS version.
+      def minos_string
+        binary = "%032b" % minos
         segs = [
           binary[0..15], binary[16..23], binary[24..31]
         ].map { |s| s.to_i(2) }
