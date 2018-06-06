@@ -143,7 +143,7 @@ module MachO
       :LC_LINKER_OPTIMIZATION_HINT => "LinkeditDataCommand",
       :LC_VERSION_MIN_TVOS => "VersionMinCommand",
       :LC_VERSION_MIN_WATCHOS => "VersionMinCommand",
-      :LC_NOTE => "LoadCommand",
+      :LC_NOTE => "NoteCommand",
       :LC_BUILD_VERSION => "BuildVersionCommand",
     }.freeze
 
@@ -1439,6 +1439,34 @@ module MachO
         @name = LCStr.new(self, name)
         @minor_version = minor_version
         @header_addr = header_addr
+      end
+    end
+
+    # A load command containing an owner name and offset/size for an arbitrary data region.
+    # Corresponds to LC_NOTE.
+    class NoteCommand < LoadCommand
+      # @return [String] the name of the owner for this note
+      attr_reader :data_owner
+
+      # @return [Integer] the offset, within the file, of the note
+      attr_reader :offset
+
+      # @return [Integer] the size, in bytes, of the note
+      attr_reader :size
+
+      # @see MachOStructure::FORMAT
+      # @api private
+      FORMAT = "L=2Z16Q=2".freeze
+
+      # @see MachOStructure::SIZEOF
+      # @api private
+      SIZEOF = 48
+
+      def initialize(view, cmd, cmdsize, data_owner, offset, size)
+        super(view, cmd, cmdsize)
+        @data_owner = data_owner
+        @offset = offset
+        @size = size
       end
     end
   end
