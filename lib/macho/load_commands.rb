@@ -1163,7 +1163,7 @@ module MachO
         attr_reader :tools
 
         # @param view [MachO::MachOView] the view into the current Mach-O
-        # @param nhints [Integer] the number of tools
+        # @param ntools [Integer] the number of tools
         # @api private
         def initialize(view, ntools)
           format = Utils.specialize_format("L=#{ntools * 2}", view.endianness)
