@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.summary = "ruby-macho - Mach-O file analyzer."
   s.description = "A library for viewing and manipulating Mach-O files in Ruby."
   s.authors = ["William Woodruff"]
-  s.email = "william@tuffbizz.com"
+  s.email = "william@yossarian.net"
   s.files = Dir["LICENSE", "README.md", ".yardopts", "lib/**/*"]
   s.required_ruby_version = ">= 2.1"
   s.homepage = "https://github.com/Homebrew/ruby-macho"
