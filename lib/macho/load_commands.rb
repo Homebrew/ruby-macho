@@ -398,7 +398,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2a16L=4l=2L=2".freeze
+      FORMAT = "L=2Z16L=4l=2L=2".freeze
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -408,7 +408,7 @@ module MachO
       def initialize(view, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
                      filesize, maxprot, initprot, nsects, flags)
         super(view, cmd, cmdsize)
-        @segname = segname.delete("\x00")
+        @segname = segname
         @vmaddr = vmaddr
         @vmsize = vmsize
         @fileoff = fileoff
@@ -455,7 +455,7 @@ module MachO
     class SegmentCommand64 < SegmentCommand
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2a16Q=4l=2L=2".freeze
+      FORMAT = "L=2Z16Q=4l=2L=2".freeze
 
       # @see MachOStructure::SIZEOF
       # @api private

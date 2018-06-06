@@ -104,7 +104,7 @@ module MachO
       attr_reader :reserved2
 
       # @see MachOStructure::FORMAT
-      FORMAT = "a16a16L=9".freeze
+      FORMAT = "Z16Z16L=9".freeze
 
       # @see MachOStructure::SIZEOF
       SIZEOF = 68
@@ -125,16 +125,14 @@ module MachO
         @reserved2 = reserved2
       end
 
-      # @return [String] the section's name, with any trailing NULL characters
-      #  removed
+      # @return [String] the section's name
       def section_name
-        sectname.delete("\x00")
+        sectname
       end
 
-      # @return [String] the parent segment's name, with any trailing NULL
-      #  characters removed
+      # @return [String] the parent segment's name
       def segment_name
-        segname.delete("\x00")
+        segname
       end
 
       # @return [Boolean] whether the section is empty (i.e, {size} is 0)
@@ -159,7 +157,7 @@ module MachO
       attr_reader :reserved3
 
       # @see MachOStructure::FORMAT
-      FORMAT = "a16a16Q=2L=8".freeze
+      FORMAT = "Z16Z16Q=2L=8".freeze
 
       # @see MachOStructure::SIZEOF
       SIZEOF = 80
