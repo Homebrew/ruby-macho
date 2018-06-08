@@ -25,7 +25,7 @@ module MachO
     # @note load commands are provided in order of ascending offset.
     attr_reader :load_commands
 
-    # Creates a new MachOFile instance from a binary string.
+    # Creates a new instance from a binary string.
     # @param bin [String] a binary string containing raw Mach-O data
     # @return [MachOFile] a new MachOFile
     def self.new_from_bin(bin)
@@ -35,7 +35,7 @@ module MachO
       instance
     end
 
-    # Creates a new FatFile from the given filename.
+    # Creates a new instance from data read from the given filename.
     # @param filename [String] the Mach-O file to load from
     # @raise [ArgumentError] if the given file does not exist
     def initialize(filename)
