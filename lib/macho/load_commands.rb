@@ -174,7 +174,8 @@ module MachO
     # represented, and no actual data. Used when a more specific class
     # isn't available/implemented.
     class LoadCommand < MachOStructure
-      # @return [MachO::MachOView] the raw view associated with the load command
+      # @return [MachO::MachOView, nil] the raw view associated with the load command,
+      #  or nil if the load command was created via {create}.
       attr_reader :view
 
       # @return [Integer] the load command's identifying number
