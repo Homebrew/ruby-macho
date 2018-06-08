@@ -169,16 +169,16 @@ module MachO
       :SG_PROTECTED_VERSION_1 => 0x8,
     }.freeze
 
-    # Mach-O load command structure
-    # This is the most generic load command - only cmd ID and size are
-    # represented, and no actual data. Used when a more specific class
-    # isn't available/implemented.
+    # The top-level Mach-O load command structure.
+    #
+    # This is the most generic load command -- only the type ID and size are
+    # represented. Used when a more specific class isn't available or isn't implemented.
     class LoadCommand < MachOStructure
       # @return [MachO::MachOView, nil] the raw view associated with the load command,
       #  or nil if the load command was created via {create}.
       attr_reader :view
 
-      # @return [Integer] the load command's identifying number
+      # @return [Integer] the load command's type ID
       attr_reader :cmd
 
       # @return [Integer] the size of the load command, in bytes
@@ -252,8 +252,8 @@ module MachO
         view.offset
       end
 
-      # @return [Symbol] a symbol representation of the load command's
-      #  identifying number
+      # @return [Symbol, nil] a symbol representation of the load command's
+      #  type ID, or nil if the ID doesn't correspond to a known load command class
       def type
         LOAD_COMMANDS[cmd]
       end
