@@ -149,6 +149,23 @@ module MachO
         return false if flag.nil?
         flags & flag == flag
       end
+
+      # @return [Hash] a hash representation of this {Section}
+      def to_h
+        {
+          "sectname" => sectname,
+          "segname" => segname,
+          "addr" => addr,
+          "size" => size,
+          "offset" => offset,
+          "align" => align,
+          "reloff" => reloff,
+          "nreloc" => nreloc,
+          "flags" => flags,
+          "reserved1" => reserved1,
+          "reserved2" => reserved2,
+        }.merge super
+      end
     end
 
     # Represents a section of a segment for 64-bit architectures.
@@ -168,6 +185,13 @@ module MachO
         super(sectname, segname, addr, size, offset, align, reloff,
           nreloc, flags, reserved1, reserved2)
         @reserved3 = reserved3
+      end
+
+      # @return [Hash] a hash representation of this {Section64}
+      def to_h
+        {
+          "reserved3" => reserved3,
+        }.merge super
       end
     end
   end

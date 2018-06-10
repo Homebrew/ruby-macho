@@ -408,6 +408,14 @@ module MachO
       File.open(@filename, "wb") { |f| f.write(@raw_data) }
     end
 
+    # @return [Hash] a hash representation of this {MachOFile}
+    def to_h
+      {
+        "header" => header.to_h,
+        "load_commands" => load_commands.map(&:to_h),
+      }
+    end
+
     private
 
     # The file's Mach-O header structure.
