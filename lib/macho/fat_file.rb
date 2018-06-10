@@ -265,6 +265,15 @@ module MachO
       File.open(@filename, "wb") { |f| f.write(@raw_data) }
     end
 
+    # @return [Hash] a hash representation of this {FatFile}
+    def to_h
+      {
+        "header" => header.to_h,
+        "fat_archs" => fat_archs.map(&:to_h),
+        "machos" => machos.map(&:to_h),
+      }
+    end
+
     private
 
     # Obtain the fat header from raw file data.
