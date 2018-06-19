@@ -507,4 +507,56 @@ class MachOFileTest < Minitest::Test
       file.delete_rpath("/this/rpath/doesn't/exist")
     end
   end
+
+  def test_to_h
+    filename = fixture(:i386, "hello.bin")
+    file = MachO::MachOFile.new(filename)
+    hsh = file.to_h
+
+    header_fields = %w[
+      magic
+      cputype
+      cpusubtype
+      filetype
+      ncmds
+      sizeofcmds
+      flags
+      alignment
+    ]
+
+    # fields in the header should be the same as in the hash representation
+    header_fields.each do |field|
+      assert_equal file.header.send(field), hsh["header"][field]
+    end
+
+    # additionally, symbol keys in the hash representation should correspond
+    # to looked-up values in the header
+    assert_equal MachO::Headers::MH_MAGICS[file.header.magic], hsh["header"]["magic_sym"]
+    assert_equal MachO::Headers::CPU_TYPES[file.header.cputype], hsh["header"]["cputype_sym"]
+    assert_equal MachO::Headers::CPU_SUBTYPES[file.header.cputype][file.header.cpusubtype], hsh["header"]["cpusubtype_sym"]
+    assert_equal MachO::Headers::MH_FILETYPES[file.header.filetype], hsh["header"]["filetype_sym"]
+
+    # the number of load commands should be the same in the hash representation
+    assert_equal file.load_commands.size, hsh["load_commands"].size
+
+    hsh["load_commands"].each do |lc_hsh|
+      # each load command should have, at minimum, a cmd, cmdsize, type, view, and structure
+      assert_kind_of Integer, lc_hsh["cmd"]
+      assert_kind_of Integer, lc_hsh["cmdsize"]
+      assert_kind_of Symbol, lc_hsh["type"]
+      assert_kind_of Hash, lc_hsh["view"]
+      assert_kind_of Hash, lc_hsh["structure"]
+
+      # when looked up, cmd should correspond to type
+      assert_equal lc_hsh["type"], MachO::LoadCommands::LOAD_COMMANDS[lc_hsh["cmd"]]
+
+      # the view should contain an endianness and an offset
+      assert_kind_of Symbol, lc_hsh["view"]["endianness"]
+      assert_kind_of Integer, lc_hsh["view"]["offset"]
+
+      # the structure should contain a format and a bytesize
+      assert_kind_of String, lc_hsh["structure"]["format"]
+      assert_kind_of Integer, lc_hsh["structure"]["bytesize"]
+    end
+  end
 end

@@ -514,4 +514,50 @@ class FatFileTest < Minitest::Test
       end
     end
   end
+
+  def test_to_h
+    filename = fixture([:i386, :x86_64], "hello.bin")
+    file = MachO::FatFile.new(filename)
+    hsh = file.to_h
+
+    # the hash representation of a FatFile should have at least a header, fat_archs, and machos
+    assert_kind_of Hash, hsh["header"]
+    assert_kind_of Array, hsh["fat_archs"]
+    assert_kind_of Array, hsh["machos"]
+
+    header_fields = %w[
+      magic
+      nfat_arch
+    ]
+
+    # fields in the header should be the same as in the hash representation
+    header_fields.each do |field|
+      assert_equal file.header.send(field), hsh["header"][field]
+    end
+
+    # additionally, symbol keys in the hash representation should correspond
+    # to looked-up values in the header
+    assert_equal MachO::Headers::MH_MAGICS[file.header.magic], hsh["header"]["magic_sym"]
+
+    fat_arch_fields = %w[
+      cputype
+      cpusubtype
+      offset
+      size
+      align
+    ]
+
+    # fields in each FatArch should be the same as in the hash representation
+    #
+    # additionally, symbol keys in the hash representation of each FatArch should
+    # correspond to looked up values
+    file.fat_archs.zip(hsh["fat_archs"]).each do |fa, fa_hsh|
+      fat_arch_fields.each do |field|
+        assert_equal fa.send(field), fa_hsh[field]
+      end
+
+      assert_equal MachO::Headers::CPU_TYPES[fa.cputype], fa_hsh["cputype_sym"]
+      assert_equal MachO::Headers::CPU_SUBTYPES[fa.cputype][fa.cpusubtype], fa_hsh["cpusubtype_sym"]
+    end
+  end
 end
