@@ -9,7 +9,7 @@ A Ruby library for examining and modifying Mach-O files.
 
 ### What is a Mach-O file?
 
-The [Mach-O file format](https://en.wikipedia.org/wiki/Mach-O) is used by OS X
+The [Mach-O file format](https://en.wikipedia.org/wiki/Mach-O) is used by macOS
 and iOS (among others) as a general purpose binary format for object files,
 executables, dynamic libraries, and so forth.
 
