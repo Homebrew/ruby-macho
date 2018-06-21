@@ -1,13 +1,13 @@
-require "#{File.dirname(__FILE__)}/macho/structure"
-require "#{File.dirname(__FILE__)}/macho/view"
-require "#{File.dirname(__FILE__)}/macho/headers"
-require "#{File.dirname(__FILE__)}/macho/load_commands"
-require "#{File.dirname(__FILE__)}/macho/sections"
-require "#{File.dirname(__FILE__)}/macho/macho_file"
-require "#{File.dirname(__FILE__)}/macho/fat_file"
-require "#{File.dirname(__FILE__)}/macho/exceptions"
-require "#{File.dirname(__FILE__)}/macho/utils"
-require "#{File.dirname(__FILE__)}/macho/tools"
+require_relative "macho/structure"
+require_relative "macho/view"
+require_relative "macho/headers"
+require_relative "macho/load_commands"
+require_relative "macho/sections"
+require_relative "macho/macho_file"
+require_relative "macho/fat_file"
+require_relative "macho/exceptions"
+require_relative "macho/utils"
+require_relative "macho/tools"
 
 # The primary namespace for ruby-macho.
 module MachO
