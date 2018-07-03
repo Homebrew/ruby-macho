@@ -219,8 +219,7 @@ module MachO
       update_sizeofcmds(sizeofcmds - lc.cmdsize)
 
       # pad the space after the load commands to preserve offsets
-      null_pad = "\x00" * lc.cmdsize
-      @raw_data.insert(header.class.bytesize + sizeofcmds - lc.cmdsize, null_pad)
+      @raw_data.insert(header.class.bytesize + sizeofcmds - lc.cmdsize, Utils.nullpad(lc.cmdsize))
 
       populate_fields if options.fetch(:repopulate, true)
     end
