@@ -477,6 +477,26 @@ module MachO
         flags & flag == flag
       end
 
+      # Guesses the alignment of the segment.
+      # @return [Integer] the guessed alignment, as a power of 2
+      # @note See `guess_align` in `cctools/misc/lipo.c`
+      def guess_align
+        return Sections::MAX_SECT_ALIGN if vmaddr.zero?
+
+        align = 0
+        segalign = 1
+
+        while (segalign & vmaddr).zero?
+          segalign <<= 1
+          align += 1
+        end
+
+        return 2 if align < 2
+        return Sections::MAX_SECT_ALIGN if align > Sections::MAX_SECT_ALIGN
+
+        align
+      end
+
       # @return [Hash] a hash representation of this {SegmentCommand}
       def to_h
         {

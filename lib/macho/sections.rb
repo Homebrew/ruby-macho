@@ -13,6 +13,10 @@ module MachO
     # system settable attributes mask
     SECTION_ATTRIBUTES_SYS = 0x00ffff00
 
+    # maximum specifiable section alignment, as a power of 2
+    # @note see `MAXSECTALIGN` macro in `cctools/misc/lipo.c`
+    MAX_SECT_ALIGN = 15
+
     # association of section flag symbols to values
     # @api private
     SECTION_FLAGS = {
