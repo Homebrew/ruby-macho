@@ -82,12 +82,19 @@ class MachOFileTest < Minitest::Test
     filenames.each do |fn|
       file = MachO::MachOFile.new(fn)
 
+      assert_kind_of Integer, file.segment_alignment
+      assert_operator file.segment_alignment, :<=, MachO::Sections::MAX_SECT_ALIGN
+
       segments = file.segments
 
       assert_kind_of Array, segments
 
       segments.each do |seg|
         assert seg
+
+        assert_kind_of Integer, seg.guess_align
+        assert_operator seg.guess_align, :<=, MachO::Sections::MAX_SECT_ALIGN
+
         assert_kind_of MachO::LoadCommands::SegmentCommand, seg if file.magic32?
         assert_kind_of MachO::LoadCommands::SegmentCommand64, seg if file.magic64?
         assert_kind_of String, seg.segname
@@ -107,6 +114,7 @@ class MachOFileTest < Minitest::Test
 
         sections.each do |sect|
           assert sect
+
           assert_kind_of MachO::Sections::Section, sect if seg.is_a? MachO::LoadCommands::SegmentCommand
           assert_kind_of MachO::Sections::Section64, sect if seg.is_a? MachO::LoadCommands::SegmentCommand64
           assert_kind_of String, sect.sectname
