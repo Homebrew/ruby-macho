@@ -75,7 +75,21 @@ module MachO
     # @param num [Integer] the number being checked
     # @return [Boolean] whether `num` is a valid Fat magic number
     def self.fat_magic?(num)
+      [Headers::FAT_MAGIC, Headers::FAT_MAGIC_64].include? num
+    end
+
+    # Compares the given number to valid 32-bit Fat magic numbers.
+    # @param num [Integer] the number being checked
+    # @return [Boolean] whether `num` is a valid 32-bit fat magic number
+    def self.fat_magic32?(num)
       num == Headers::FAT_MAGIC
+    end
+
+    # Compares the given number to valid 64-bit Fat magic numbers.
+    # @param num [Integer] the number being checked
+    # @return [Boolean] whether `num` is a valid 64-bit fat magic number
+    def self.fat_magic64?(num)
+      num == Headers::FAT_MAGIC_64
     end
 
     # Compares the given number to valid 32-bit Mach-O magic numbers.
