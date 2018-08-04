@@ -6,10 +6,18 @@ module MachO
     FAT_MAGIC = 0xcafebabe
 
     # little-endian fat magic
-    # this is defined, but should never appear in ruby-macho code because
-    # fat headers are always big-endian and therefore always unpacked as such.
+    # @note This is defined for completeness, but should never appear in ruby-macho code,
+    #  since fat headers are always big-endian.
     # @api private
     FAT_CIGAM = 0xbebafeca
+
+    # 64-bit big-endian fat magic
+    FAT_MAGIC_64 = 0xcafebabf
+
+    # 64-bit little-endian fat magic
+    # @note This is defined for completeness, but should never appear in ruby-macho code,
+    #   since fat headers are always big-endian.
+    FAT_CIGAM_64 = 0xbfbafeca
 
     # 32-bit big-endian magic
     # @api private
@@ -31,6 +39,7 @@ module MachO
     # @api private
     MH_MAGICS = {
       FAT_MAGIC => "FAT_MAGIC",
+      FAT_MAGIC_64 => "FAT_MAGIC_64",
       MH_MAGIC => "MH_MAGIC",
       MH_CIGAM => "MH_CIGAM",
       MH_MAGIC_64 => "MH_MAGIC_64",
@@ -486,8 +495,10 @@ module MachO
       end
     end
 
-    # Fat binary header architecture structure. A Fat binary has one or more of
-    # these, representing one or more internal Mach-O blobs.
+    # 32-bit fat binary header architecture structure. A 32-bit fat Mach-O has one or more of
+    #  these, indicating one or more internal Mach-O blobs.
+    # @note "32-bit" indicates the fact that this structure stores 32-bit offsets, not that the
+    #  Mach-Os that it points to necessarily *are* 32-bit.
     # @see MachO::Headers::FatHeader
     class FatArch < MachOStructure
       # @return [Integer] the CPU type of the Mach-O
@@ -505,10 +516,10 @@ module MachO
       # @return [Integer] the alignment, as a power of 2
       attr_reader :align
 
-      # always big-endian
+      # @note Always big endian.
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "N5".freeze
+      FORMAT = "L>5".freeze
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -538,6 +549,43 @@ module MachO
           "offset" => offset,
           "size" => size,
           "align" => align,
+        }.merge super
+      end
+    end
+
+    # 64-bit fat binary header architecture structure. A 64-bit fat Mach-O has one or more of
+    #  these, indicating one or more internal Mach-O blobs.
+    # @note "64-bit" indicates the fact that this structure stores 64-bit offsets, not that the
+    #  Mach-Os that it points to necessarily *are* 64-bit.
+    # @see MachO::Headers::FatHeader
+    class FatArch64 < FatArch
+      # @return [void]
+      attr_reader :reserved
+
+      # @note Always big endian.
+      # @see MachOStructure::FORMAT
+      # @api private
+      FORMAT = "L>2Q>2L>2".freeze
+
+      # @see MachOStructure::SIZEOF
+      # @api private
+      SIZEOF = 32
+
+      # @api private
+      def initialize(cputype, cpusubtype, offset, size, align, reserved = 0)
+        super(cputype, cpusubtype, offset, size, align)
+        @reserved = reserved
+      end
+
+      # @return [String] the serialized fields of the fat arch
+      def serialize
+        [cputype, cpusubtype, offset, size, align, reserved].pack(FORMAT)
+      end
+
+      # @return [Hash] a hash representation of this {FatArch64}
+      def to_h
+        {
+          "reserved" => reserved,
         }.merge super
       end
     end
