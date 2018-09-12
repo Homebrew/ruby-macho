@@ -641,7 +641,9 @@ module MachO
       # @return [Boolean] true if `flag` is present in the header's flag section
       def flag?(flag)
         flag = MH_FLAGS[flag]
+
         return false if flag.nil?
+
         flags & flag == flag
       end
 
