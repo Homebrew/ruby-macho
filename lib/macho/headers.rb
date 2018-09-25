@@ -50,6 +50,11 @@ module MachO
     # @api private
     CPU_ARCH_ABI64 = 0x01000000
 
+    # mask for CPUs with 64-bit architectures (when running a 32-bit ABI?)
+    # @see https://github.com/Homebrew/ruby-macho/issues/113
+    # @api private
+    CPU_ARCH_ABI32 = 0x02000000
+
     # any CPU (unused?)
     # @api private
     CPU_TYPE_ANY = -1
@@ -78,6 +83,10 @@ module MachO
     # @api private
     CPU_TYPE_ARM64 = (CPU_TYPE_ARM | CPU_ARCH_ABI64)
 
+    # 64-bit ARM compatible CPUs (running in 32-bit mode?)
+    # @see https://github.com/Homebrew/ruby-macho/issues/113
+    CPU_TYPE_ARM64_32 = (CPU_TYPE_ARM | CPU_ARCH_ABI32)
+
     # PowerPC compatible CPUs
     # @api private
     CPU_TYPE_POWERPC = 0x12
@@ -94,6 +103,7 @@ module MachO
       CPU_TYPE_X86_64 => :x86_64,
       CPU_TYPE_ARM => :arm,
       CPU_TYPE_ARM64 => :arm64,
+      CPU_TYPE_ARM64_32 => :arm64_32,
       CPU_TYPE_POWERPC => :ppc,
       CPU_TYPE_POWERPC64 => :ppc64,
     }.freeze
@@ -227,6 +237,10 @@ module MachO
     # @api private
     CPU_SUBTYPE_ARM64_V8 = 1
 
+    # the v8 sub-type for `CPU_TYPE_ARM64_32`
+    # @api private
+    CPU_SUBTYPE_ARM64_32_V8 = 1
+
     # the lowest common sub-type for `CPU_TYPE_MC88000`
     # @api private
     CPU_SUBTYPE_MC88000_ALL = 0
@@ -336,6 +350,9 @@ module MachO
       CPU_TYPE_ARM64 => {
         CPU_SUBTYPE_ARM64_ALL => :arm64,
         CPU_SUBTYPE_ARM64_V8 => :arm64v8,
+      }.freeze,
+      CPU_TYPE_ARM64_32 => {
+        CPU_SUBTYPE_ARM64_32_V8 => :arm64_32v8,
       }.freeze,
       CPU_TYPE_POWERPC => {
         CPU_SUBTYPE_POWERPC_ALL => :ppc,
