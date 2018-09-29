@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 die() {
   echo "Error: $*" >&2
@@ -24,13 +24,17 @@ if ! bundle check ; then
 fi
 echo
 
-# Run rubocop.
-echo ">> Running style enforcement."
-bundle exec rubocop -DES
-result="$?"
-echo
+read -r major minor < <(ruby -e 'puts RUBY_VERSION' | awk -F. '{ print $1, $2 }')
 
-echo ">> Done: ${result}."
+if [[ "${major}" -eq 2 && "${minor}" -ge 2 ]]; then
+    # Run rubocop.
+    echo ">> Running style enforcement."
+    bundle exec rubocop -DES lib/
+    result="$?"
+    echo ">> Done: ${result}."
+else
+    echo ">> Older ruby, skipping style enforcement."
+fi
 
 # Run the test suite.
 echo ">> Running test suite."
