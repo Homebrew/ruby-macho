@@ -5,5 +5,6 @@ group :test do
   gem "codecov", require: false, group: :test
   gem "minitest"
   gem "rake"
-  gem "rubocop"
+
+  gem "rubocop" if RUBY_VERSION > "2.2"
 end
