@@ -27,7 +27,7 @@ module MachO
     # @return [String] the null string (or empty string, for `size = 0`)
     # @raise [ArgumentError] if a non-positive nullpad is requested
     def self.nullpad(size)
-      raise ArgumentError, "size < 0: #{size}" if size.negative?
+      raise ArgumentError, "size < 0: #{size}" if size < 0
 
       "\x00" * size
     end

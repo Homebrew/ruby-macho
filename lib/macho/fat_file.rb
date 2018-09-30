@@ -39,7 +39,11 @@ module MachO
       # put the smaller alignments further forwards in fat macho, so that we do less padding
       machos = machos.sort_by(&:segment_alignment)
 
-      bin = +""
+      bin = if String.instance_methods.include? :+@
+        +""
+      else
+        ""
+      end
 
       bin << Headers::FatHeader.new(magic, machos.size).serialize
       offset = Headers::FatHeader.bytesize + (machos.size * fa_klass.bytesize)
