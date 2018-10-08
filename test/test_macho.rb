@@ -54,6 +54,18 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_unknown_load_command
+    filename = fixture(:x86_64, "hello_unk_lc.bin")
+
+    # Unknown load command in non-permissive mode: raise exception.
+    assert_raises MachO::LoadCommandError do
+      MachO::MachOFile.new(filename)
+    end
+
+    # Unknown load command in permissive mode: treat as a generic LoadCommand.
+    MachO::MachOFile.new(filename, :permissive => true)
+  end
+
   def test_mach_header
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "libhello.dylib") }
 
