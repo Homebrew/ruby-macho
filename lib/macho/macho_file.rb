@@ -155,16 +155,13 @@ module MachO
     def insert_command(offset, lc, options = {})
       context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
       cmd_raw = lc.serialize(context)
+      fileoff = offset + cmd_raw.bytesize
 
-      if offset < header.class.bytesize || offset + cmd_raw.bytesize > low_fileoff
-        raise OffsetInsertionError, offset
-      end
+      raise OffsetInsertionError, offset if offset < header.class.bytesize || fileoff > low_fileoff
 
       new_sizeofcmds = sizeofcmds + cmd_raw.bytesize
 
-      if header.class.bytesize + new_sizeofcmds > low_fileoff
-        raise HeaderPadError, @filename
-      end
+      raise HeaderPadError, @filename if header.class.bytesize + new_sizeofcmds > low_fileoff
 
       # update Mach-O header fields to account for inserted load command
       update_ncmds(ncmds + 1)
@@ -187,9 +184,8 @@ module MachO
       context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
       cmd_raw = new_lc.serialize(context)
       new_sizeofcmds = sizeofcmds + cmd_raw.bytesize - old_lc.cmdsize
-      if header.class.bytesize + new_sizeofcmds > low_fileoff
-        raise HeaderPadError, @filename
-      end
+
+      raise HeaderPadError, @filename if header.class.bytesize + new_sizeofcmds > low_fileoff
 
       delete_command(old_lc)
       insert_command(old_lc.view.offset, new_lc)
