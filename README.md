@@ -13,6 +13,14 @@ The [Mach-O file format](https://en.wikipedia.org/wiki/Mach-O) is used by macOS
 and iOS (among others) as a general purpose binary format for object files,
 executables, dynamic libraries, and so forth.
 
+### Installation
+
+ruby-macho can be installed via RubyGems:
+
+```bash
+$ gem install ruby-macho
+```
+
 ### Documentation
 
 Full documentation is available on [RubyDoc](http://www.rubydoc.info/gems/ruby-macho/).
@@ -46,7 +54,6 @@ puts lc_vers.version_string # => "10.10.0"
 
 ### What needs to be done?
 
-* Documentation.
 * Unit and performance testing.
 
 Attribution:
