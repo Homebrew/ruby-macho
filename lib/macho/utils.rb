@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MachO
   # A collection of utility functions used throughout ruby-macho.
   module Utils

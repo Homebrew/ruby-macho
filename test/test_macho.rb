@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "helpers"
 
 class MachOFileTest < Minitest::Test
@@ -226,11 +228,11 @@ class MachOFileTest < Minitest::Test
 
   def test_extra_dylib
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "libextrahello.dylib") }
-    unusual_dylib_lcs = [
-      :LC_LOAD_UPWARD_DYLIB,
-      :LC_LAZY_LOAD_DYLIB,
-      :LC_LOAD_WEAK_DYLIB,
-      :LC_REEXPORT_DYLIB,
+    unusual_dylib_lcs = %i[
+      LC_LOAD_UPWARD_DYLIB
+      LC_LAZY_LOAD_DYLIB
+      LC_LOAD_WEAK_DYLIB
+      LC_REEXPORT_DYLIB
     ]
 
     filenames.each do |fn|

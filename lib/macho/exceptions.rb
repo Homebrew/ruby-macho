@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MachO
   # A generic Mach-O error in execution.
   class MachOError < RuntimeError

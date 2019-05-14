@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # if we're running the tests on the CI, generate a codecov coverage report
 if ENV["CI"]
   require "simplecov"
@@ -15,12 +17,12 @@ require "tempfile"
 require "macho"
 
 module Helpers
-  OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/
+  OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/.freeze
 
   # architectures used in testing 32-bit single-arch binaries
-  SINGLE_32_ARCHES = [
-    :i386,
-    :ppc,
+  SINGLE_32_ARCHES = %i[
+    i386
+    ppc
   ].freeze
 
   # architectures used in testing 64-bit single-arch binaries
@@ -33,8 +35,8 @@ module Helpers
 
   # architecture pairs used in testing fat binaries
   FAT_ARCH_PAIRS = [
-    [:i386, :x86_64],
-    [:i386, :ppc],
+    %i[i386 x86_64],
+    %i[i386 ppc],
   ].freeze
 
   def fixture(archs, name)
@@ -58,9 +60,9 @@ module Helpers
   end
 
   def filechecks(except = nil)
-    checks = [
-      :object?, :executable?, :fvmlib?, :core?, :preload?, :dylib?,
-      :dylinker?, :bundle?, :dsym?, :kext?
+    checks = %i[
+      object? executable? fvmlib? core? preload? dylib?
+      dylinker? bundle? dsym? kext?
     ]
 
     checks.delete(except)

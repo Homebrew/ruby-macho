@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "helpers"
 
 class MachOToolsTest < Minitest::Test
@@ -16,7 +18,7 @@ class MachOToolsTest < Minitest::Test
   end
 
   def test_dylibs_fat
-    dylibs = MachO::Tools.dylibs(fixture([:i386, :x86_64], "hello.bin"))
+    dylibs = MachO::Tools.dylibs(fixture(%i[i386 x86_64], "hello.bin"))
 
     assert dylibs
     assert_kind_of Array, dylibs

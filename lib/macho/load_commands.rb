@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MachO
   # Classes and constants for parsing load commands in Mach-O binaries.
   module LoadCommands
@@ -186,7 +188,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2".freeze
+      FORMAT = "L=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -365,7 +367,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2a16".freeze
+      FORMAT = "L=2a16"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -429,7 +431,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Z16L=4l=2L=2".freeze
+      FORMAT = "L=2Z16L=4l=2L=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -524,7 +526,7 @@ module MachO
     class SegmentCommand64 < SegmentCommand
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Z16Q=4l=2L=2".freeze
+      FORMAT = "L=2Z16Q=4l=2L=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -550,7 +552,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=6".freeze
+      FORMAT = "L=6"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -601,7 +603,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -649,7 +651,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=5".freeze
+      FORMAT = "L=5"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -679,7 +681,7 @@ module MachO
     class ThreadCommand < LoadCommand
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2".freeze
+      FORMAT = "L=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -717,7 +719,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=10".freeze
+      FORMAT = "L=10"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -758,7 +760,7 @@ module MachO
     class RoutinesCommand64 < RoutinesCommand
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Q=8".freeze
+      FORMAT = "L=2Q=8"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -773,7 +775,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -801,7 +803,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -829,7 +831,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -857,7 +859,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -894,7 +896,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=6".freeze
+      FORMAT = "L=6"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -979,7 +981,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=20".freeze
+      FORMAT = "L=20"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1052,7 +1054,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=4".freeze
+      FORMAT = "L=4"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1127,7 +1129,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1156,7 +1158,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1201,7 +1203,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=4".freeze
+      FORMAT = "L=4"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1237,7 +1239,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=5".freeze
+      FORMAT = "L=5"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1269,7 +1271,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=6".freeze
+      FORMAT = "L=6"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1301,7 +1303,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=4".freeze
+      FORMAT = "L=4"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1365,7 +1367,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=6".freeze
+      FORMAT = "L=6"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1494,7 +1496,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=12".freeze
+      FORMAT = "L=12"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1542,7 +1544,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=3".freeze
+      FORMAT = "L=3"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1572,7 +1574,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Q=2".freeze
+      FORMAT = "L=2Q=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1602,7 +1604,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Q=1".freeze
+      FORMAT = "L=2Q=1"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1646,7 +1648,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=4".freeze
+      FORMAT = "L=4"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1674,7 +1676,7 @@ module MachO
     class IdentCommand < LoadCommand
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2".freeze
+      FORMAT = "L=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1692,7 +1694,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=4".freeze
+      FORMAT = "L=4"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1727,7 +1729,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=5".freeze
+      FORMAT = "L=5"
 
       # @see MachOStructure::SIZEOF
       # @api private
@@ -1764,7 +1766,7 @@ module MachO
 
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Z16Q=2".freeze
+      FORMAT = "L=2Z16Q=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
