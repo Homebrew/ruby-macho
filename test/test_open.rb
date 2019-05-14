@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "helpers"
 
 class MachOOpenTest < Minitest::Test
@@ -34,7 +36,7 @@ class MachOOpenTest < Minitest::Test
 
     assert_kind_of MachO::MachOFile, file
 
-    file = MachO.open(fixture([:i386, :x86_64], "libhello.dylib"))
+    file = MachO.open(fixture(%i[i386 x86_64], "libhello.dylib"))
 
     assert_kind_of MachO::FatFile, file
   end

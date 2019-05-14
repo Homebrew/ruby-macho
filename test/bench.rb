@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "helpers"
 require "benchmark/ips"
 
@@ -185,7 +187,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_get_id
-    filename = fixture([:i386, :x86_64], "libhello.dylib")
+    filename = fixture(%i[i386 x86_64], "libhello.dylib")
 
     Benchmark.ips do |bm|
       bm.report("otool_fat_get_id") do
@@ -203,7 +205,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_get_dylib
-    filename = fixture([:i386, :x86_64], "libhello.dylib")
+    filename = fixture(%i[i386 x86_64], "libhello.dylib")
 
     Benchmark.ips do |bm|
       bm.report("otool_fat_get_dylib") do
@@ -221,7 +223,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_set_id
-    filename = fixture([:i386, :x86_64], "libhello.dylib")
+    filename = fixture(%i[i386 x86_64], "libhello.dylib")
     benchfile = "#{filename}.bench"
     FileUtils.cp(filename, benchfile)
     i = 0
@@ -244,7 +246,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_set_dylib
-    filename = fixture([:i386, :x86_64], "libhello.dylib")
+    filename = fixture(%i[i386 x86_64], "libhello.dylib")
     benchfile = "#{filename}.bench"
     FileUtils.cp(filename, benchfile)
     i = 0
@@ -270,7 +272,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_add_rpath
-    filename = fixture([:i386, :x86_64], "libhello.dylib")
+    filename = fixture(%i[i386 x86_64], "libhello.dylib")
     benchfile = "#{filename}.bench"
     i = 0
 
@@ -294,7 +296,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_delete_rpath
-    filename = fixture([:i386, :x86_64], "hello.bin")
+    filename = fixture(%i[i386 x86_64], "hello.bin")
     benchfile = "#{filename}.bench"
     rpath = MachO.open(filename).rpaths.first
 
@@ -318,7 +320,7 @@ class RubyMachOBenchmark
   end
 
   def bench_fat_change_rpath
-    filename = fixture([:i386, :x86_64], "hello.bin")
+    filename = fixture(%i[i386 x86_64], "hello.bin")
     benchfile = "#{filename}.bench"
     FileUtils.cp(filename, benchfile)
     rpath = MachO.open(filename).rpaths.first

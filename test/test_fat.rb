@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "helpers"
 
 class FatFileTest < Minitest::Test
@@ -153,11 +155,11 @@ class FatFileTest < Minitest::Test
 
   def test_extra_dylib
     filenames = FAT_ARCH_PAIRS.map { |a| fixture(a, "libextrahello.dylib") }
-    unusual_dylib_lcs = [
-      :LC_LOAD_UPWARD_DYLIB,
-      :LC_LAZY_LOAD_DYLIB,
-      :LC_LOAD_WEAK_DYLIB,
-      :LC_REEXPORT_DYLIB,
+    unusual_dylib_lcs = %i[
+      LC_LOAD_UPWARD_DYLIB
+      LC_LAZY_LOAD_DYLIB
+      LC_LOAD_WEAK_DYLIB
+      LC_REEXPORT_DYLIB
     ]
 
     filenames.each do |fn|
@@ -472,7 +474,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_inconsistent_slices
-    filename = fixture([:i386, :x86_64], "libinconsistent.dylib")
+    filename = fixture(%i[i386 x86_64], "libinconsistent.dylib")
 
     file = MachO::FatFile.new(filename)
 
@@ -495,10 +497,10 @@ class FatFileTest < Minitest::Test
     file.change_install_name("/usr/lib/libz.1.dylib", "foo", :strict => false)
 
     # ...but not all slices will have the modified dylib
-    refute file.machos.all? { |m| m.linked_dylibs.include?("foo") }
+    refute (file.machos.all? { |m| m.linked_dylibs.include?("foo") })
 
     # ...but at least one will
-    assert file.machos.any? { |m| m.linked_dylibs.include?("foo") }
+    assert (file.machos.any? { |m| m.linked_dylibs.include?("foo") })
   end
 
   def test_dylib_load_commands
@@ -516,7 +518,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_to_h
-    filename = fixture([:i386, :x86_64], "hello.bin")
+    filename = fixture(%i[i386 x86_64], "hello.bin")
     file = MachO::FatFile.new(filename)
     hsh = file.to_h
 

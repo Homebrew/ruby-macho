@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.unshift "#{File.dirname(__FILE__)}/lib"
 require "rake/testtask"
 require_relative "test/bench"
