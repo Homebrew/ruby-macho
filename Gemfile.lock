@@ -8,7 +8,7 @@ GEM
       simplecov
       url
     docile (1.3.2)
-    jaro_winkler (1.5.2)
+    jaro_winkler (1.5.3)
     json (2.2.0)
     minitest (5.11.3)
     parallel (1.17.0)
