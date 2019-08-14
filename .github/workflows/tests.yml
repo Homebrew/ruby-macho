@@ -1,0 +1,31 @@
+name: GitHub Actions CI
+on:
+  push:
+    branches: master
+  pull_request:
+    paths: '*'
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [2.3, 2.4, 2.5, 2.6]
+    steps:
+    - name: Set up Git repository
+      uses: actions/checkout@master
+
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
+      with:
+        version: ${{ matrix.ruby }}
+
+    - name: Install RubyGems
+      run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+
+    - name: Run tests
+      run: bundle exec rake
+
+    - name: Run RuboCop
+      run: bundle exec rubocop -D lib/
