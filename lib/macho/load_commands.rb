@@ -381,7 +381,7 @@ module MachO
 
       # @return [String] a string representation of the UUID
       def uuid_string
-        hexes = uuid.map { |e| "%02x" % e }
+        hexes = uuid.map { |elem| "%02<elem>x" % { :elem => elem } }
         segs = [
           hexes[0..3].join, hexes[4..5].join, hexes[6..7].join,
           hexes[8..9].join, hexes[10..15].join
@@ -1319,7 +1319,7 @@ module MachO
       # A string representation of the binary's minimum OS version.
       # @return [String] a string representing the minimum OS version.
       def version_string
-        binary = "%032b" % version
+        binary = "%032<version>b" % { :version => version }
         segs = [
           binary[0..15], binary[16..23], binary[24..31]
         ].map { |s| s.to_i(2) }
@@ -1330,7 +1330,7 @@ module MachO
       # A string representation of the binary's SDK version.
       # @return [String] a string representing the SDK version.
       def sdk_string
-        binary = "%032b" % sdk
+        binary = "%032<sdk>b" % { :sdk => sdk }
         segs = [
           binary[0..15], binary[16..23], binary[24..31]
         ].map { |s| s.to_i(2) }
@@ -1385,7 +1385,7 @@ module MachO
       # A string representation of the binary's minimum OS version.
       # @return [String] a string representing the minimum OS version.
       def minos_string
-        binary = "%032b" % minos
+        binary = "%032<minos>b" % { :minos => minos }
         segs = [
           binary[0..15], binary[16..23], binary[24..31]
         ].map { |s| s.to_i(2) }
@@ -1396,7 +1396,7 @@ module MachO
       # A string representation of the binary's SDK version.
       # @return [String] a string representing the SDK version.
       def sdk_string
-        binary = "%032b" % sdk
+        binary = "%032<sdk>b" % { :sdk => sdk }
         segs = [
           binary[0..15], binary[16..23], binary[24..31]
         ].map { |s| s.to_i(2) }
@@ -1619,7 +1619,7 @@ module MachO
       # A string representation of the sources used to build the binary.
       # @return [String] a string representation of the version
       def version_string
-        binary = "%064b" % version
+        binary = "%064<version>b" % { :version => version }
         segs = [
           binary[0..23], binary[24..33], binary[34..43], binary[44..53],
           binary[54..63]
