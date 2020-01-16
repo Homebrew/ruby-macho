@@ -29,7 +29,7 @@ GEM
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    unicode-display_width (1.6.0)
+    unicode-display_width (1.6.1)
     url (0.3.2)
 
 PLATFORMS
