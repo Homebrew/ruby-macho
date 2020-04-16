@@ -27,7 +27,7 @@ module MachO
     raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
     raise TruncatedFileError unless File.stat(filename).size >= 4
 
-    magic = File.open(filename, "rb") { |f| f.read(4) }.unpack("N").first
+    magic = File.open(filename, "rb") { |f| f.read(4) }.unpack1("N")
 
     if Utils.fat_magic?(magic)
       file = FatFile.new(filename)
