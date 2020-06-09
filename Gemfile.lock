@@ -3,7 +3,7 @@ GEM
   specs:
     ast (2.4.0)
     benchmark-ips (2.8.2)
-    codecov (0.1.16)
+    codecov (0.1.17)
       json
       simplecov
       url
