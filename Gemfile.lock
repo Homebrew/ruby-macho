@@ -3,7 +3,7 @@ GEM
   specs:
     ast (2.4.1)
     benchmark-ips (2.8.2)
-    codecov (0.2.2)
+    codecov (0.2.3)
       colorize
       json
       simplecov
