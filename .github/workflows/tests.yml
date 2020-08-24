@@ -8,13 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [2.4, 2.5, 2.6]
+        ruby: [2.5, 2.6, 2.7]
     steps:
     - name: Set up Git repository
-      uses: actions/checkout@master
+      uses: actions/checkout@main
 
     - name: Set up Ruby
-      uses: actions/setup-ruby@v1
+      uses: actions/setup-ruby@main
       with:
         ruby-version: ${{ matrix.ruby }}
 
