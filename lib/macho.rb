@@ -47,7 +47,7 @@ module MachO
   # @param filename [String] the file being opened
   # @return [void]
   # @raise [ModificationError] if the operation fails
-  def self.codesign(filename)
+  def self.codesign!(filename)
     # codesign binary is not available on Linux
     return if RUBY_PLATFORM !~ /darwin/
     raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
