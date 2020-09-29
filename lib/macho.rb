@@ -49,7 +49,7 @@ module MachO
   # @raise [ModificationError] if the operation fails
   def self.codesign(filename)
     # codesign binary is not available on Linux
-    return unless RUBY_PLATFORM =~ /darwin/
+    return if RUBY_PLATFORM !~ /darwin/
     raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
     system("codesign", "--sign", "-", "--force",
