@@ -26,7 +26,7 @@ module MachO
       file.change_dylib_id(new_id, options)
       file.write!
 
-      MachO.codesign(filename)
+      MachO.codesign!(filename)
     end
 
     # Changes a shared library install name in a Mach-O or Fat binary,
@@ -44,7 +44,7 @@ module MachO
       file.change_install_name(old_name, new_name, options)
       file.write!
 
-      MachO.codesign(filename)
+      MachO.codesign!(filename)
     end
 
     # Changes a runtime path in a Mach-O or Fat binary, overwriting the source
@@ -62,7 +62,7 @@ module MachO
       file.change_rpath(old_path, new_path, options)
       file.write!
 
-      MachO.codesign(filename)
+      MachO.codesign!(filename)
     end
 
     # Add a runtime path to a Mach-O or Fat binary, overwriting the source file.
@@ -78,7 +78,7 @@ module MachO
       file.add_rpath(new_path, options)
       file.write!
 
-      MachO.codesign(filename)
+      MachO.codesign!(filename)
     end
 
     # Delete a runtime path from a Mach-O or Fat binary, overwriting the source
@@ -95,7 +95,7 @@ module MachO
       file.delete_rpath(old_path, options)
       file.write!
 
-      MachO.codesign(filename)
+      MachO.codesign!(filename)
     end
 
     # Merge multiple Mach-Os into one universal (Fat) binary.
@@ -117,7 +117,7 @@ module MachO
       fat_macho = MachO::FatFile.new_from_machos(*machos, :fat64 => fat64)
       fat_macho.write(filename)
 
-      MachO.codesign(filename)
+      MachO.codesign!(filename)
     end
   end
 end
