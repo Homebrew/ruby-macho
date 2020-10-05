@@ -1223,6 +1223,14 @@ module MachO
           "datasize" => datasize,
         }.merge super
       end
+
+      # TODO(ww): doc
+      def superblob
+        raise LinkeditTypeMismatchError.new(__method__, type) unless type == :LC_CODE_SIGNATURE
+
+        superblob_view = MachOView.new view.raw_data, view.endianness, dataoff
+        CodeSigning::SuperBlob.new_from_bin superblob_view
+      end
     end
 
     # A load command representing the offset to and size of an encrypted

@@ -206,4 +206,12 @@ module MachO
             " Consider merging with `fat64: true`"
     end
   end
+
+  # TODO(ww): doc
+  class LinkeditTypeMismatchError < MachOError
+    # TODO(ww): doc
+    def initialize(meth, lc_sym)
+      super "Method #{meth} can't be used on __LINKEDIT data commands of type #{lc_sym}"
+    end
+  end
 end
