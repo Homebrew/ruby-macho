@@ -37,7 +37,7 @@ module MachO
 
       def to_h
         {
-          "view" => "view.to_h",
+          "view" => view.to_h,
         }.merge super
       end
     end
