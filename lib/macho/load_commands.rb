@@ -62,6 +62,8 @@ module MachO
       0x30 => :LC_VERSION_MIN_WATCHOS,
       0x31 => :LC_NOTE,
       0x32 => :LC_BUILD_VERSION,
+      (0x33 | LC_REQ_DYLD) => :LC_DYLD_EXPORTS_TRIE,
+      (0x34 | LC_REQ_DYLD) => :LD_DYLD_CHAINED_FIXUPS,
     }.freeze
 
     # association of symbol representations to load command constants
@@ -147,6 +149,8 @@ module MachO
       :LC_VERSION_MIN_WATCHOS => "VersionMinCommand",
       :LC_NOTE => "NoteCommand",
       :LC_BUILD_VERSION => "BuildVersionCommand",
+      :LC_DYLD_EXPORTS_TRIE => "LinkeditDataCommand",
+      :LD_DYLD_CHAINED_FIXUPS => "LinkeditDataCommand",
     }.freeze
 
     # association of segment name symbols to names
@@ -1193,7 +1197,8 @@ module MachO
     # A load command representing the offsets and sizes of a blob of data in
     # the __LINKEDIT segment. Corresponds to LC_CODE_SIGNATURE,
     # LC_SEGMENT_SPLIT_INFO, LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
-    # LC_DYLIB_CODE_SIGN_DRS, and LC_LINKER_OPTIMIZATION_HINT.
+    # LC_DYLIB_CODE_SIGN_DRS, LC_LINKER_OPTIMIZATION_HINT, LC_DYLD_EXPORTS_TRIE,
+    # or LC_DYLD_CHAINED_FIXUPS.
     class LinkeditDataCommand < LoadCommand
       # @return [Integer] offset to the data in the __LINKEDIT segment
       attr_reader :dataoff
