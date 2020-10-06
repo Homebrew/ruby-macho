@@ -14,6 +14,13 @@ module MachO
       Headers::CSMAGIC_BLOBWRAPPER => "BlobWrapper",
     }.freeze
 
+    CS_HASHTYPES = {
+      1 => :CS_HASHTYPE_SHA1,
+      2 => :CS_HASHTYPE_SHA256,
+      3 => :CS_HASHTYPE_SHA256_TRUNCATED,
+      4 => :CS_HASHTYPE_SHA384,
+    }.freeze
+
     class CSStructure < MachOStructure
       attr_reader :view
 
@@ -124,6 +131,14 @@ module MachO
           yield blob_klass.new_from_bin blob_view
         end
       end
+
+      def to_h
+        {
+          magic_sym.to_h => {
+            "count" => count,
+          },
+        }.merge super
+      end
     end
 
     # Represents a code signing Requirement blob.
@@ -170,6 +185,28 @@ module MachO
         @page_size = page_size
         @spare2 = spare2
       end
+
+      def hash_type_sym
+        CS_HASHTYPES[hash_type]
+      end
+
+      # TODO(ww): Figure out a good way to handle the fields that have been
+      # added with different CodeDirectory versions:
+      # * 0x20100:
+      #   uint32_t scatterOffset
+      #   char end_withScatter[0]
+      # * 0x20200:
+      #   uint32_t teamOffset
+      #   char end_withTeam[0]
+      # * 0x20300:
+      #   uint32_t spare3
+      #   uint64_t codeLimit64
+      #   char end_withCodeLimit64[0]
+      # * 0x20400:
+      #   uint64_t execSegBase
+      #   uint64_t execSegLimit
+      #   uint64_t execSegFlags
+      #   char end_withExecSec[0]
 
       def to_h
         {
