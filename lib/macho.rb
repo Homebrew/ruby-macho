@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "English"
 require_relative "macho/structure"
 require_relative "macho/view"
 require_relative "macho/headers"
@@ -38,5 +39,23 @@ module MachO
     end
 
     file
+  end
+
+  # Signs the dylib using an ad-hoc identity.
+  # Necessary after making any changes to a dylib, since otherwise
+  # changing a signed file invalidates its signature.
+  # @param filename [String] the file being opened
+  # @return [void]
+  # @raise [ModificationError] if the operation fails
+  def self.codesign!(filename)
+    # codesign binary is not available on Linux
+    return if RUBY_PLATFORM !~ /darwin/
+    raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
+
+    system("codesign", "--sign", "-", "--force",
+           "--preserve-metadata=entitlements,requirements,flags,runtime",
+           filename)
+
+    raise ModificationError, "#{filename}: signing failed!" unless $CHILD_STATUS.success?
   end
 end
