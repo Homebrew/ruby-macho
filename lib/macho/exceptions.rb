@@ -9,6 +9,11 @@ module MachO
   class ModificationError < MachOError
   end
 
+  # Raised when codesigning fails. Certain environments
+  # may want to rescue this to treat it as non-fatal.
+  class CodeSigningError < MachOError
+  end
+
   # Raised when a Mach-O file modification fails but can be recovered when
   # operating on multiple Mach-O slices of a fat binary in non-strict mode.
   class RecoverableModificationError < ModificationError
