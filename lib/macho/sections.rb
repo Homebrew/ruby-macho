@@ -118,6 +118,7 @@ module MachO
       # @api private
       def initialize(sectname, segname, addr, size, offset, align, reloff,
                      nreloc, flags, reserved1, reserved2)
+        super
         @sectname = sectname
         @segname = segname
         @addr = addr
