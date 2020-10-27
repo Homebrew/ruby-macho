@@ -231,7 +231,7 @@ module MachO
       # @param cmdsize [Integer] the size of the load command in bytes
       # @api private
       def initialize(view, cmd, cmdsize)
-        super
+        super()
         @view = view
         @cmd = cmd
         @cmdsize = cmdsize

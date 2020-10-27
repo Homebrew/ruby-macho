@@ -500,7 +500,7 @@ module MachO
 
       # @api private
       def initialize(magic, nfat_arch)
-        super
+        super()
         @magic = magic
         @nfat_arch = nfat_arch
       end
@@ -552,7 +552,7 @@ module MachO
 
       # @api private
       def initialize(cputype, cpusubtype, offset, size, align)
-        super
+        super()
         @cputype = cputype
         @cpusubtype = cpusubtype & ~CPU_SUBTYPE_MASK
         @offset = offset
@@ -650,7 +650,7 @@ module MachO
       # @api private
       def initialize(magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds,
                      flags)
-        super
+        super()
         @magic = magic
         @cputype = cputype
         # For now we're not interested in additional capability bits also to be
