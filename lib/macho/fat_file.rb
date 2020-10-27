@@ -66,7 +66,7 @@ module MachO
         offset += (macho.serialize.bytesize + macho_pads[macho])
       end
 
-      machos.each do |macho|
+      machos.each do |macho| # rubocop:disable Style/CombinableLoops
         bin << Utils.nullpad(macho_pads[macho])
         bin << macho.serialize
       end

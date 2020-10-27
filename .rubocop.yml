@@ -31,7 +31,7 @@ Layout/DotPosition:
   EnforcedStyle: trailing
 
 # TODO: re-enable in the future
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/AbcSize:

@@ -27,10 +27,6 @@ module MachO
 
   # Raised when a file is not a Mach-O.
   class NotAMachOError < MachOError
-    # @param error [String] the error in question
-    def initialize(error)
-      super error
-    end
   end
 
   # Raised when a file is too short to be a valid Mach-O file.
