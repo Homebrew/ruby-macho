@@ -56,6 +56,6 @@ module MachO
            "--preserve-metadata=entitlements,requirements,flags,runtime",
            filename)
 
-    raise ModificationError, "#{filename}: signing failed!" unless $CHILD_STATUS.success?
+    raise CodeSigningError, "#{filename}: signing failed!" unless $CHILD_STATUS.success?
   end
 end
