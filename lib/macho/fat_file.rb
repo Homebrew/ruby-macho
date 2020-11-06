@@ -398,16 +398,14 @@ module MachO
       errors = []
 
       machos.each_with_index do |macho, index|
-        begin
-          yield macho
-        rescue RecoverableModificationError => e
-          e.macho_slice = index
+        yield macho
+      rescue RecoverableModificationError => e
+        e.macho_slice = index
 
-          # Strict mode: Immediately re-raise. Otherwise: Retain, check later.
-          raise e if strict
+        # Strict mode: Immediately re-raise. Otherwise: Retain, check later.
+        raise e if strict
 
-          errors << e
-        end
+        errors << e
       end
 
       # Non-strict mode: Raise first error if *all* Mach-O slices failed.
