@@ -60,3 +60,6 @@ Metrics/PerceivedComplexity:
 
 Naming/MethodParameterName:
   Enabled: false
+
+Naming/VariableNumber:
+  CheckSymbols: false
