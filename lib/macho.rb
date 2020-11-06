@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require "English"
+require "open3"
+
 require_relative "macho/structure"
 require_relative "macho/view"
 require_relative "macho/headers"
@@ -52,10 +53,10 @@ module MachO
     return if RUBY_PLATFORM !~ /darwin/
     raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
-    system("codesign", "--sign", "-", "--force",
-           "--preserve-metadata=entitlements,requirements,flags,runtime",
-           filename)
+    _, _, status = Open3.capture3("codesign", "--sign", "-", "--force",
+                                  "--preserve-metadata=entitlements,requirements,flags,runtime",
+                                  filename)
 
-    raise CodeSigningError, "#{filename}: signing failed!" unless $CHILD_STATUS.success?
+    raise CodeSigningError, "#{filename}: signing failed!" unless status.success?
   end
 end
