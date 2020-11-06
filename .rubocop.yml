@@ -1,3 +1,6 @@
+AllCops:
+  NewCops: enable
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
@@ -57,3 +60,6 @@ Metrics/PerceivedComplexity:
 
 Naming/MethodParameterName:
   Enabled: false
+
+Naming/VariableNumber:
+  CheckSymbols: false
