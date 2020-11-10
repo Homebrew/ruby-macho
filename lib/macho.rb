@@ -49,8 +49,7 @@ module MachO
   # @return [void]
   # @raise [ModificationError] if the operation fails
   def self.codesign!(filename)
-    # codesign binary is not available on Linux
-    return if RUBY_PLATFORM !~ /darwin/
+    raise ArgumentError, "codesign binary is not available on Linux" if RUBY_PLATFORM !~ /darwin/
     raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
     _, _, status = Open3.capture3("codesign", "--sign", "-", "--force",
