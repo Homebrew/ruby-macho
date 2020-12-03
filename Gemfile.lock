@@ -2,7 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.1)
-    benchmark-ips (2.8.3)
+    benchmark-ips (2.8.4)
     codecov (0.2.12)
       json
       simplecov
