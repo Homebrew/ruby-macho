@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    ast (2.4.1)
+    ast (2.4.2)
     benchmark-ips (2.8.4)
     codecov (0.3.0)
       simplecov (>= 0.15, < 0.22)
@@ -23,7 +23,7 @@ GEM
       rubocop-ast (>= 1.2.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.4.0)
+    rubocop-ast (1.4.1)
       parser (>= 2.7.1.5)
     ruby-progressbar (1.11.0)
     simplecov (0.21.2)
