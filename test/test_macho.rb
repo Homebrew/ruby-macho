@@ -443,6 +443,10 @@ class MachOFileTest < Minitest::Test
       end
     end
 
+    groups << ["libdupe.dylib", "libdupe_actual.dylib"].map do |fn|
+      fixture(:x86_64, fn)
+    end
+
     groups.each do |filename, actual|
       file = MachO::MachOFile.new(filename)
 
@@ -460,6 +464,7 @@ class MachOFileTest < Minitest::Test
       # ensure we can actually re-load and parse the modified file
       modified = MachO::MachOFile.new(actual)
 
+      assert_empty modified.rpaths
       assert_equal file.serialize.bytesize, modified.serialize.bytesize
       assert_operator modified.ncmds, :<, orig_ncmds
       assert_operator modified.sizeofcmds, :<, orig_sizeofcmds
