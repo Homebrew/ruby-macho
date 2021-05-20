@@ -415,11 +415,10 @@ module MachO
     # @note `_options` is currently unused and is provided for signature
     #  compatibility with {MachO::FatFile#delete_rpath}
     def delete_rpath(path, _options = {})
-      rpath_cmds = command(:LC_RPATH).select { |r| r.path.to_s == path }
-      raise RpathUnknownError, path if rpath_cmds.empty?
+      rpath_cmd = command(:LC_RPATH).find { |r| r.path.to_s == path }
+      raise RpathUnknownError, path unless rpath_cmd
 
-      # delete the commands in reverse order, offset descending.
-      rpath_cmds.reverse_each { |cmd| delete_command(cmd) }
+      delete_command(rpath_cmd)
     end
 
     # Write all Mach-O data to the given filename.

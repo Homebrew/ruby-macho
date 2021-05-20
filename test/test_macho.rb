@@ -455,7 +455,7 @@ class MachOFileTest < Minitest::Test
       orig_sizeofcmds = file.sizeofcmds
       orig_npaths = file.rpaths.size
 
-      file.delete_rpath(file.rpaths.first)
+      file.rpaths.each { |rpath| file.delete_rpath(rpath) }
       assert_operator file.ncmds, :<, orig_ncmds
       assert_operator file.sizeofcmds, :<, orig_sizeofcmds
       assert_operator file.rpaths.size, :<, orig_npaths
