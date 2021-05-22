@@ -451,14 +451,19 @@ class MachOFileTest < Minitest::Test
       file = MachO::MachOFile.new(filename)
 
       refute_empty file.rpaths
-      orig_ncmds = file.ncmds
+      orig_ncmds = current_ncmds = file.ncmds
       orig_sizeofcmds = file.sizeofcmds
-      orig_npaths = file.rpaths.size
+      orig_npaths = current_npaths = file.rpaths.size
 
-      file.delete_rpath(file.rpaths.first)
-      assert_operator file.ncmds, :<, orig_ncmds
-      assert_operator file.sizeofcmds, :<, orig_sizeofcmds
-      assert_operator file.rpaths.size, :<, orig_npaths
+      file.rpaths.each do |rpath|
+        file.delete_rpath(rpath)
+        current_npaths -= 1
+        current_ncmds -= 1
+
+        assert_equal file.ncmds, current_ncmds
+        assert_equal file.rpaths.size, current_npaths
+        assert_operator file.sizeofcmds, :<, orig_sizeofcmds
+      end
 
       file.write(actual)
       # ensure we can actually re-load and parse the modified file
