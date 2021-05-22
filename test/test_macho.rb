@@ -482,6 +482,47 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_delete_rpath_uniq
+    groups = SINGLE_ARCHES.map do |arch|
+      ["hello.bin", "hello_actual.bin"].map do |fn|
+        fixture(arch, fn)
+      end
+    end
+
+    groups << ["libdupe.dylib", "libdupe_actual.dylib"].map do |fn|
+      fixture(:x86_64, fn)
+    end
+
+    groups.each do |filename, actual|
+      file = MachO::MachOFile.new(filename)
+
+      refute_empty file.rpaths
+      orig_ncmds = file.ncmds
+      orig_sizeofcmds = file.sizeofcmds
+      orig_npaths = file.rpaths.size
+
+      file.delete_rpath(file.rpaths.first, :uniq => true)
+      assert_operator file.ncmds, :<, orig_ncmds
+      assert_operator file.sizeofcmds, :<, orig_sizeofcmds
+      assert_operator file.rpaths.size, :<, orig_npaths
+
+      file.write(actual)
+      # ensure we can actually re-load and parse the modified file
+      modified = MachO::MachOFile.new(actual)
+
+      assert_empty modified.rpaths
+      assert_equal file.serialize.bytesize, modified.serialize.bytesize
+      assert_operator modified.ncmds, :<, orig_ncmds
+      assert_operator modified.sizeofcmds, :<, orig_sizeofcmds
+      assert_equal file.rpaths.size, modified.rpaths.size
+      assert_operator modified.rpaths.size, :<, orig_npaths
+    end
+  ensure
+    groups.each do |_, actual|
+      delete_if_exists(actual)
+    end
+  end
+
   def test_add_rpath
     groups = SINGLE_ARCHES.map do |arch|
       ["hello.bin", "hello_actual.bin"].map do |fn|
