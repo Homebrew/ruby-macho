@@ -731,6 +731,11 @@ module MachO
         filetype == Headers::MH_KEXT_BUNDLE
       end
 
+      # @return [Boolean] whether or not the file is of type `MH_FILESET`
+      def fileset?
+        filetype == Headers::MH_FILESET
+      end
+
       # @return [Boolean] true if the Mach-O has 32-bit magic, false otherwise
       def magic32?
         Utils.magic32?(magic)
