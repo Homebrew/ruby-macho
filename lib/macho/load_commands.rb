@@ -63,7 +63,8 @@ module MachO
       0x31 => :LC_NOTE,
       0x32 => :LC_BUILD_VERSION,
       (0x33 | LC_REQ_DYLD) => :LC_DYLD_EXPORTS_TRIE,
-      (0x34 | LC_REQ_DYLD) => :LD_DYLD_CHAINED_FIXUPS,
+      (0x34 | LC_REQ_DYLD) => :LC_DYLD_CHAINED_FIXUPS,
+      (0x35 | LC_REQ_DYLD) => :LC_FILESET_ENTRY,
     }.freeze
 
     # association of symbol representations to load command constants
@@ -150,7 +151,8 @@ module MachO
       :LC_NOTE => "NoteCommand",
       :LC_BUILD_VERSION => "BuildVersionCommand",
       :LC_DYLD_EXPORTS_TRIE => "LinkeditDataCommand",
-      :LD_DYLD_CHAINED_FIXUPS => "LinkeditDataCommand",
+      :LC_DYLD_CHAINED_FIXUPS => "LinkeditDataCommand",
+      :LC_FILESET_ENTRY => "LoadCommand",
     }.freeze
 
     # association of segment name symbols to names

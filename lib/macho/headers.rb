@@ -433,6 +433,10 @@ module MachO
     # @api private
     MH_KEXT_BUNDLE = 0xb
 
+    # a set of Mach-Os, running in the same userspace, sharing a linkedit
+    # @api private
+    MH_FILESET = 0xc
+
     # association of filetypes to Symbol representations
     # @api private
     MH_FILETYPES = {
@@ -478,6 +482,9 @@ module MachO
       :MH_HAS_TLV_DESCRIPTORS => 0x800000,
       :MH_NO_HEAP_EXECUTION => 0x1000000,
       :MH_APP_EXTENSION_SAFE => 0x02000000,
+      :MH_NLIST_OUTOFSYNC_WITH_DYLDINFO => 0x04000000,
+      :MH_SIM_SUPPORT => 0x08000000,
+      :MH_DYLIB_IN_CACHE => 0x80000000,
     }.freeze
 
     # Fat binary header structure
