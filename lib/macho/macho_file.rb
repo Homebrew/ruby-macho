@@ -368,20 +368,20 @@ module MachO
     #  file.change_rpath("/usr/lib", "/usr/local/lib")
     # @param old_path [String] the old runtime path
     # @param new_path [String] the new runtime path
-    # @param _options [Hash]
+    # @param options [Hash]
+    # @option options [Boolean] :uniq (false) if true, change duplicate
+    #  rpaths simultaneously.
     # @return [void]
     # @raise [RpathUnknownError] if no such old runtime path exists
     # @raise [RpathExistsError] if the new runtime path already exists
-    # @note `_options` is currently unused and is provided for signature
-    #  compatibility with {MachO::FatFile#change_rpath}
-    def change_rpath(old_path, new_path, _options = {})
+    def change_rpath(old_path, new_path, options = {})
       old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
       raise RpathUnknownError, old_path if old_lc.nil?
       raise RpathExistsError, new_path if rpaths.include?(new_path)
 
       new_lc = LoadCommands::LoadCommand.create(:LC_RPATH, new_path)
 
-      delete_rpath(old_path)
+      delete_rpath(old_path, options)
       insert_command(old_lc.view.offset, new_lc)
     end
 
@@ -409,16 +409,22 @@ module MachO
     #  file.delete_rpath("/lib")
     #  file.rpaths # => []
     # @param path [String] the runtime path to delete
-    # @param _options [Hash]
+    # @param options [Hash]
+    # @option options [Boolean] :uniq (false) if true, also delete
+    #  duplicates of the requested path. If false, delete the first
+    #  instance (by offset) of the requested path.
     # @return void
     # @raise [RpathUnknownError] if no such runtime path exists
-    # @note `_options` is currently unused and is provided for signature
-    #  compatibility with {MachO::FatFile#delete_rpath}
-    def delete_rpath(path, _options = {})
-      rpath_cmd = command(:LC_RPATH).find { |r| r.path.to_s == path }
-      raise RpathUnknownError, path unless rpath_cmd
+    def delete_rpath(path, options = {})
+      uniq = options.fetch(:uniq, false)
+      search_method = uniq ? :select : :find
 
-      delete_command(rpath_cmd)
+      # Cast rpath_cmds into an Array so we can handle the uniq and non-uniq cases the same way
+      rpath_cmds = Array(command(:LC_RPATH).method(search_method).call { |r| r.path.to_s == path })
+      raise RpathUnknownError, path if rpath_cmds.empty?
+
+      # delete the commands in reverse order, offset descending.
+      rpath_cmds.reverse_each { |cmd| delete_command(cmd) }
     end
 
     # Write all Mach-O data to the given filename.
