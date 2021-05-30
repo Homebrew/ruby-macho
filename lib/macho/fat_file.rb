@@ -238,6 +238,8 @@ module MachO
     # @param options [Hash]
     # @option options [Boolean] :strict (true) if true, fail if one slice fails.
     #  if false, fail only if all slices fail.
+    # @option options [Boolean] :uniq (false) for each slice: if true, change
+    #  each rpath simultaneously.
     # @return [void]
     # @see MachOFile#change_rpath
     def change_rpath(old_path, new_path, options = {})
@@ -268,6 +270,9 @@ module MachO
     # @param options [Hash]
     # @option options [Boolean] :strict (true) if true, fail if one slice fails.
     #  if false, fail only if all slices fail.
+    # @option options [Boolean] :uniq (false) for each slice: if true, delete
+    #  only the first runtime path that matches. if false, delete all duplicate
+    #  paths that match.
     # @return void
     # @see MachOFile#delete_rpath
     def delete_rpath(path, options = {})
