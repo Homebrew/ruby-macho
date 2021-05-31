@@ -482,6 +482,9 @@ module MachO
     def populate_and_check_magic
       magic = @raw_data[0..3].unpack1("N")
 
+      # We don't consider the compressed magic to be a "normal" Mach-O magic,
+      # so we check it first.
+      raise CompressedMachOError if Utils.compressed_magic?(magic)
       raise MagicError, magic unless Utils.magic?(magic)
       raise FatBinaryError if Utils.fat_magic?(magic)
 

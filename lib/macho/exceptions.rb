@@ -207,4 +207,9 @@ module MachO
             " Consider merging with `fat64: true`"
     end
   end
+
+  # Raised when attempting to parse a compressed Mach-O without optional
+  # compression support.
+  class CompressedMachOError < MachOError
+  end
 end

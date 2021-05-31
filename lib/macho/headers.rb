@@ -37,6 +37,18 @@ module MachO
     # @api private
     MH_CIGAM_64 = 0xcffaedfe
 
+    # compressed mach-o magic
+    # @api private
+    COMPRESSED_MAGIC = 0x636f6d70 # "comp"
+
+    # a compressed mach-o slice, using LZSS for compression
+    # @api private
+    COMP_TYPE_LZSS = 0x6c7a7373 # "lzss"
+
+    # a compressed mach-o slice, using LZVN ("FastLib") for compression
+    # @api private
+    COMP_TYPE_FASTLIB = 0x6c7a766e # "lzvn"
+
     # association of magic numbers to string representations
     # @api private
     MH_MAGICS = {
