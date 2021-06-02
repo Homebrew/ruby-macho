@@ -562,12 +562,4 @@ class FatFileTest < Minitest::Test
       assert_equal MachO::Headers::CPU_SUBTYPES[fa.cputype][fa.cpusubtype], fa_hsh["cpusubtype_sym"]
     end
   end
-
-  def test_prelinkedkernel_fails
-    prelinked_kernel = "/Library/Apple/System/Library/PrelinkedKernels/prelinkedkernel"
-
-    assert_raises MachO::CompressedMachOError do
-      MachO::FatFile.new(prelinked_kernel)
-    end
-  end
 end
