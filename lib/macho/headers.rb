@@ -809,5 +809,88 @@ module MachO
         }.merge super
       end
     end
+
+    # Prelinked kernel/"kernelcache" header structure
+    class PrelinkedKernelHeader < MachOStructure
+      # @return [Integer] the magic number for a compressed header ({COMPRESSED_MAGIC})
+      attr_reader :signature
+
+      # @return [Integer] the type of compression used
+      attr_reader :compress_type
+
+      # @return [Integer] a checksum for the uncompressed data
+      attr_reader :adler32
+
+      # @return [Integer] the size of the uncompressed data, in bytes
+      attr_reader :uncompressed_size
+
+      # @return [Integer] the size of the compressed data, in bytes
+      attr_reader :compressed_size
+
+      # @return [Integer] the version of the prelink format
+      attr_reader :prelink_version
+
+      # @return [void]
+      attr_reader :reserved
+
+      # @return [void]
+      attr_reader :platform_name
+
+      # @return [void]
+      attr_reader :root_path
+
+      # @see MachOStructure::FORMAT
+      # @api private
+      FORMAT = "L>6a40a64a256"
+
+      # @see MachOStructure::SIZEOF
+      # @api private
+      SIZEOF = 384
+
+      # @api private
+      def initialize(signature, compress_type, adler32, uncompressed_size, compressed_size, prelink_version, reserved, platform_name, root_path)
+        super()
+
+        @signature = signature
+        @compress_type = compress_type
+        @adler32 = adler32
+        @uncompressed_size = uncompressed_size
+        @compressed_size = compressed_size
+        @prelink_version = prelink_version
+        @reserved = reserved.unpack("L>10")
+        @platform_name = platform_name
+        @root_path = root_path
+      end
+
+      # @return [Boolean] whether this prelinked kernel supports KASLR
+      def kaslr?
+        prelink_version >= 1
+      end
+
+      # @return [Boolean] whether this prelinked kernel is compressed with LZSS
+      def lzss?
+        compress_type == COMP_TYPE_LZSS
+      end
+
+      # @return [Boolean] whether this prelinked kernel is compressed with LZVN
+      def lzvn?
+        compress_type == COMP_TYPE_FASTLIB
+      end
+
+      # @return [Hash] a hash representation of this {PrelinkedKernelHeader}
+      def to_h
+        {
+          "signature" => signature,
+          "compress_type" => compress_type,
+          "adler32" => adler32,
+          "uncompressed_size" => uncompressed_size,
+          "compressed_size" => compressed_size,
+          "prelink_version" => prelink_version,
+          "reserved" => reserved,
+          "platform_name" => platform_name,
+          "root_path" => root_path,
+        }.merge super
+      end
+    end
   end
 end

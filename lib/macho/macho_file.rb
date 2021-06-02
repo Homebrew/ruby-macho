@@ -34,7 +34,11 @@ module MachO
     # @param bin [String] a binary string containing raw Mach-O data
     # @param opts [Hash] options to control the parser with
     # @option opts [Boolean] :permissive whether to ignore unknown load commands
+    # @option opts [Boolean] :decompress whether to decompress, if capable
     # @return [MachOFile] a new MachOFile
+    # @note The `:decompress` option relies on non-default dependencies. Compression
+    #  is only used in niche Mach-Os, so leaving this disabled is a reasonable default for
+    #  virtual all normal uses.
     def self.new_from_bin(bin, **opts)
       instance = allocate
       instance.initialize_from_bin(bin, opts)
@@ -46,7 +50,11 @@ module MachO
     # @param filename [String] the Mach-O file to load from
     # @param opts [Hash] options to control the parser with
     # @option opts [Boolean] :permissive whether to ignore unknown load commands
+    # @option opts [Boolean] :decompress whether to decompress, if capable
     # @raise [ArgumentError] if the given file does not exist
+    # @note The `:decompress` option relies on non-default dependencies. Compression
+    #  is only used in niche Mach-Os, so leaving this disabled is a reasonable default for
+    #  virtual all normal uses.
     def initialize(filename, **opts)
       raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
@@ -196,7 +204,7 @@ module MachO
     # Appends a new load command to the Mach-O.
     # @param lc [LoadCommands::LoadCommand] the load command being added
     # @param options [Hash]
-    # @option options [Boolean] :repopulate (true) whether or not to repopulate
+    # @option f [Boolean] :repopulate (true) whether or not to repopulate
     #  the instance fields
     # @return [void]
     # @see #insert_command
@@ -463,6 +471,9 @@ module MachO
       # the smallest Mach-O header is 28 bytes
       raise TruncatedFileError if @raw_data.size < 28
 
+      magic = @raw_data[0..3].unpack1("N")
+      populate_prelinked_kernel_header if Utils.compressed_magic?(magic)
+
       magic = populate_and_check_magic
       mh_klass = Utils.magic32?(magic) ? Headers::MachHeader : Headers::MachHeader64
       mh = mh_klass.new_from_bin(endianness, @raw_data[0, mh_klass.bytesize])
@@ -474,6 +485,48 @@ module MachO
       mh
     end
 
+    # Read a compressed Mach-O header and check its validity, as well as whether we're able
+    # to parse it.
+    # @return [void]
+    # @raise [CompressedMachOError] if we weren't asked to perform decompression
+    # @raise [DecompressionError] if decompression is impossible or fails
+    # @api private
+    def populate_prelinked_kernel_header
+      raise CompressedMachOError unless options.fetch(:decompress, false)
+
+      @plh = Headers::PrelinkedKernelHeader.new_from_bin :big, @raw_data[0, Headers::PrelinkedKernelHeader.bytesize]
+
+      raise DecompressionError, "unsupported compression type: LZSS" if @plh.lzss?
+      raise DecompressionError, "unknown compression type: 0x#{plh.compress_type.to_s 16}" unless @plh.lzvn?
+
+      decompress_macho_lzvn
+    end
+
+    # Attempt to decompress a Mach-O file from the data specified in a prelinked kernel header.
+    # @return [void]
+    # @raise [DecompressionError] if decompression is impossible or fails
+    # @api private
+    # @note This method rewrites the internal state of {MachOFile} to pretend as if it was never
+    #  compressed to begin with, allowing all other APIs to transparently act on compressed Mach-Os.
+    def decompress_macho_lzvn
+      begin
+        require "lzfse"
+      rescue LoadError
+        raise DecompressionError, "LZVN required but the optional 'lzfse' gem is not installed"
+      end
+
+      # From this point onwards, the internal buffer of this MachOFile refers to the decompressed
+      # contents specified by the prelinked kernel header.
+      begin
+        @raw_data = LZFSE.lzvn_decompress @raw_data.slice(Headers::PrelinkedKernelHeader.bytesize, @plh.compressed_size)
+        # Sanity checks.
+        raise DecompressionError if @raw_data.size != @plh.uncompressed_size
+        # TODO: check the adler32 CRC in @plh
+      rescue LZFSE::DecodeError
+        raise DecompressionError, "LZVN decompression failed"
+      end
+    end
+
     # Read just the file's magic number and check its validity.
     # @return [Integer] the magic
     # @raise [MagicError] if the magic is not valid Mach-O magic
@@ -482,9 +535,6 @@ module MachO
     def populate_and_check_magic
       magic = @raw_data[0..3].unpack1("N")
 
-      # We don't consider the compressed magic to be a "normal" Mach-O magic,
-      # so we check it first.
-      raise CompressedMachOError if Utils.compressed_magic?(magic)
       raise MagicError, magic unless Utils.magic?(magic)
       raise FatBinaryError if Utils.fat_magic?(magic)
 
