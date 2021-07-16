@@ -59,7 +59,7 @@ puts lc_vers.version_string # => "10.10.0"
 Attribution:
 
 * Constants were taken from Apple, Inc's
-[`loader.h` in `cctools/include/mach-o`](https://www.opensource.apple.com/source/cctools/cctools-870/include/mach-o/loader.h).
+[`loader.h` in `cctools/include/mach-o`](https://opensource.apple.com/source/cctools/cctools-973.0.1/include/mach-o/loader.h.auto.html).
 (Apple Public Source License 2.0).
 
 ### License

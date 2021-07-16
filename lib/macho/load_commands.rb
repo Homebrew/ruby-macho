@@ -63,7 +63,8 @@ module MachO
       0x31 => :LC_NOTE,
       0x32 => :LC_BUILD_VERSION,
       (0x33 | LC_REQ_DYLD) => :LC_DYLD_EXPORTS_TRIE,
-      (0x34 | LC_REQ_DYLD) => :LD_DYLD_CHAINED_FIXUPS,
+      (0x34 | LC_REQ_DYLD) => :LC_DYLD_CHAINED_FIXUPS,
+      (0x35 | LC_REQ_DYLD) => :LC_FILESET_ENTRY,
     }.freeze
 
     # association of symbol representations to load command constants
@@ -150,7 +151,8 @@ module MachO
       :LC_NOTE => "NoteCommand",
       :LC_BUILD_VERSION => "BuildVersionCommand",
       :LC_DYLD_EXPORTS_TRIE => "LinkeditDataCommand",
-      :LD_DYLD_CHAINED_FIXUPS => "LinkeditDataCommand",
+      :LC_DYLD_CHAINED_FIXUPS => "LinkeditDataCommand",
+      :LC_FILESET_ENTRY => "FilesetEntryCommand",
     }.freeze
 
     # association of segment name symbols to names
@@ -1793,6 +1795,31 @@ module MachO
           "size" => size,
         }.merge super
       end
+    end
+
+    # A load command containing a description of a Mach-O that is a constituent of a fileset.
+    # Each entry is further described by its own Mach header.
+    # Corresponds to LC_FILESET_ENTRY.
+    class FilesetEntryCommand < LoadCommand
+      # @return [Integer] the virtual memory address of the entry
+      attr_reader :vmaddr
+
+      # @return [Integer] the file offset of the entry
+      attr_reader :fileoff
+
+      # @return [LCStr] the entry's ID
+      attr_reader :entry_id
+
+      # @return [void]
+      attr_reader :reserved
+
+      # @see MachOStructure::FORMAT
+      # @api private
+      FORMAT = "L=2Q=2L=2"
+
+      # @see MachOStructure::SIZEOF
+      # @api private
+      SIZEOF = 20
     end
   end
 end
