@@ -7,7 +7,7 @@ GEM
       simplecov (>= 0.15, < 0.22)
     docile (1.4.0)
     minitest (5.14.4)
-    parallel (1.20.1)
+    parallel (1.21.0)
     parser (3.0.2.0)
       ast (~> 2.4.1)
     rainbow (3.0.0)
