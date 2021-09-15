@@ -55,7 +55,7 @@ module MachO
       machos.each do |macho|
         macho_offset = Utils.round(offset, 2**macho.segment_alignment)
 
-        raise FatArchOffsetOverflowError, macho_offset if !fat64 && macho_offset > (2**32 - 1)
+        raise FatArchOffsetOverflowError, macho_offset if !fat64 && macho_offset > ((2**32) - 1)
 
         macho_pads[macho] = Utils.padding_for(offset, 2**macho.segment_alignment)
 
