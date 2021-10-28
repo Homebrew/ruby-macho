@@ -9,6 +9,11 @@ module MachO
   class ModificationError < MachOError
   end
 
+  # Raised when codesigning fails. Certain environments
+  # may want to rescue this to treat it as non-fatal.
+  class CodeSigningError < MachOError
+  end
+
   # Raised when a Mach-O file modification fails but can be recovered when
   # operating on multiple Mach-O slices of a fat binary in non-strict mode.
   class RecoverableModificationError < ModificationError
@@ -27,10 +32,6 @@ module MachO
 
   # Raised when a file is not a Mach-O.
   class NotAMachOError < MachOError
-    # @param error [String] the error in question
-    def initialize(error)
-      super error
-    end
   end
 
   # Raised when a file is too short to be a valid Mach-O file.
@@ -83,7 +84,7 @@ module MachO
     # @param cpusubtype [Integer] the CPU sub-type of the unknown pair
     def initialize(cputype, cpusubtype)
       super "Unrecognized CPU sub-type: 0x%08<cpusubtype>x" \
-        " (for CPU type: 0x%08<cputype>x" % { :cputype => cputype, :cpusubtype => cpusubtype }
+            " (for CPU type: 0x%08<cputype>x" % { :cputype => cputype, :cpusubtype => cpusubtype }
     end
   end
 
@@ -119,7 +120,7 @@ module MachO
     # @param actual_arity [Integer] the number of arguments received
     def initialize(cmd_sym, expected_arity, actual_arity)
       super "Expected #{expected_arity} arguments for #{cmd_sym} creation," \
-        " got #{actual_arity}"
+            " got #{actual_arity}"
     end
   end
 
@@ -136,7 +137,7 @@ module MachO
     # @param lc [MachO::LoadCommand] the load command containing the string
     def initialize(lc)
       super "Load command #{lc.type} at offset #{lc.view.offset} contains a" \
-        " malformed string"
+            " malformed string"
     end
   end
 
@@ -153,8 +154,8 @@ module MachO
     # @param filename [String] the filename
     def initialize(filename)
       super "Updated load commands do not fit in the header of " \
-        "#{filename}. #{filename} needs to be relinked, possibly with " \
-        "-headerpad or -headerpad_max_install_names"
+            "#{filename}. #{filename} needs to be relinked, possibly with " \
+            "-headerpad or -headerpad_max_install_names"
     end
   end
 

@@ -1,3 +1,7 @@
+AllCops:
+  TargetRubyVersion: 2.6
+  NewCops: enable
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
@@ -26,12 +30,8 @@ Style/TrailingCommaInArguments:
 Layout/CaseIndentation:
   EnforcedStyle: end
 
-# Ruby 1.8 compatibility
-Layout/DotPosition:
-  EnforcedStyle: trailing
-
 # TODO: re-enable in the future
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/AbcSize:
@@ -57,3 +57,6 @@ Metrics/PerceivedComplexity:
 
 Naming/MethodParameterName:
   Enabled: false
+
+Naming/VariableNumber:
+  CheckSymbols: false

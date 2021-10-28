@@ -55,7 +55,7 @@ module MachO
       machos.each do |macho|
         macho_offset = Utils.round(offset, 2**macho.segment_alignment)
 
-        raise FatArchOffsetOverflowError, macho_offset if !fat64 && macho_offset > (2**32 - 1)
+        raise FatArchOffsetOverflowError, macho_offset if !fat64 && macho_offset > ((2**32) - 1)
 
         macho_pads[macho] = Utils.padding_for(offset, 2**macho.segment_alignment)
 
@@ -66,7 +66,7 @@ module MachO
         offset += (macho.serialize.bytesize + macho_pads[macho])
       end
 
-      machos.each do |macho|
+      machos.each do |macho| # rubocop:disable Style/CombinableLoops
         bin << Utils.nullpad(macho_pads[macho])
         bin << macho.serialize
       end
@@ -238,6 +238,8 @@ module MachO
     # @param options [Hash]
     # @option options [Boolean] :strict (true) if true, fail if one slice fails.
     #  if false, fail only if all slices fail.
+    # @option options [Boolean] :uniq (false) for each slice: if true, change
+    #  each rpath simultaneously.
     # @return [void]
     # @see MachOFile#change_rpath
     def change_rpath(old_path, new_path, options = {})
@@ -268,6 +270,9 @@ module MachO
     # @param options [Hash]
     # @option options [Boolean] :strict (true) if true, fail if one slice fails.
     #  if false, fail only if all slices fail.
+    # @option options [Boolean] :uniq (false) for each slice: if true, delete
+    #  only the first runtime path that matches. if false, delete all duplicate
+    #  paths that match.
     # @return void
     # @see MachOFile#delete_rpath
     def delete_rpath(path, options = {})
@@ -398,16 +403,14 @@ module MachO
       errors = []
 
       machos.each_with_index do |macho, index|
-        begin
-          yield macho
-        rescue RecoverableModificationError => e
-          e.macho_slice = index
+        yield macho
+      rescue RecoverableModificationError => e
+        e.macho_slice = index
 
-          # Strict mode: Immediately re-raise. Otherwise: Retain, check later.
-          raise e if strict
+        # Strict mode: Immediately re-raise. Otherwise: Retain, check later.
+        raise e if strict
 
-          errors << e
-        end
+        errors << e
       end
 
       # Non-strict mode: Raise first error if *all* Mach-O slices failed.
