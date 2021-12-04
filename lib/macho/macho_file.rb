@@ -38,7 +38,7 @@ module MachO
     # @return [MachOFile] a new MachOFile
     # @note The `:decompress` option relies on non-default dependencies. Compression
     #  is only used in niche Mach-Os, so leaving this disabled is a reasonable default for
-    #  virtual all normal uses.
+    #  virtually all normal uses.
     def self.new_from_bin(bin, **opts)
       instance = allocate
       instance.initialize_from_bin(bin, opts)
@@ -54,7 +54,7 @@ module MachO
     # @raise [ArgumentError] if the given file does not exist
     # @note The `:decompress` option relies on non-default dependencies. Compression
     #  is only used in niche Mach-Os, so leaving this disabled is a reasonable default for
-    #  virtual all normal uses.
+    #  virtually all normal uses.
     def initialize(filename, **opts)
       raise ArgumentError, "#{filename}: no such file" unless File.file?(filename)
 
