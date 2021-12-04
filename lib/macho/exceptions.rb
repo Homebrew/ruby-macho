@@ -216,9 +216,21 @@ module MachO
     end
   end
 
+  # TODO(ww): doc
   class CSBlobUnknownError < MachOError
+    # TODO(ww): doc
     def initialize(magic)
       super "Unknown code signing blob magic: 0x#{magic.to_s 16}"
     end
+  end
+
+  # Raised when attempting to parse a compressed Mach-O without explicitly
+  # requesting decompression.
+  class CompressedMachOError < MachOError
+  end
+
+  # Raised when attempting to decompress a compressed Mach-O without adequate
+  # dependencies, or on other decompression errors.
+  class DecompressionError < MachOError
   end
 end
