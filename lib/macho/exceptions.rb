@@ -207,4 +207,14 @@ module MachO
             " Consider merging with `fat64: true`"
     end
   end
+
+  # Raised when attempting to parse a compressed Mach-O without explicitly
+  # requesting decompression.
+  class CompressedMachOError < MachOError
+  end
+
+  # Raised when attempting to decompress a compressed Mach-O without adequate
+  # dependencies, or on other decompression errors.
+  class DecompressionError < MachOError
+  end
 end
