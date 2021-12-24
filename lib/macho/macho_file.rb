@@ -60,7 +60,7 @@ module MachO
 
       @filename = filename
       @options = opts
-      @raw_data = File.open(@filename, "rb", &:read)
+      @raw_data = File.binread(@filename)
       populate_fields
     end
 
@@ -439,7 +439,7 @@ module MachO
     # @param filename [String] the file to write to
     # @return [void]
     def write(filename)
-      File.open(filename, "wb") { |f| f.write(@raw_data) }
+      File.binwrite(filename, @raw_data)
     end
 
     # Write all Mach-O data to the file used to initialize the instance.
@@ -449,7 +449,7 @@ module MachO
     def write!
       raise MachOError, "no initial file to write to" if @filename.nil?
 
-      File.open(@filename, "wb") { |f| f.write(@raw_data) }
+      File.binwrite(@filename, @raw_data)
     end
 
     # @return [Hash] a hash representation of this {MachOFile}
