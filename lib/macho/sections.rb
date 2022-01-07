@@ -10,10 +10,10 @@ module MachO
     SECTION_ATTRIBUTES_MASK = 0xffffff00
 
     # user settable attributes mask
-    SECTION_ATTRIBUTES_USR = 0xff000000
+    SECTION_ATTRIBUTES_USR_MASK = 0xff000000
 
     # system settable attributes mask
-    SECTION_ATTRIBUTES_SYS = 0x00ffff00
+    SECTION_ATTRIBUTES_SYS_MASK = 0x00ffff00
 
     # maximum specifiable section alignment, as a power of 2
     # @note see `MAXSECTALIGN` macro in `cctools/misc/lipo.c`
