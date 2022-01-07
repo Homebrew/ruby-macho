@@ -611,8 +611,8 @@ module MachO
       segments.each do |seg|
         seg.sections.each do |sect|
           next if sect.empty?
-          next if sect.flag?(:S_ZEROFILL)
-          next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
+          next if sect.type?(:S_ZEROFILL)
+          next if sect.type?(:S_THREAD_LOCAL_ZEROFILL)
           next unless sect.offset < offset
 
           offset = sect.offset
