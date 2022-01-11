@@ -1825,7 +1825,7 @@ module MachO
         super(view, cmd, cmdsize)
         @vmaddr = vmaddr
         @fileoff = fileoff
-        @entry_id = entry_id
+        @entry_id = LCStr.new(self, entry_id)
         @reserved = reserved
       end
 
