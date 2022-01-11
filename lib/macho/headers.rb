@@ -445,7 +445,8 @@ module MachO
     # @api private
     MH_KEXT_BUNDLE = 0xb
 
-    # a set of Mach-Os, running in the same userspace, sharing a linkedit
+    # a set of Mach-Os, running in the same userspace, sharing a linkedit.  The kext collection files are an example
+    # of this object type
     # @api private
     MH_FILESET = 0xc
 
@@ -463,6 +464,7 @@ module MachO
       MH_DYLIB_STUB => :dylib_stub,
       MH_DSYM => :dsym,
       MH_KEXT_BUNDLE => :kext_bundle,
+      MH_FILESET => :fileset,
     }.freeze
 
     # association of mach header flag symbols to values
