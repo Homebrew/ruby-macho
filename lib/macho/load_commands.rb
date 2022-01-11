@@ -175,6 +175,7 @@ module MachO
       :SG_FVMLIB => 0x2,
       :SG_NORELOC => 0x4,
       :SG_PROTECTED_VERSION_1 => 0x8,
+      :SG_READ_ONLY => 0x10,
     }.freeze
 
     # The top-level Mach-O load command structure.

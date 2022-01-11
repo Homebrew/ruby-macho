@@ -121,6 +121,9 @@ class MachOFileTest < Minitest::Test
         assert_kind_of Integer, seg.nsects
         assert_kind_of Integer, seg.flags
         refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
+        if seg.flags != 0
+          assert MachO::LoadCommands::SEGMENT_FLAGS.keys.one? { |sf| seg.flag?(sf) }
+        end
 
         sections = seg.sections
 
@@ -141,6 +144,11 @@ class MachOFileTest < Minitest::Test
           assert_kind_of Integer, sect.nreloc
           assert_kind_of Integer, sect.flags
           refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
+          assert_kind_of Integer, sect.type
+          assert MachO::Sections::SECTION_TYPES.values.include?(sect.type)
+          assert MachO::Sections::SECTION_TYPES.keys.one? { |st| sect.type?(st) }
+          assert_kind_of Integer, sect.attributes
+          assert MachO::Sections::SECTION_ATTRIBUTES.keys.any? { |sa| sect.attribute?(sa) }
           assert_kind_of Integer, sect.reserved1
           assert_kind_of Integer, sect.reserved2
           assert_kind_of Integer, sect.reserved3 if sect.is_a? MachO::Sections::Section64
