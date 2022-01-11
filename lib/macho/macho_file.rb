@@ -160,8 +160,8 @@ module MachO
     #  the instance fields
     # @raise [OffsetInsertionError] if the offset is not in the load command region
     # @raise [HeaderPadError] if the new command exceeds the header pad buffer
-    # @note Calling this method with an arbitrary offset in the load command
-    #  region **will leave the object in an inconsistent state**.
+    # @note Calling this method with an arbitrary offset in the load command region
+    # **will leave the object in an inconsistent state**.
     def insert_command(offset, lc, options = {})
       context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
       cmd_raw = lc.serialize(context)

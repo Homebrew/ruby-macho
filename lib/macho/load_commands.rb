@@ -1820,7 +1820,25 @@ module MachO
 
       # @see MachOStructure::SIZEOF
       # @api private
-      SIZEOF = 20
+      SIZEOF = 28
+
+      def initialize(view, cmd, cmdsize, vmaddr, fileoff, entry_id, reserved)
+        super(view, cmd, cmdsize)
+        @vmaddr = vmaddr
+        @fileoff = fileoff
+        @entry_id = LCStr.new(self, entry_id)
+        @reserved = reserved
+      end
+
+      # @return [Hash] a hash representation of this {FilesetEntryCommand}
+      def to_h
+        {
+          "vmaddr" => vmaddr,
+          "fileoff" => fileoff,
+          "entry_id" => entry_id,
+          "reserved" => reserved,
+        }.merge super
+      end
     end
   end
 end
