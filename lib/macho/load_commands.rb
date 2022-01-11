@@ -1819,7 +1819,7 @@ module MachO
 
       # @see MachOStructure::SIZEOF
       # @api private
-      SIZEOF = 20
+      SIZEOF = 28
 
       def initialize(view, cmd, cmdsize, vmaddr, fileoff, entry_id, reserved)
         super(view, cmd, cmdsize)
