@@ -29,5 +29,9 @@ module MachO
         "offset" => offset,
       }
     end
+
+    def inspect
+      "#<#{self.class}:0x#{self.__id__.to_s(16)} @endianness=#{@endianness.inspect}, @offset=#{@offset.inspect}, length=#{@raw_data.length}>"
+    end
   end
 end
