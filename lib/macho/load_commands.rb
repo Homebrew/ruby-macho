@@ -167,6 +167,7 @@ module MachO
       :SEG_OBJC_CONST => '__OBJC_CONST',
       :SEG_ICON => "__ICON",
       :SEG_LINKEDIT => "__LINKEDIT",
+      :SEG_LINKINFO => "__LINKINFO",
       :SEG_UNIXSTACK => "__UNIXSTACK",
       :SEG_IMPORT => "__IMPORT",
       :SEG_KLD => '__KLD',
