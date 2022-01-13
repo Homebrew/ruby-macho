@@ -1839,6 +1839,11 @@ module MachO
           "reserved" => reserved,
         }.merge super
       end
+
+      # @return [SegmentCommand64, nil] the matching segment command or nil if nothing matches
+      def segment
+        view.macho_file.command(:LC_SEGMENT_64).select { |cmd| cmd.fileoff == fileoff }.first
+      end
     end
   end
 end
