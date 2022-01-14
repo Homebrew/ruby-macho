@@ -160,12 +160,27 @@ module MachO
     SEGMENT_NAMES = {
       :SEG_PAGEZERO => "__PAGEZERO",
       :SEG_TEXT => "__TEXT",
+      :SEG_TEXT_EXEC => "__TEXT_EXEC",
       :SEG_DATA => "__DATA",
+      :SEG_DATA_CONST => "__DATA_CONST",
       :SEG_OBJC => "__OBJC",
+      :SEG_OBJC_CONST => "__OBJC_CONST",
       :SEG_ICON => "__ICON",
       :SEG_LINKEDIT => "__LINKEDIT",
+      :SEG_LINKINFO => "__LINKINFO",
       :SEG_UNIXSTACK => "__UNIXSTACK",
       :SEG_IMPORT => "__IMPORT",
+      :SEG_KLD => "__KLD",
+      :SEG_KLDDATA => "__KLDDATA",
+      :SEG_HIB => "__HIB",
+      :SEG_VECTORS => "__VECTORS",
+      :SEG_LAST => "__LAST",
+      :SEG_LASTDATA_CONST => "__LASTDATA_CONST",
+      :SEG_PRELINK_TEXT => "__PRELINK_TEXT",
+      :SEG_PRELINK_INFO => "__PRELINK_INFO",
+      :SEG_CTF => "__CTF",
+      :SEG_AUTH => "__AUTH",
+      :SEG_AUTH_CONST => "__AUTH_CONST",
     }.freeze
 
     # association of segment flag symbols to values
