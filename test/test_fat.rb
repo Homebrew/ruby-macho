@@ -497,10 +497,10 @@ class FatFileTest < Minitest::Test
     file.change_install_name("/usr/lib/libz.1.dylib", "foo", :strict => false)
 
     # ...but not all slices will have the modified dylib
-    refute (file.machos.all? { |m| m.linked_dylibs.include?("foo") })
+    refute(file.machos.all? { |m| m.linked_dylibs.include?("foo") })
 
     # ...but at least one will
-    assert (file.machos.any? { |m| m.linked_dylibs.include?("foo") })
+    assert(file.machos.any? { |m| m.linked_dylibs.include?("foo") })
   end
 
   def test_dylib_load_commands

@@ -3,10 +3,16 @@ GEM
   specs:
     ast (2.4.2)
     benchmark-ips (2.9.2)
+    childprocess (4.1.0)
     codecov (0.6.0)
       simplecov (>= 0.15, < 0.22)
     docile (1.4.0)
+    iniparse (1.5.0)
     minitest (5.15.0)
+    overcommit (0.58.0)
+      childprocess (>= 0.6.3, < 5)
+      iniparse (~> 1.4)
+      rexml (~> 3.2)
     parallel (1.21.0)
     parser (3.1.0.0)
       ast (~> 2.4.1)
@@ -41,8 +47,9 @@ DEPENDENCIES
   benchmark-ips
   codecov
   minitest
+  overcommit
   rake
   rubocop
 
 BUNDLED WITH
-   2.0.2
+   2.3.5
