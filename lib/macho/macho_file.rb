@@ -592,7 +592,7 @@ module MachO
           LoadCommands::LoadCommand
         end
 
-        view = MachOView.new(@raw_data, endianness, offset)
+        view = MachOView.new(self, @raw_data, endianness, offset)
         command = klass.new_from_bin(view)
 
         load_commands << command

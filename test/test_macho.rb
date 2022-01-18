@@ -587,6 +587,16 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_fail_loading_fat
+    filename = fixture(['i386', 'x86_64'], 'libhello.dylib')
+
+    ex = assert_raises(MachO::FatBinaryError) do
+      MachO::MachOFile.new_from_bin File.read(filename)
+    end
+
+    assert_match(/must be/, ex.inspect)
+  end
+
   def test_to_h
     filename = fixture(:i386, "hello.bin")
     file = MachO::MachOFile.new(filename)
