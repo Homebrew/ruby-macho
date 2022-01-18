@@ -31,6 +31,7 @@ class MachOLoadCommandCreationTest < Minitest::Test
       assert_equal 0, lc.timestamp
       assert_equal 0, lc.current_version
       assert_equal 0, lc.compatibility_version
+      assert_instance_of String, lc.view.inspect
     end
   end
 

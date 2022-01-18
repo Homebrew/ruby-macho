@@ -121,9 +121,7 @@ class MachOFileTest < Minitest::Test
         assert_kind_of Integer, seg.nsects
         assert_kind_of Integer, seg.flags
         refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
-        if seg.flags != 0
-          assert MachO::LoadCommands::SEGMENT_FLAGS.keys.one? { |sf| seg.flag?(sf) }
-        end
+        assert MachO::LoadCommands::SEGMENT_FLAGS.keys.one? { |sf| seg.flag?(sf) } if seg.flags != 0
 
         sections = seg.sections
 
@@ -587,6 +585,16 @@ class MachOFileTest < Minitest::Test
     assert_raises MachO::RpathUnknownError do
       file.delete_rpath("/this/rpath/doesn't/exist")
     end
+  end
+
+  def test_fail_loading_fat
+    filename = fixture(['i386', 'x86_64'], 'libhello.dylib')
+
+    ex = assert_raises(MachO::FatBinaryError) do
+      MachO::MachOFile.new_from_bin File.read(filename)
+    end
+
+    assert_match(/must be/, ex.inspect)
   end
 
   def test_to_h
