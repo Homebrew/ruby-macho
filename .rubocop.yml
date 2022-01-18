@@ -60,3 +60,10 @@ Naming/MethodParameterName:
 
 Naming/VariableNumber:
   CheckSymbols: false
+  Exclude:
+    - 'test/**'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**'
+
