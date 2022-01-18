@@ -56,7 +56,19 @@ puts lc_vers.version_string # => "10.10.0"
 
 * Unit and performance testing.
 
-Attribution:
+### Contributing, setting up `overcommit` and the linters
+
+In order to keep the repo, docs and data tidy, we use a tool called [`overcommit`](https://github.com/sds/overcommit)
+to connect up the git hooks to a set of quality checks.  The fastest way to get setup is to run the following to make
+sure you have all the tools:
+
+```shell
+gem install overcommit bundler
+bundle install
+overcommit --install
+```
+
+### Attribution
 
 * Constants were taken from Apple, Inc's
 [`loader.h` in `cctools/include/mach-o`](https://opensource.apple.com/source/cctools/cctools-973.0.1/include/mach-o/loader.h.auto.html).
