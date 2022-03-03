@@ -381,11 +381,9 @@ module MachO
     #  rpaths simultaneously.
     # @return [void]
     # @raise [RpathUnknownError] if no such old runtime path exists
-    # @raise [RpathExistsError] if the new runtime path already exists
     def change_rpath(old_path, new_path, options = {})
       old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
       raise RpathUnknownError, old_path if old_lc.nil?
-      raise RpathExistsError, new_path if rpaths.include?(new_path)
 
       new_lc = LoadCommands::LoadCommand.create(:LC_RPATH, new_path)
 

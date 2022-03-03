@@ -415,6 +415,14 @@ class MachOFileTest < Minitest::Test
       # there should be at least one rpath in each binary
       refute_empty rpaths
 
+      # We should ignore errors when changing to an existing rpath
+      # This is the same behaviour as `install_name_tool`
+      file.change_rpath(rpaths.first, rpaths.first)
+      new_rpaths = file.rpaths
+
+      assert_equal new_rpaths.first, rpaths.first
+      refute_empty new_rpaths.first, rpaths.first
+
       file.change_rpath(rpaths.first, "/usr/lib")
       new_rpaths = file.rpaths
 
@@ -572,10 +580,6 @@ class MachOFileTest < Minitest::Test
 
     assert_raises MachO::RpathUnknownError do
       file.change_rpath("/this/rpath/doesn't/exist", "/lib")
-    end
-
-    assert_raises MachO::RpathExistsError do
-      file.change_rpath(file.rpaths.first, file.rpaths.first)
     end
 
     assert_raises MachO::RpathExistsError do
