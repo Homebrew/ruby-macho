@@ -302,7 +302,7 @@ module MachO
 
       dylib_id_cmd = command(:LC_ID_DYLIB).first
 
-      dylib_id_cmd.to_s
+      dylib_id_cmd.name.to_s
     end
 
     # Changes the Mach-O's dylib ID to `new_id`. Does nothing if not a dylib.
@@ -368,7 +368,7 @@ module MachO
     # All runtime paths searched by the dynamic linker for the Mach-O.
     # @return [Array<String>] an array of all runtime paths
     def rpaths
-      command(:LC_RPATH).map(&:to_s)
+      command(:LC_RPATH).map(&:path).map(&:to_s)
     end
 
     # Changes the runtime path `old_path` to `new_path`
@@ -382,7 +382,7 @@ module MachO
     # @return [void]
     # @raise [RpathUnknownError] if no such old runtime path exists
     def change_rpath(old_path, new_path, options = {})
-      old_lc = command(:LC_RPATH).find { |r| r.to_s == old_path }
+      old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
       raise RpathUnknownError, old_path if old_lc.nil?
 
       new_lc = LoadCommands::LoadCommand.create(:LC_RPATH, new_path)
@@ -426,7 +426,7 @@ module MachO
       search_method = uniq ? :select : :find
 
       # Cast rpath_cmds into an Array so we can handle the uniq and non-uniq cases the same way
-      rpath_cmds = Array(command(:LC_RPATH).method(search_method).call { |r| r.to_s == path })
+      rpath_cmds = Array(command(:LC_RPATH).method(search_method).call { |r| r.path.to_s == path })
       raise RpathUnknownError, path if rpath_cmds.empty?
 
       # delete the commands in reverse order, offset descending.
