@@ -112,6 +112,7 @@ class MachOFileTest < Minitest::Test
         assert_kind_of MachO::LoadCommands::SegmentCommand, seg if file.magic32?
         assert_kind_of MachO::LoadCommands::SegmentCommand64, seg if file.magic64?
         assert_kind_of String, seg.segname
+        assert_equal seg.segname, seg.to_s
         assert_kind_of Integer, seg.vmaddr
         assert_kind_of Integer, seg.vmsize
         assert_kind_of Integer, seg.fileoff
@@ -592,7 +593,7 @@ class MachOFileTest < Minitest::Test
   end
 
   def test_fail_loading_fat
-    filename = fixture(['i386', 'x86_64'], 'libhello.dylib')
+    filename = fixture(%w[i386 x86_64], "libhello.dylib")
 
     ex = assert_raises(MachO::FatBinaryError) do
       MachO::MachOFile.new_from_bin File.read(filename)

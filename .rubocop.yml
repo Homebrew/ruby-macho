@@ -17,6 +17,10 @@ Style/TrailingCommaInHashLiteral:
 Style/FormatString:
   EnforcedStyle: percent
 
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - "test/**/*"
+
 # we prefer compact if-else-end/case-when-end alignment
 Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
