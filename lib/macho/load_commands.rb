@@ -413,6 +413,11 @@ module MachO
         segs.join("-")
       end
 
+      # @return [String] an alias for uuid_string
+      def to_s
+        uuid_string
+      end
+
       # @return [Hash] returns a hash representation of this {UUIDCommand}
       def to_h
         {
@@ -527,6 +532,11 @@ module MachO
         align
       end
 
+      # @return [String] a string representation of the segment name
+      def to_s
+        segname
+      end
+
       # @return [Hash] a hash representation of this {SegmentCommand}
       def to_h
         {
@@ -605,6 +615,11 @@ module MachO
          compatibility_version].pack(format) + string_payload
       end
 
+      # @return [String] a string representation of the library's pathname
+      def to_s
+        name.to_s
+      end
+
       # @return [Hash] a hash representation of this {DylibCommand}
       def to_h
         {
@@ -651,6 +666,11 @@ module MachO
         [cmd, cmdsize, string_offsets[:name]].pack(format) + string_payload
       end
 
+      # @return [String] a string representation of the dynamic linker's pathname
+      def to_s
+        name.to_s
+      end
+
       # @return [Hash] a hash representation of this {DylinkerCommand}
       def to_h
         {
@@ -686,6 +706,11 @@ module MachO
         @name = LCStr.new(self, name)
         @nmodules = nmodules
         @linked_modules = linked_modules
+      end
+
+      # @return [String] a string representation of the library's pathname
+      def to_s
+        name.to_s
       end
 
       # @return [Hash] a hash representation of this {PreboundDylibCommand}
@@ -810,6 +835,11 @@ module MachO
         @umbrella = LCStr.new(self, umbrella)
       end
 
+      # @return [String] a string represenation of the umbrella framework name
+      def to_s
+        umbrella.to_s
+      end
+
       # @return [Hash] a hash representation of this {SubFrameworkCommand}
       def to_h
         {
@@ -836,6 +866,11 @@ module MachO
       def initialize(view, cmd, cmdsize, sub_umbrella)
         super(view, cmd, cmdsize)
         @sub_umbrella = LCStr.new(self, sub_umbrella)
+      end
+
+      # @return [String] a string represenation of the sub-umbrella framework name
+      def to_s
+        sub_umbrella.to_s
       end
 
       # @return [Hash] a hash representation of this {SubUmbrellaCommand}
@@ -866,6 +901,11 @@ module MachO
         @sub_library = LCStr.new(self, sub_library)
       end
 
+      # @return [String] a string represenation of the sub-library name
+      def to_s
+        sublibrary.to_s
+      end
+
       # @return [Hash] a hash representation of this {SubLibraryCommand}
       def to_h
         {
@@ -892,6 +932,11 @@ module MachO
       def initialize(view, cmd, cmdsize, sub_client)
         super(view, cmd, cmdsize)
         @sub_client = LCStr.new(self, sub_client)
+      end
+
+      # @return [String] a string represenation of the sub-client name
+      def to_s
+        sub_client.to_s
       end
 
       # @return [Hash] a hash representation of this {SubClientCommand}
@@ -1203,6 +1248,11 @@ module MachO
                                                             :path => path.to_s)
         cmdsize = SIZEOF + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:path]].pack(format) + string_payload
+      end
+
+      # @return [String] a string representation of the run path
+      def to_s
+        path.to_s
       end
 
       # @return [Hash] a hash representation of this {RpathCommand}
@@ -1652,6 +1702,11 @@ module MachO
         segs.join(".")
       end
 
+      # @return [String] an alias for version_string
+      def to_s
+        version_string
+      end
+
       # @return [Hash] a hash representation of this {SourceVersionCommand}
       def to_h
         {
@@ -1730,6 +1785,11 @@ module MachO
         @header_addr = header_addr
       end
 
+      # @return [String] a string representation of the pathname
+      def to_s
+        name.to_s
+      end
+
       # @return [Hash] a hash representation of this {FvmfileCommand}
       def to_h
         {
@@ -1764,6 +1824,11 @@ module MachO
         @name = LCStr.new(self, name)
         @minor_version = minor_version
         @header_addr = header_addr
+      end
+
+      # @return [String] a string representation of the target pathname
+      def to_s
+        name.to_s
       end
 
       # @return [Hash] a hash representation of this {FvmlibCommand}
@@ -1801,6 +1866,11 @@ module MachO
         @data_owner = data_owner
         @offset = offset
         @size = size
+      end
+
+      # @return [String] a string representation of data owner of this note
+      def to_s
+        data_owner
       end
 
       # @return [Hash] a hash representation of this {NoteCommand}
