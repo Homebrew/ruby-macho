@@ -327,6 +327,8 @@ module MachO
     # @raise [MagicError] if the magic is not valid Mach-O magic
     # @raise [MachOBinaryError] if the magic is for a non-fat Mach-O file
     # @raise [JavaClassFileError] if the file is a Java classfile
+    # @raise [ZeroArchitectureError] if the file has no internal slices
+    #  (i.e., nfat_arch == 0) and the permissive option is not set
     # @api private
     def populate_fat_header
       # the smallest fat Mach-O header is 8 bytes
@@ -345,6 +347,11 @@ module MachO
       # but this is extremely unlikely and in practice distinguishes the two
       # formats.
       raise JavaClassFileError if fh.nfat_arch > 30
+
+      # Rationale: fat Mach-0 files with no internal slices should
+      # return an error unless the permissive option is set.
+      permissive = options.fetch(:permissive, false)
+      raise ZeroArchitectureError if !permissive && fh.nfat_arch.zero?
 
       fh
     end
