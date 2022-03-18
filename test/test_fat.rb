@@ -36,6 +36,14 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_zero_arch_file
+    assert_raises MachO::ZeroArchitectureError do
+      MachO::FatFile.new("test/bin/llvm/macho-invalid-fat-header")
+    end
+
+    MachO::FatFile.new("test/bin/llvm/macho-invalid-fat-header", :permissive => true)
+  end
+
   def test_fat_header
     filenames = FAT_ARCH_PAIRS.map { |a| fixture(a, "hello.bin") }
 
@@ -518,7 +526,7 @@ class FatFileTest < Minitest::Test
   end
 
   def test_fail_loading_thin
-    filename = fixture('x86_64', 'libhello.dylib')
+    filename = fixture("x86_64", "libhello.dylib")
 
     ex = assert_raises(MachO::MachOBinaryError) do
       MachO::FatFile.new_from_bin File.read(filename)
