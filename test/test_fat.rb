@@ -40,8 +40,6 @@ class FatFileTest < Minitest::Test
     assert_raises MachO::ZeroArchitectureError do
       MachO::FatFile.new("test/bin/llvm/macho-invalid-fat-header")
     end
-
-    MachO::FatFile.new("test/bin/llvm/macho-invalid-fat-header", :permissive => true)
   end
 
   def test_fat_header

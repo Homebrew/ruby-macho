@@ -348,10 +348,8 @@ module MachO
       # formats.
       raise JavaClassFileError if fh.nfat_arch > 30
 
-      # Rationale: fat Mach-0 files with no internal slices should
-      # return an error unless the permissive option is set.
-      permissive = options.fetch(:permissive, false)
-      raise ZeroArchitectureError if !permissive && fh.nfat_arch.zero?
+      # Rationale: return an error if the file has no internal slices.
+      raise ZeroArchitectureError if fh.nfat_arch.zero?
 
       fh
     end
