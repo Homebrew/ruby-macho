@@ -73,6 +73,7 @@ overcommit --install
 * Constants were taken from Apple, Inc's
 [`loader.h` in `cctools/include/mach-o`](https://opensource.apple.com/source/cctools/cctools-973.0.1/include/mach-o/loader.h.auto.html).
 (Apple Public Source License 2.0).
+* Binary files used for testing were taken from The LLVM Project. ([Apache License v2.0 with LLVM Exceptions](test/bin/llvm/LICENSE.txt)).
 
 ### License
 

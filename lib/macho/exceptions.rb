@@ -56,6 +56,13 @@ module MachO
     end
   end
 
+  # Raised when a a fat Mach-O file has zero architectures
+  class ZeroArchitectureError < NotAMachOError
+    def initialize
+      super "Fat file has zero internal architectures"
+    end
+  end
+
   # Raised when a fat binary is loaded with MachOFile.
   class FatBinaryError < MachOError
     def initialize
