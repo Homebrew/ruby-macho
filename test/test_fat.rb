@@ -42,6 +42,12 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_mismatch_cpu_arch_file
+    assert_raises MachO::CPUTypeMismatchError do
+      MachO::FatFile.new("test/bin/llvm/macho-invalid-fat_cputype")
+    end
+  end
+
   def test_fat_header
     filenames = FAT_ARCH_PAIRS.map { |a| fixture(a, "hello.bin") }
 

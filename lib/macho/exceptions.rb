@@ -63,6 +63,21 @@ module MachO
     end
   end
 
+  # Raised when there is a mismatch between the fat arch
+  # and internal slice cputype or cpusubtype.
+  class CPUTypeMismatchError < NotAMachOError
+    def initialize(fat_cputype, fat_cpusubtype, macho_cputype, macho_cpusubtype)
+      # @param cputype_fat [Integer] the CPU type in the fat header
+      # @param cpusubtype_fat [Integer] the CPU subtype in the fat header
+      # @param cputype_macho [Integer] the CPU type in the macho header
+      # @param cpusubtype_macho [Integer] the CPU subtype in the macho header
+      super ("Mismatch between cputypes >> 0x%08<fat_cputype>x and 0x%08<macho_cputype>x\n" \
+             "and/or cpusubtypes >> 0x%08<fat_cpusubtype>x and 0x%08<macho_cpusubtype>x" %
+            { :fat_cputype => fat_cputype, :macho_cputype => macho_cputype,
+              :fat_cpusubtype => fat_cpusubtype, :macho_cpusubtype => macho_cpusubtype })
+    end
+  end
+
   # Raised when a fat binary is loaded with MachOFile.
   class FatBinaryError < MachOError
     def initialize
