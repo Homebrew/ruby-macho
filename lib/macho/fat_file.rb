@@ -379,6 +379,13 @@ module MachO
 
       fat_archs.each do |arch|
         machos << MachOFile.new_from_bin(@raw_data[arch.offset, arch.size], **options)
+
+        # Make sure that each fat_arch and internal slice.
+        # contain matching cputypes and cpusubtypes
+        next if machos.last.header.cputype == arch.cputype &&
+                machos.last.header.cpusubtype == arch.cpusubtype
+
+        raise CPUTypeMismatchError.new(arch.cputype, arch.cpusubtype, machos.last.header.cputype, machos.last.header.cpusubtype)
       end
 
       machos
