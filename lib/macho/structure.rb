@@ -14,7 +14,9 @@ module MachO
 
       # Set up all instance variables
       self.class.field_list.zip(args).each do |field, value|
+        value = LCStr.new(self, value) if field == :lcstr
         value &= ~self.class.mask_map(field) if mask_map.key?(field)
+
         instance_variable_set("@#{field}", value)
       end
     end
@@ -24,7 +26,7 @@ module MachO
     # @param size [Int] an optional size parameter for string types
     # @api private
     def self.field(name, type, fmt:, size:, mask:)
-      raise ArgumentError, "Invalid field type #{type}" unless type == :custom || BinPack::FORMAT_CODE.key?(type)
+      raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
       raise ArgumentError, "Missing custom type arguments :fmt and/or :size" unless type != :custom && fmt && size
       raise ArgumentError, "Invalid field size #{size}" unless !size || size >= 0
 
@@ -32,9 +34,9 @@ module MachO
       attr_reader name
 
       # Add new field to list and calculate size and format
-      @field_list << name
-      @sizeof += size || BinPack::BYTE_SIZE[type]
-      @format += fmt || BinPack::FORMAT_CODE[type]
+      @field_list << name.to_sym
+      @sizeof += Fields::BYTE_SIZE[type] || size
+      @format += Fields::FORMAT_CODE[type] || fmt
       @mask_map[name] = mask if mask
     end
 
