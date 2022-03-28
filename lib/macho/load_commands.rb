@@ -200,21 +200,13 @@ module MachO
     class LoadCommand < MachOStructure
       # @return [MachO::MachOView, nil] the raw view associated with the load command,
       #  or nil if the load command was created via {create}.
-      attr_reader :view
+      field :view, :view
 
       # @return [Integer] the load command's type ID
-      attr_reader :cmd
+      field :cmd, :uint32
 
       # @return [Integer] the size of the load command, in bytes
-      attr_reader :cmdsize
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 8
+      field :cmdsize, :uint32
 
       # Instantiates a new LoadCommand given a view into its origin Mach-O
       # @param view [MachO::MachOView] the load command's raw view
@@ -242,17 +234,6 @@ module MachO
         raise LoadCommandCreationArityError.new(cmd_sym, klass_arity, args.size) if klass_arity != args.size
 
         klass.new(nil, cmd, nil, *args)
-      end
-
-      # @param view [MachO::MachOView] the load command's raw view
-      # @param cmd [Integer] the load command's identifying number
-      # @param cmdsize [Integer] the size of the load command in bytes
-      # @api private
-      def initialize(view, cmd, cmdsize)
-        super()
-        @view = view
-        @cmd = cmd
-        @cmdsize = cmdsize
       end
 
       # @return [Boolean] whether the load command can be serialized
@@ -386,21 +367,7 @@ module MachO
     # LC_UUID.
     class UUIDCommand < LoadCommand
       # @return [Array<Integer>] the UUID
-      attr_reader :uuid
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2a16"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 24
-
-      # @api private
-      def initialize(view, cmd, cmdsize, uuid)
-        super(view, cmd, cmdsize)
-        @uuid = uuid.unpack("C16") # re-unpack for the actual UUID array
-      end
+      field :uuid, :bin_string, :size => 16, :unpack => "C16"
 
       # @return [String] a string representation of the UUID
       def uuid_string
@@ -431,54 +398,31 @@ module MachO
     # the task's address space. Corresponds to LC_SEGMENT.
     class SegmentCommand < LoadCommand
       # @return [String] the name of the segment
-      attr_reader :segname
+      field :segname, :string, :size => 16
 
       # @return [Integer] the memory address of the segment
-      attr_reader :vmaddr
+      field :vmaddr, :uint32
 
       # @return [Integer] the memory size of the segment
-      attr_reader :vmsize
+      field :vmsize, :uint32
 
       # @return [Integer] the file offset of the segment
-      attr_reader :fileoff
+      field :fileoff, :uint32
 
       # @return [Integer] the amount to map from the file
-      attr_reader :filesize
+      field :filesize, :uint32
 
       # @return [Integer] the maximum VM protection
-      attr_reader :maxprot
+      field :maxprot, :int32
 
       # @return [Integer] the initial VM protection
-      attr_reader :initprot
+      field :initprot, :int32
 
       # @return [Integer] the number of sections in the segment
-      attr_reader :nsects
+      field :nsects, :uint32
 
       # @return [Integer] any flags associated with the segment
-      attr_reader :flags
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2Z16L=4l=2L=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 56
-
-      # @api private
-      def initialize(view, cmd, cmdsize, segname, vmaddr, vmsize, fileoff,
-                     filesize, maxprot, initprot, nsects, flags)
-        super(view, cmd, cmdsize)
-        @segname = segname
-        @vmaddr = vmaddr
-        @vmsize = vmsize
-        @fileoff = fileoff
-        @filesize = filesize
-        @maxprot = maxprot
-        @initprot = initprot
-        @nsects = nsects
-        @flags = flags
-      end
+      field :flags, :uint32
 
       # All sections referenced within this segment.
       # @return [Array<MachO::Sections::Section>] if the Mach-O is 32-bit
@@ -559,11 +503,11 @@ module MachO
     class SegmentCommand64 < SegmentCommand
       # @see MachOStructure::FORMAT
       # @api private
-      FORMAT = "L=2Z16Q=4l=2L=2"
+      @format = "L=2Z16Q=4l=2L=2"
 
       # @see MachOStructure::SIZEOF
       # @api private
-      SIZEOF = 72
+      @bytesize = 72
     end
 
     # A load command representing some aspect of shared libraries, depending
@@ -572,16 +516,16 @@ module MachO
     class DylibCommand < LoadCommand
       # @return [LCStr] the library's path
       #  name as an LCStr
-      attr_reader :name
+      field :name
 
       # @return [Integer] the library's build time stamp
-      attr_reader :timestamp
+      field :timestamp
 
       # @return [Integer] the library's current version number
-      attr_reader :current_version
+      field :current_version
 
       # @return [Integer] the library's compatibility version number
-      attr_reader :compatibility_version
+      field :compatibility_version
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -637,7 +581,7 @@ module MachO
     class DylinkerCommand < LoadCommand
       # @return [LCStr] the dynamic linker's
       #  path name as an LCStr
-      attr_reader :name
+      field :name
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -684,13 +628,13 @@ module MachO
     class PreboundDylibCommand < LoadCommand
       # @return [LCStr] the library's path
       #  name as an LCStr
-      attr_reader :name
+      field :name
 
       # @return [Integer] the number of modules in the library
-      attr_reader :nmodules
+      field :nmodules
 
       # @return [Integer] a bit vector of linked modules
-      attr_reader :linked_modules
+      field :linked_modules
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -741,29 +685,29 @@ module MachO
     # that defines the routine. Corresponds to LC_ROUTINES.
     class RoutinesCommand < LoadCommand
       # @return [Integer] the address of the initialization routine
-      attr_reader :init_address
+      field :init_address
 
       # @return [Integer] the index into the module table that the init routine
       #  is defined in
-      attr_reader :init_module
+      field :init_module
 
       # @return [void]
-      attr_reader :reserved1
+      field :reserved1
 
       # @return [void]
-      attr_reader :reserved2
+      field :reserved2
 
       # @return [void]
-      attr_reader :reserved3
+      field :reserved3
 
       # @return [void]
-      attr_reader :reserved4
+      field :reserved4
 
       # @return [void]
-      attr_reader :reserved5
+      field :reserved5
 
       # @return [void]
-      attr_reader :reserved6
+      field :reserved6
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -819,7 +763,7 @@ module MachO
     # of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
     class SubFrameworkCommand < LoadCommand
       # @return [LCStr] the umbrella framework name as an LCStr
-      attr_reader :umbrella
+      field :umbrella
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -852,7 +796,7 @@ module MachO
     # of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
     class SubUmbrellaCommand < LoadCommand
       # @return [LCStr] the subumbrella framework name as an LCStr
-      attr_reader :sub_umbrella
+      field :sub_umbrella
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -885,7 +829,7 @@ module MachO
     # to LC_SUB_LIBRARY.
     class SubLibraryCommand < LoadCommand
       # @return [LCStr] the sublibrary name as an LCStr
-      attr_reader :sub_library
+      field :sub_library
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -918,7 +862,7 @@ module MachO
     # an umbrella framework. Corresponds to LC_SUB_CLIENT.
     class SubClientCommand < LoadCommand
       # @return [LCStr] the subclient name as an LCStr
-      attr_reader :sub_client
+      field :sub_client
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -951,16 +895,16 @@ module MachO
     # "stab" style symbol table information. Corresponds to LC_SYMTAB.
     class SymtabCommand < LoadCommand
       # @return [Integer] the symbol table's offset
-      attr_reader :symoff
+      field :symoff
 
       # @return [Integer] the number of symbol table entries
-      attr_reader :nsyms
+      field :nsyms
 
       # @return [Integer] the string table's offset
-      attr_reader :stroff
+      field :stroff
 
       # @return [Integer] the string table size in bytes
-      attr_reader :strsize
+      field :strsize
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -994,58 +938,58 @@ module MachO
     # structures used by the dynamic link editor. Corresponds to LC_DYSYMTAB.
     class DysymtabCommand < LoadCommand
       # @return [Integer] the index to local symbols
-      attr_reader :ilocalsym
+      field :ilocalsym
 
       # @return [Integer] the number of local symbols
-      attr_reader :nlocalsym
+      field :nlocalsym
 
       # @return [Integer] the index to externally defined symbols
-      attr_reader :iextdefsym
+      field :iextdefsym
 
       # @return [Integer] the number of externally defined symbols
-      attr_reader :nextdefsym
+      field :nextdefsym
 
       # @return [Integer] the index to undefined symbols
-      attr_reader :iundefsym
+      field :iundefsym
 
       # @return [Integer] the number of undefined symbols
-      attr_reader :nundefsym
+      field :nundefsym
 
       # @return [Integer] the file offset to the table of contents
-      attr_reader :tocoff
+      field :tocoff
 
       # @return [Integer] the number of entries in the table of contents
-      attr_reader :ntoc
+      field :ntoc
 
       # @return [Integer] the file offset to the module table
-      attr_reader :modtaboff
+      field :modtaboff
 
       # @return [Integer] the number of entries in the module table
-      attr_reader :nmodtab
+      field :nmodtab
 
       # @return [Integer] the file offset to the referenced symbol table
-      attr_reader :extrefsymoff
+      field :extrefsymoff
 
       # @return [Integer] the number of entries in the referenced symbol table
-      attr_reader :nextrefsyms
+      field :nextrefsyms
 
       # @return [Integer] the file offset to the indirect symbol table
-      attr_reader :indirectsymoff
+      field :indirectsymoff
 
       # @return [Integer] the number of entries in the indirect symbol table
-      attr_reader :nindirectsyms
+      field :nindirectsyms
 
       # @return [Integer] the file offset to the external relocation entries
-      attr_reader :extreloff
+      field :extreloff
 
       # @return [Integer] the number of external relocation entries
-      attr_reader :nextrel
+      field :nextrel
 
       # @return [Integer] the file offset to the local relocation entries
-      attr_reader :locreloff
+      field :locreloff
 
       # @return [Integer] the number of local relocation entries
-      attr_reader :nlocrel
+      field :nlocrel
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1111,14 +1055,14 @@ module MachO
     # namespace lookup hints table. Corresponds to LC_TWOLEVEL_HINTS.
     class TwolevelHintsCommand < LoadCommand
       # @return [Integer] the offset to the hint table
-      attr_reader :htoffset
+      field :htoffset
 
       # @return [Integer] the number of hints in the hint table
-      attr_reader :nhints
+      field :nhints
 
       # @return [TwolevelHintsTable]
       #  the hint table
-      attr_reader :table
+      field :table
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1193,7 +1137,7 @@ module MachO
     # files, or zero. Corresponds to LC_PREBIND_CKSUM.
     class PrebindCksumCommand < LoadCommand
       # @return [Integer] the checksum or 0
-      attr_reader :cksum
+      field :cksum
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1222,7 +1166,7 @@ module MachO
     # Corresponds to LC_RPATH.
     class RpathCommand < LoadCommand
       # @return [LCStr] the path to add to the run path as an LCStr
-      attr_reader :path
+      field :path
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1270,10 +1214,10 @@ module MachO
     # or LC_DYLD_CHAINED_FIXUPS.
     class LinkeditDataCommand < LoadCommand
       # @return [Integer] offset to the data in the __LINKEDIT segment
-      attr_reader :dataoff
+      field :dataoff
 
       # @return [Integer] size of the data in the __LINKEDIT segment
-      attr_reader :datasize
+      field :datasize
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1303,13 +1247,13 @@ module MachO
     # segment. Corresponds to LC_ENCRYPTION_INFO.
     class EncryptionInfoCommand < LoadCommand
       # @return [Integer] the offset to the encrypted segment
-      attr_reader :cryptoff
+      field :cryptoff
 
       # @return [Integer] the size of the encrypted segment
-      attr_reader :cryptsize
+      field :cryptsize
 
       # @return [Integer] the encryption system, or 0 if not encrypted yet
-      attr_reader :cryptid
+      field :cryptid
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1341,7 +1285,7 @@ module MachO
     # segment. Corresponds to LC_ENCRYPTION_INFO_64.
     class EncryptionInfoCommand64 < EncryptionInfoCommand
       # @return [Integer] 64-bit padding value
-      attr_reader :pad
+      field :pad
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1370,10 +1314,10 @@ module MachO
     # LC_VERSION_MIN_IPHONEOS.
     class VersionMinCommand < LoadCommand
       # @return [Integer] the version X.Y.Z packed as x16.y8.z8
-      attr_reader :version
+      field :version
 
       # @return [Integer] the SDK version X.Y.Z packed as x16.y8.z8
-      attr_reader :sdk
+      field :sdk
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1428,16 +1372,16 @@ module MachO
     # Corresponds to LC_BUILD_VERSION.
     class BuildVersionCommand < LoadCommand
       # @return [Integer]
-      attr_reader :platform
+      field :platform
 
       # @return [Integer] the minimum OS version X.Y.Z packed as x16.y8.z8
-      attr_reader :minos
+      field :minos
 
       # @return [Integer] the SDK version X.Y.Z packed as x16.y8.z8
-      attr_reader :sdk
+      field :sdk
 
       # @return [ToolEntries] tool entries
-      attr_reader :tool_entries
+      field :tool_entries
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1539,34 +1483,34 @@ module MachO
     # Corresponds to LC_DYLD_INFO and LC_DYLD_INFO_ONLY.
     class DyldInfoCommand < LoadCommand
       # @return [Integer] the file offset to the rebase information
-      attr_reader :rebase_off
+      field :rebase_off
 
       # @return [Integer] the size of the rebase information
-      attr_reader :rebase_size
+      field :rebase_size
 
       # @return [Integer] the file offset to the binding information
-      attr_reader :bind_off
+      field :bind_off
 
       # @return [Integer] the size of the binding information
-      attr_reader :bind_size
+      field :bind_size
 
       # @return [Integer] the file offset to the weak binding information
-      attr_reader :weak_bind_off
+      field :weak_bind_off
 
       # @return [Integer] the size of the weak binding information
-      attr_reader :weak_bind_size
+      field :weak_bind_size
 
       # @return [Integer] the file offset to the lazy binding information
-      attr_reader :lazy_bind_off
+      field :lazy_bind_off
 
       # @return [Integer] the size of the lazy binding information
-      attr_reader :lazy_bind_size
+      field :lazy_bind_size
 
       # @return [Integer] the file offset to the export information
-      attr_reader :export_off
+      field :export_off
 
       # @return [Integer] the size of the export information
-      attr_reader :export_size
+      field :export_size
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1614,7 +1558,7 @@ module MachO
     # Corresponds to LC_LINKER_OPTION.
     class LinkerOptionCommand < LoadCommand
       # @return [Integer] the number of strings
-      attr_reader :count
+      field :count
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1641,10 +1585,10 @@ module MachO
     # A load command specifying the offset of main(). Corresponds to LC_MAIN.
     class EntryPointCommand < LoadCommand
       # @return [Integer] the file (__TEXT) offset of main()
-      attr_reader :entryoff
+      field :entryoff
 
       # @return [Integer] if not 0, the initial stack size.
-      attr_reader :stacksize
+      field :stacksize
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1674,7 +1618,7 @@ module MachO
     # binary. Corresponds to LC_SOURCE_VERSION.
     class SourceVersionCommand < LoadCommand
       # @return [Integer] the version packed as a24.b10.c10.d10.e10
-      attr_reader :version
+      field :version
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1720,10 +1664,10 @@ module MachO
     # symbol table information. Corresponds to LC_SYMSEG.
     class SymsegCommand < LoadCommand
       # @return [Integer] the offset to the symbol segment
-      attr_reader :offset
+      field :offset
 
       # @return [Integer] the size of the symbol segment in bytes
-      attr_reader :size
+      field :size
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1766,10 +1710,10 @@ module MachO
     # memory. Corresponds to LC_FVMFILE.
     class FvmfileCommand < LoadCommand
       # @return [LCStr] the pathname of the file being loaded
-      attr_reader :name
+      field :name
 
       # @return [Integer] the virtual address being loaded at
-      attr_reader :header_addr
+      field :header_addr
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1803,13 +1747,13 @@ module MachO
     # into memory. Corresponds to LC_LOADFVMLIB and LC_IDFVMLIB.
     class FvmlibCommand < LoadCommand
       # @return [LCStr] the library's target pathname
-      attr_reader :name
+      field :name
 
       # @return [Integer] the library's minor version number
-      attr_reader :minor_version
+      field :minor_version
 
       # @return [Integer] the library's header address
-      attr_reader :header_addr
+      field :header_addr
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1845,13 +1789,13 @@ module MachO
     # Corresponds to LC_NOTE.
     class NoteCommand < LoadCommand
       # @return [String] the name of the owner for this note
-      attr_reader :data_owner
+      field :data_owner
 
       # @return [Integer] the offset, within the file, of the note
-      attr_reader :offset
+      field :offset
 
       # @return [Integer] the size, in bytes, of the note
-      attr_reader :size
+      field :size
 
       # @see MachOStructure::FORMAT
       # @api private
@@ -1888,16 +1832,16 @@ module MachO
     # Corresponds to LC_FILESET_ENTRY.
     class FilesetEntryCommand < LoadCommand
       # @return [Integer] the virtual memory address of the entry
-      attr_reader :vmaddr
+      field :vmaddr
 
       # @return [Integer] the file offset of the entry
-      attr_reader :fileoff
+      field :fileoff
 
       # @return [LCStr] the entry's ID
-      attr_reader :entry_id
+      field :entry_id
 
       # @return [void]
-      attr_reader :reserved
+      field :reserved
 
       # @see MachOStructure::FORMAT
       # @api private

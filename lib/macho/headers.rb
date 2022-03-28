@@ -754,7 +754,7 @@ module MachO
       field :prelink_version, :uint32_net
 
       # @return [void]
-      field :reserved, :custom, :fmt => "L>10", :size => 40
+      field :reserved, :bin_string, :size => 40, :unpack => "L>10"
 
       # @return [void]
       field :platform_name, :bin_string, :size => 64

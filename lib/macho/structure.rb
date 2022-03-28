@@ -16,14 +16,17 @@ module MachO
     # map of bitmasks
     @mask_map = {}
 
+    # map of format strings for additional unpacking
+    @unpack_map = {}
+
     class << self
       # Public getters
-      attr_reader :bytesize, :format, :field_list, :mask_map
+      attr_reader :bytesize, :format, :field_list, :mask_map, :unpack_map
 
       private
 
       # Private setters
-      attr_writer :bytesize, :format, :field_list, :mask_map
+      attr_writer :bytesize, :format, :field_list, :mask_map, :unpack_map
     end
 
     # Used to dynamically create an instance of the inherited class
@@ -34,8 +37,14 @@ module MachO
 
       # Set up all instance variables
       self.class.field_list.zip(args).each do |field, value|
-        value = LCStr.new(self, value) if field == :lcstr
-        value &= ~self.class.mask_map[field] if self.class.mask_map.key?(field)
+        # Handle special cases
+        if field == :lcstr
+          value = LCStr.new(self, value)
+        elsif self.class.mask_map.key?(field)
+          value &= ~self.class.mask_map[field]
+        elsif self.class.unpack_map.key?(field)
+          value = value.unpack(self.class.unpack_map[field])
+        end
 
         instance_variable_set("@#{field}", value)
       end
@@ -49,6 +58,7 @@ module MachO
       bytesize = @bytesize.clone
       fmt = @format.clone
       mask_map = @mask_map.clone
+      unpack_map = @unpack_map.clone
 
       # Add those values to the inheriting class
       subclass.class_eval do
@@ -56,6 +66,7 @@ module MachO
         @bytesize ||= bytesize
         @format ||= fmt
         @mask_map ||= mask_map
+        @unpack_map ||= unpack_map
       end
     end
 
@@ -65,7 +76,7 @@ module MachO
     # @param size [Int] optional size parameter for custom types
     # @param mask [Int] optional bitmask
     # @api private
-    def self.field(name, type, fmt:, size:, mask:)
+    def self.field(name, type, fmt:, size:, mask:, unpack:)
       raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
       raise ArgumentError, "Missing custom type arguments :fmt and/or :size" if type == :custom && fmt && size
 
@@ -77,6 +88,7 @@ module MachO
       @bytesize += Fields::BYTE_SIZE[type] || size
       @format += Fields::FORMAT_CODE[type] || fmt
       @mask_map[name] = mask if mask
+      @unpack_map[name] = unpack if unpack
     end
 
     # @param endianness [Symbol] either `:big` or `:little`
