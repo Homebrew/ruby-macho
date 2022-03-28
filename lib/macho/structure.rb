@@ -1,49 +1,54 @@
 # frozen_string_literal: true
 
+require_relative "fields"
+
 module MachO
   # A general purpose pseudo-structure.
   # @abstract
   class MachOStructure
-    # array of fields in definition order
+    # map of field names to field types
+    @type_map = {}
+
+    # array of field name in definition order
     @field_list = []
 
-    # total size of binary chunk
-    @bytesize = 0
+    # map of field options
+    @option_map = {}
 
-    # binary format string
-    @format = ""
-
-    # map of bitmasks
-    @mask_map = {}
-
-    # map of format strings for additional unpacking
-    @unpack_map = {}
+    # minimum number of required arguments
+    @min_args = 0
 
     class << self
       # Public getters
-      attr_reader :bytesize, :format, :field_list, :mask_map, :unpack_map
+      attr_reader :type_map, :field_list, :option_map, :min_args
 
       private
 
       # Private setters
-      attr_writer :bytesize, :format, :field_list, :mask_map, :unpack_map
+      attr_writer :type_map, :field_list, :option_map, :min_args
     end
 
     # Used to dynamically create an instance of the inherited class
     # according to the defined fields.
     # @param args [Array[x]] list of field parameters
     def initialize(*args)
-      raise ArgumentError, "Invalid number of arguments" if args.size != self.class.field_list.size
+      raise ArgumentError, "Invalid number of arguments" if args.size < self.class.min_args
 
       # Set up all instance variables
       self.class.field_list.zip(args).each do |field, value|
         # Handle special cases
-        if field == :lcstr
+        if type_map[field] == :lcstr
           value = LCStr.new(self, value)
-        elsif self.class.mask_map.key?(field)
-          value &= ~self.class.mask_map[field]
-        elsif self.class.unpack_map.key?(field)
-          value = value.unpack(self.class.unpack_map[field])
+        elsif self.class.option_map.key?(field)
+          options = self.class.option_map[field]
+
+          if options.key?(:mask)
+            value &= ~options[:mask]
+          elsif options.key?(:unpack)
+            value = value.unpack(options[:unpack])
+          elsif options.key?(:default)
+            value = options[:default] if value.nil?
+          end
         end
 
         instance_variable_set("@#{field}", value)
@@ -54,41 +59,45 @@ module MachO
     # @api private
     def self.inherited(subclass)
       # Clone all class instance variables
-      field_list = @field_list.clone
-      bytesize = @bytesize.clone
-      fmt = @format.clone
-      mask_map = @mask_map.clone
-      unpack_map = @unpack_map.clone
+      type_map = @type_map.dup
+      field_list = @field_list.dup
+      option_map = @option_map.dup
+      min_args = @min_args.dup
 
       # Add those values to the inheriting class
       subclass.class_eval do
-        @field_list ||= field_list
-        @bytesize ||= bytesize
-        @format ||= fmt
-        @mask_map ||= mask_map
-        @unpack_map ||= unpack_map
+        @type_map = type_map
+        @field_list = field_list
+        @option_map = option_map
+        @min_args = min_args
       end
     end
 
     # @param name [Symbol] name of internal field
     # @param type [Symbol] type of field in terms of binary size
-    # @param fmt [String] optional binary format for custom types
-    # @param size [Int] optional size parameter for custom types
-    # @param mask [Int] optional bitmask
+    # @param options [Hash] set of additonal options
+    # Expected options
+    #   :size [Int] size in bytes
+    #   :mask [Int] bitmask
+    #   :unpack [String] string format
+    #   :default [Value] default value
     # @api private
-    def self.field(name, type, fmt:, size:, mask:, unpack:)
+    def self.field(name, type, **options)
       raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
-      raise ArgumentError, "Missing custom type arguments :fmt and/or :size" if type == :custom && fmt && size
 
-      # Add new field attribute that will be initialized later
-      attr_reader name
+      if type_map.key?(name)
+        @min_args += 1 if @option_map.dig(name, :default)
 
-      # Add new field to list and calculate size and format
-      @field_list << name
-      @bytesize += Fields::BYTE_SIZE[type] || size
-      @format += Fields::FORMAT_CODE[type] || fmt
-      @mask_map[name] = mask if mask
-      @unpack_map[name] = unpack if unpack
+        @option_map.delete(name) if options.empty?
+      else
+        attr_reader name
+
+        @field_list << name
+      end
+
+      @option_map[name] = options unless options.empty?
+      @min_args += 1 unless options.key?(:default)
+      @type_map[name] = type
     end
 
     # @param endianness [Symbol] either `:big` or `:little`
@@ -99,6 +108,19 @@ module MachO
       format = Utils.specialize_format(@format, endianness)
 
       new(*bin.unpack(format))
+    end
+
+    def self.format
+      @format ||= @field_list.map do |field|
+        FIELDS::FORMAT_CODE[@type_map[field]]
+      end.join
+    end
+
+    def self.bytesize
+      @bytesize ||= @field_list.map do |field|
+        Fields::BYTE_SIZE[@type_map[field]] ||
+          @option_map[field][:size]
+      end.sum
     end
 
     # @return [Hash] a hash representation of this {MachOStructure}.

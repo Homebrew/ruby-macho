@@ -571,17 +571,14 @@ module MachO
     #  Mach-Os that it points to necessarily *are* 64-bit.
     # @see MachO::Headers::FatHeader
     class FatArch64 < FatArch
+      # @return [Integer] the file offset to the beginning of the Mach-O data
+      field :offset, :uint64_net
+
+      # @return [Integer] the size, in bytes, of the Mach-O data
+      field :size, :uint64_net
+
       # @return [void]
-      field :reserved, :custom
-
-      # @note Always big endian.
-      # @see MachOStructure::FORMAT
-      # @api private
-      @format = "L>2Q>2L>2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      @bytesize = 32
+      field :reserved, :uint32_net, :default => 0
 
       # @return [String] the serialized fields of the fat arch
       def serialize

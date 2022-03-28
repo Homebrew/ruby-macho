@@ -501,13 +501,17 @@ module MachO
     # A load command indicating that part of this file is to be mapped into
     # the task's address space. Corresponds to LC_SEGMENT_64.
     class SegmentCommand64 < SegmentCommand
-      # @see MachOStructure::FORMAT
-      # @api private
-      @format = "L=2Z16Q=4l=2L=2"
+      # @return [Integer] the memory address of the segment
+      field :vmaddr, :uint64
 
-      # @see MachOStructure::SIZEOF
-      # @api private
-      @bytesize = 72
+      # @return [Integer] the memory size of the segment
+      field :vmsize, :uint64
+
+      # @return [Integer] the file offset of the segment
+      field :fileoff, :uint64
+
+      # @return [Integer] the amount to map from the file
+      field :filesize, :uint64
     end
 
     # A load command representing some aspect of shared libraries, depending

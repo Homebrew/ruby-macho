@@ -196,14 +196,14 @@ module MachO
 
     # Represents a section of a segment for 64-bit architectures.
     class Section64 < Section
+      # @return [Integer] the memory address of the section
+      field :addr, :uint64
+
+      # @return [Integer] the size, in bytes, of the section
+      field :size, :uint64
+
       # @return [void] reserved
-      field :reserved3, :custom
-
-      # @see MachOStructure::FORMAT
-      @format = "Z16Z16Q=2L=8"
-
-      # @see MachOStructure::SIZEOF
-      @bytesize = 80
+      field :reserved3, :uint32
 
       # @return [Hash] a hash representation of this {Section64}
       def to_h

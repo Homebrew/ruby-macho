@@ -12,7 +12,6 @@ module MachO
     # association of field types to byte size
     # @api private
     BYTE_SIZE = {
-      :custom => 0,
       :lcstr => 0,
       :view => 0,
       :bin_string => nil,
@@ -29,7 +28,6 @@ module MachO
     # https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-unpack
     # @api private
     FORMAT_CODE = {
-      :custom => "",
       :lcstr => "",
       :view => "",
       :bin_string => "a",
