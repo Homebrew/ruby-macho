@@ -52,10 +52,10 @@ module MachO
 
       # Add those values to the inheriting class
       subclass.class_eval do
-        @field_list = field_list
-        @bytesize = bytesize
-        @format = fmt
-        @mask_map = mask_map
+        @field_list ||= field_list
+        @bytesize ||= bytesize
+        @format ||= fmt
+        @mask_map ||= mask_map
       end
     end
 
