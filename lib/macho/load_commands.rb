@@ -214,7 +214,7 @@ module MachO
       # @api private
       def self.new_from_bin(view)
         bin = view.raw_data.slice(view.offset, bytesize)
-        format = Utils.specialize_format(self::FORMAT, view.endianness)
+        format = Utils.specialize_format(self.format, view.endianness)
 
         new(view, *bin.unpack(format))
       end
@@ -229,9 +229,9 @@ module MachO
         cmd = LOAD_COMMAND_CONSTANTS[cmd_sym]
 
         # cmd will be filled in, view and cmdsize will be left unpopulated
-        klass_arity = klass.instance_method(:initialize).arity - 3
+        klass_arity = klass.min_args - 3
 
-        raise LoadCommandCreationArityError.new(cmd_sym, klass_arity, args.size) if klass_arity != args.size
+        raise LoadCommandCreationArityError.new(cmd_sym, klass_arity, args.size) if klass_arity > args.size
 
         klass.new(nil, cmd, nil, *args)
       end
@@ -249,8 +249,8 @@ module MachO
       def serialize(context)
         raise LoadCommandNotSerializableError, LOAD_COMMANDS[cmd] unless serializable?
 
-        format = Utils.specialize_format(FORMAT, context.endianness)
-        [cmd, SIZEOF].pack(format)
+        format = Utils.specialize_format(self.class.format, context.endianness)
+        [cmd, self.class.bytesize].pack(format)
       end
 
       # @return [Integer] the load command's offset in the source file
@@ -531,34 +531,16 @@ module MachO
       # @return [Integer] the library's compatibility version number
       field :compatibility_version, :uint32
 
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=6"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 24
-
-      # @api private
-      def initialize(view, cmd, cmdsize, name, timestamp, current_version,
-                     compatibility_version)
-        super(view, cmd, cmdsize)
-        @name = LCStr.new(self, name)
-        @timestamp = timestamp
-        @current_version = current_version
-        @compatibility_version = compatibility_version
-      end
-
       # @param context [SerializationContext]
       #  the context
       # @return [String] the serialized fields of the load command
       # @api private
       def serialize(context)
-        format = Utils.specialize_format(FORMAT, context.endianness)
-        string_payload, string_offsets = Utils.pack_strings(SIZEOF,
+        format = Utils.specialize_format(self.class.format, context.endianness)
+        string_payload, string_offsets = Utils.pack_strings(self.class.bytesize,
                                                             context.alignment,
                                                             :name => name.to_s)
-        cmdsize = SIZEOF + string_payload.bytesize
+        cmdsize = self.class.bytesize + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:name], timestamp, current_version,
          compatibility_version].pack(format) + string_payload
       end
@@ -585,32 +567,18 @@ module MachO
     class DylinkerCommand < LoadCommand
       # @return [LCStr] the dynamic linker's
       #  path name as an LCStr
-      field :name
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, name)
-        super(view, cmd, cmdsize)
-        @name = LCStr.new(self, name)
-      end
+      field :name, :lcstr
 
       # @param context [SerializationContext]
       #  the context
       # @return [String] the serialized fields of the load command
       # @api private
       def serialize(context)
-        format = Utils.specialize_format(FORMAT, context.endianness)
-        string_payload, string_offsets = Utils.pack_strings(SIZEOF,
+        format = Utils.specialize_format(self.class.format, context.endianness)
+        string_payload, string_offsets = Utils.pack_strings(self.class.bytesize,
                                                             context.alignment,
                                                             :name => name.to_s)
-        cmdsize = SIZEOF + string_payload.bytesize
+        cmdsize = self.class.bytesize + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:name]].pack(format) + string_payload
       end
 
@@ -632,29 +600,13 @@ module MachO
     class PreboundDylibCommand < LoadCommand
       # @return [LCStr] the library's path
       #  name as an LCStr
-      field :name
+      field :name, :lcstr
 
       # @return [Integer] the number of modules in the library
-      field :nmodules
+      field :nmodules, :uint32
 
       # @return [Integer] a bit vector of linked modules
-      field :linked_modules
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=5"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 20
-
-      # @api private
-      def initialize(view, cmd, cmdsize, name, nmodules, linked_modules)
-        super(view, cmd, cmdsize)
-        @name = LCStr.new(self, name)
-        @nmodules = nmodules
-        @linked_modules = linked_modules
-      end
+      field :linked_modules, :uint32
 
       # @return [String] a string representation of the library's pathname
       def to_s
@@ -675,13 +627,6 @@ module MachO
     # @note cctools-870 and onwards have all fields of thread_command commented
     # out except the common ones (cmd, cmdsize)
     class ThreadCommand < LoadCommand
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 8
     end
 
     # A load command containing the address of the dynamic shared library
@@ -689,51 +634,29 @@ module MachO
     # that defines the routine. Corresponds to LC_ROUTINES.
     class RoutinesCommand < LoadCommand
       # @return [Integer] the address of the initialization routine
-      field :init_address
+      field :init_address, :uint32
 
       # @return [Integer] the index into the module table that the init routine
       #  is defined in
-      field :init_module
+      field :init_module, :uint32
 
       # @return [void]
-      field :reserved1
+      field :reserved1, :uint32
 
       # @return [void]
-      field :reserved2
+      field :reserved2, :uint32
 
       # @return [void]
-      field :reserved3
+      field :reserved3, :uint32
 
       # @return [void]
-      field :reserved4
+      field :reserved4, :uint32
 
       # @return [void]
-      field :reserved5
+      field :reserved5, :uint32
 
       # @return [void]
-      field :reserved6
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=10"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 40
-
-      # @api private
-      def initialize(view, cmd, cmdsize, init_address, init_module, reserved1,
-                     reserved2, reserved3, reserved4, reserved5, reserved6)
-        super(view, cmd, cmdsize)
-        @init_address = init_address
-        @init_module = init_module
-        @reserved1 = reserved1
-        @reserved2 = reserved2
-        @reserved3 = reserved3
-        @reserved4 = reserved4
-        @reserved5 = reserved5
-        @reserved6 = reserved6
-      end
+      field :reserved6, :uint32
 
       # @return [Hash] a hash representation of this {RoutinesCommand}
       def to_h
@@ -754,34 +677,37 @@ module MachO
     # initialization routine and an index into the module table for the module
     # that defines the routine. Corresponds to LC_ROUTINES_64.
     class RoutinesCommand64 < RoutinesCommand
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2Q=8"
+      # @return [Integer] the address of the initialization routine
+      field :init_address, :uint64
 
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 72
+      # @return [Integer] the index into the module table that the init routine
+      #  is defined in
+      field :init_module, :uint64
+
+      # @return [void]
+      field :reserved1, :uint64
+
+      # @return [void]
+      field :reserved2, :uint64
+
+      # @return [void]
+      field :reserved3, :uint64
+
+      # @return [void]
+      field :reserved4, :uint64
+
+      # @return [void]
+      field :reserved5, :uint64
+
+      # @return [void]
+      field :reserved6, :uint64
     end
 
     # A load command signifying membership of a subframework containing the name
     # of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
     class SubFrameworkCommand < LoadCommand
       # @return [LCStr] the umbrella framework name as an LCStr
-      field :umbrella
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, umbrella)
-        super(view, cmd, cmdsize)
-        @umbrella = LCStr.new(self, umbrella)
-      end
+      field :umbrella, :lcstr
 
       # @return [String] a string represenation of the umbrella framework name
       def to_s
@@ -800,21 +726,7 @@ module MachO
     # of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
     class SubUmbrellaCommand < LoadCommand
       # @return [LCStr] the subumbrella framework name as an LCStr
-      field :sub_umbrella
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, sub_umbrella)
-        super(view, cmd, cmdsize)
-        @sub_umbrella = LCStr.new(self, sub_umbrella)
-      end
+      field :sub_umbrella, :lcstr
 
       # @return [String] a string represenation of the sub-umbrella framework name
       def to_s
@@ -833,21 +745,7 @@ module MachO
     # to LC_SUB_LIBRARY.
     class SubLibraryCommand < LoadCommand
       # @return [LCStr] the sublibrary name as an LCStr
-      field :sub_library
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, sub_library)
-        super(view, cmd, cmdsize)
-        @sub_library = LCStr.new(self, sub_library)
-      end
+      field :sub_library, :lcstr
 
       # @return [String] a string represenation of the sub-library name
       def to_s
@@ -866,21 +764,7 @@ module MachO
     # an umbrella framework. Corresponds to LC_SUB_CLIENT.
     class SubClientCommand < LoadCommand
       # @return [LCStr] the subclient name as an LCStr
-      field :sub_client
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, sub_client)
-        super(view, cmd, cmdsize)
-        @sub_client = LCStr.new(self, sub_client)
-      end
+      field :sub_client, :lcstr
 
       # @return [String] a string represenation of the sub-client name
       def to_s
@@ -899,33 +783,16 @@ module MachO
     # "stab" style symbol table information. Corresponds to LC_SYMTAB.
     class SymtabCommand < LoadCommand
       # @return [Integer] the symbol table's offset
-      field :symoff
+      field :symoff, :uint32
 
       # @return [Integer] the number of symbol table entries
-      field :nsyms
+      field :nsyms, :uint32
 
       # @return [Integer] the string table's offset
-      field :stroff
+      field :stroff, :uint32
 
       # @return [Integer] the string table size in bytes
-      field :strsize
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=6"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 24
-
-      # @api private
-      def initialize(view, cmd, cmdsize, symoff, nsyms, stroff, strsize)
-        super(view, cmd, cmdsize)
-        @symoff = symoff
-        @nsyms = nsyms
-        @stroff = stroff
-        @strsize = strsize
-      end
+      field :strsize, :uint32
 
       # @return [Hash] a hash representation of this {SymtabCommand}
       def to_h
@@ -942,93 +809,58 @@ module MachO
     # structures used by the dynamic link editor. Corresponds to LC_DYSYMTAB.
     class DysymtabCommand < LoadCommand
       # @return [Integer] the index to local symbols
-      field :ilocalsym
+      field :ilocalsym, :uint32
 
       # @return [Integer] the number of local symbols
-      field :nlocalsym
+      field :nlocalsym, :uint32
 
       # @return [Integer] the index to externally defined symbols
-      field :iextdefsym
+      field :iextdefsym, :uint32
 
       # @return [Integer] the number of externally defined symbols
-      field :nextdefsym
+      field :nextdefsym, :uint32
 
       # @return [Integer] the index to undefined symbols
-      field :iundefsym
+      field :iundefsym, :uint32
 
       # @return [Integer] the number of undefined symbols
-      field :nundefsym
+      field :nundefsym, :uint32
 
       # @return [Integer] the file offset to the table of contents
-      field :tocoff
+      field :tocoff, :uint32
 
       # @return [Integer] the number of entries in the table of contents
-      field :ntoc
+      field :ntoc, :uint32
 
       # @return [Integer] the file offset to the module table
-      field :modtaboff
+      field :modtaboff, :uint32
 
       # @return [Integer] the number of entries in the module table
-      field :nmodtab
+      field :nmodtab, :uint32
 
       # @return [Integer] the file offset to the referenced symbol table
-      field :extrefsymoff
+      field :extrefsymoff, :uint32
 
       # @return [Integer] the number of entries in the referenced symbol table
-      field :nextrefsyms
+      field :nextrefsyms, :uint32
 
       # @return [Integer] the file offset to the indirect symbol table
-      field :indirectsymoff
+      field :indirectsymoff, :uint32
 
       # @return [Integer] the number of entries in the indirect symbol table
-      field :nindirectsyms
+      field :nindirectsyms, :uint32
 
       # @return [Integer] the file offset to the external relocation entries
-      field :extreloff
+      field :extreloff, :uint32
 
       # @return [Integer] the number of external relocation entries
-      field :nextrel
+      field :nextrel, :uint32
 
       # @return [Integer] the file offset to the local relocation entries
-      field :locreloff
+      field :locreloff, :uint32
 
       # @return [Integer] the number of local relocation entries
-      field :nlocrel
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=20"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 80
-
-      # ugh
-      # @api private
-      def initialize(view, cmd, cmdsize, ilocalsym, nlocalsym, iextdefsym,
-                     nextdefsym, iundefsym, nundefsym, tocoff, ntoc, modtaboff,
-                     nmodtab, extrefsymoff, nextrefsyms, indirectsymoff,
-                     nindirectsyms, extreloff, nextrel, locreloff, nlocrel)
-        super(view, cmd, cmdsize)
-        @ilocalsym = ilocalsym
-        @nlocalsym = nlocalsym
-        @iextdefsym = iextdefsym
-        @nextdefsym = nextdefsym
-        @iundefsym = iundefsym
-        @nundefsym = nundefsym
-        @tocoff = tocoff
-        @ntoc = ntoc
-        @modtaboff = modtaboff
-        @nmodtab = nmodtab
-        @extrefsymoff = extrefsymoff
-        @nextrefsyms = nextrefsyms
-        @indirectsymoff = indirectsymoff
-        @nindirectsyms = nindirectsyms
-        @extreloff = extreloff
-        @nextrel = nextrel
-        @locreloff = locreloff
-        @nlocrel = nlocrel
-      end
+      field :nlocrel, :uint32
 
       # @return [Hash] a hash representation of this {DysymtabCommand}
       def to_h
@@ -1059,30 +891,14 @@ module MachO
     # namespace lookup hints table. Corresponds to LC_TWOLEVEL_HINTS.
     class TwolevelHintsCommand < LoadCommand
       # @return [Integer] the offset to the hint table
-      field :htoffset
+      field :htoffset, :uint32
 
       # @return [Integer] the number of hints in the hint table
-      field :nhints
+      field :nhints, :uint32
 
       # @return [TwolevelHintsTable]
       #  the hint table
-      field :table
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=4"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 16
-
-      # @api private
-      def initialize(view, cmd, cmdsize, htoffset, nhints)
-        super(view, cmd, cmdsize)
-        @htoffset = htoffset
-        @nhints = nhints
-        @table = TwolevelHintsTable.new(view, htoffset, nhints)
-      end
+      field :table, :two_level_hints_table
 
       # @return [Hash] a hash representation of this {TwolevelHintsCommand}
       def to_h
@@ -1141,21 +957,7 @@ module MachO
     # files, or zero. Corresponds to LC_PREBIND_CKSUM.
     class PrebindCksumCommand < LoadCommand
       # @return [Integer] the checksum or 0
-      field :cksum
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, cksum)
-        super(view, cmd, cmdsize)
-        @cksum = cksum
-      end
+      field :cksum, :uint32
 
       # @return [Hash] a hash representation of this {PrebindCksumCommand}
       def to_h
@@ -1170,31 +972,17 @@ module MachO
     # Corresponds to LC_RPATH.
     class RpathCommand < LoadCommand
       # @return [LCStr] the path to add to the run path as an LCStr
-      field :path
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, path)
-        super(view, cmd, cmdsize)
-        @path = LCStr.new(self, path)
-      end
+      field :path, :lcstr
 
       # @param context [SerializationContext] the context
       # @return [String] the serialized fields of the load command
       # @api private
       def serialize(context)
-        format = Utils.specialize_format(FORMAT, context.endianness)
-        string_payload, string_offsets = Utils.pack_strings(SIZEOF,
+        format = Utils.specialize_format(self.class.format, context.endianness)
+        string_payload, string_offsets = Utils.pack_strings(self.class.bytesize,
                                                             context.alignment,
                                                             :path => path.to_s)
-        cmdsize = SIZEOF + string_payload.bytesize
+        cmdsize = self.class.bytesize + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:path]].pack(format) + string_payload
       end
 
@@ -1218,25 +1006,10 @@ module MachO
     # or LC_DYLD_CHAINED_FIXUPS.
     class LinkeditDataCommand < LoadCommand
       # @return [Integer] offset to the data in the __LINKEDIT segment
-      field :dataoff
+      field :dataoff, :uint32
 
       # @return [Integer] size of the data in the __LINKEDIT segment
-      field :datasize
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=4"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 16
-
-      # @api private
-      def initialize(view, cmd, cmdsize, dataoff, datasize)
-        super(view, cmd, cmdsize)
-        @dataoff = dataoff
-        @datasize = datasize
-      end
+      field :datasize, :uint32
 
       # @return [Hash] a hash representation of this {LinkeditDataCommand}
       def to_h
@@ -1251,29 +1024,13 @@ module MachO
     # segment. Corresponds to LC_ENCRYPTION_INFO.
     class EncryptionInfoCommand < LoadCommand
       # @return [Integer] the offset to the encrypted segment
-      field :cryptoff
+      field :cryptoff, :uint32
 
       # @return [Integer] the size of the encrypted segment
-      field :cryptsize
+      field :cryptsize, :uint32
 
       # @return [Integer] the encryption system, or 0 if not encrypted yet
-      field :cryptid
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=5"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 20
-
-      # @api private
-      def initialize(view, cmd, cmdsize, cryptoff, cryptsize, cryptid)
-        super(view, cmd, cmdsize)
-        @cryptoff = cryptoff
-        @cryptsize = cryptsize
-        @cryptid = cryptid
-      end
+      field :cryptid, :uint32
 
       # @return [Hash] a hash representation of this {EncryptionInfoCommand}
       def to_h
@@ -1289,21 +1046,7 @@ module MachO
     # segment. Corresponds to LC_ENCRYPTION_INFO_64.
     class EncryptionInfoCommand64 < EncryptionInfoCommand
       # @return [Integer] 64-bit padding value
-      field :pad
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=6"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 24
-
-      # @api private
-      def initialize(view, cmd, cmdsize, cryptoff, cryptsize, cryptid, pad)
-        super(view, cmd, cmdsize, cryptoff, cryptsize, cryptid)
-        @pad = pad
-      end
+      field :pad, :uint32
 
       # @return [Hash] a hash representation of this {EncryptionInfoCommand64}
       def to_h
@@ -1318,25 +1061,10 @@ module MachO
     # LC_VERSION_MIN_IPHONEOS.
     class VersionMinCommand < LoadCommand
       # @return [Integer] the version X.Y.Z packed as x16.y8.z8
-      field :version
+      field :version, :uint32
 
       # @return [Integer] the SDK version X.Y.Z packed as x16.y8.z8
-      field :sdk
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=4"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 16
-
-      # @api private
-      def initialize(view, cmd, cmdsize, version, sdk)
-        super(view, cmd, cmdsize)
-        @version = version
-        @sdk = sdk
-      end
+      field :sdk, :uint32
 
       # A string representation of the binary's minimum OS version.
       # @return [String] a string representing the minimum OS version.
@@ -1376,33 +1104,16 @@ module MachO
     # Corresponds to LC_BUILD_VERSION.
     class BuildVersionCommand < LoadCommand
       # @return [Integer]
-      field :platform
+      field :platform, :uint32
 
       # @return [Integer] the minimum OS version X.Y.Z packed as x16.y8.z8
-      field :minos
+      field :minos, :uint32
 
       # @return [Integer] the SDK version X.Y.Z packed as x16.y8.z8
-      field :sdk
+      field :sdk, :uint32
 
       # @return [ToolEntries] tool entries
-      field :tool_entries
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=6"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 24
-
-      # @api private
-      def initialize(view, cmd, cmdsize, platform, minos, sdk, ntools)
-        super(view, cmd, cmdsize)
-        @platform = platform
-        @minos = minos
-        @sdk = sdk
-        @tool_entries = ToolEntries.new(view, ntools)
-      end
+      field :tool_entries, :tool_entries
 
       # A string representation of the binary's minimum OS version.
       # @return [String] a string representing the minimum OS version.
@@ -1487,59 +1198,34 @@ module MachO
     # Corresponds to LC_DYLD_INFO and LC_DYLD_INFO_ONLY.
     class DyldInfoCommand < LoadCommand
       # @return [Integer] the file offset to the rebase information
-      field :rebase_off
+      field :rebase_off, :uint32
 
       # @return [Integer] the size of the rebase information
-      field :rebase_size
+      field :rebase_size, :uint32
 
       # @return [Integer] the file offset to the binding information
-      field :bind_off
+      field :bind_off, :uint32
 
       # @return [Integer] the size of the binding information
-      field :bind_size
+      field :bind_size, :uint32
 
       # @return [Integer] the file offset to the weak binding information
-      field :weak_bind_off
+      field :weak_bind_off, :uint32
 
       # @return [Integer] the size of the weak binding information
-      field :weak_bind_size
+      field :weak_bind_size, :uint32
 
       # @return [Integer] the file offset to the lazy binding information
-      field :lazy_bind_off
+      field :lazy_bind_off, :uint32
 
       # @return [Integer] the size of the lazy binding information
-      field :lazy_bind_size
+      field :lazy_bind_size, :uint32
 
       # @return [Integer] the file offset to the export information
-      field :export_off
+      field :export_off, :uint32
 
       # @return [Integer] the size of the export information
-      field :export_size
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=12"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 48
-
-      # @api private
-      def initialize(view, cmd, cmdsize, rebase_off, rebase_size, bind_off,
-                     bind_size, weak_bind_off, weak_bind_size, lazy_bind_off,
-                     lazy_bind_size, export_off, export_size)
-        super(view, cmd, cmdsize)
-        @rebase_off = rebase_off
-        @rebase_size = rebase_size
-        @bind_off = bind_off
-        @bind_size = bind_size
-        @weak_bind_off = weak_bind_off
-        @weak_bind_size = weak_bind_size
-        @lazy_bind_off = lazy_bind_off
-        @lazy_bind_size = lazy_bind_size
-        @export_off = export_off
-        @export_size = export_size
-      end
+      field :export_size, :uint32
 
       # @return [Hash] a hash representation of this {DyldInfoCommand}
       def to_h
@@ -1562,21 +1248,7 @@ module MachO
     # Corresponds to LC_LINKER_OPTION.
     class LinkerOptionCommand < LoadCommand
       # @return [Integer] the number of strings
-      field :count
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=3"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 12
-
-      # @api private
-      def initialize(view, cmd, cmdsize, count)
-        super(view, cmd, cmdsize)
-        @count = count
-      end
+      field :count, :uint32
 
       # @return [Hash] a hash representation of this {LinkerOptionCommand}
       def to_h
@@ -1589,25 +1261,10 @@ module MachO
     # A load command specifying the offset of main(). Corresponds to LC_MAIN.
     class EntryPointCommand < LoadCommand
       # @return [Integer] the file (__TEXT) offset of main()
-      field :entryoff
+      field :entryoff, :uint64
 
       # @return [Integer] if not 0, the initial stack size.
-      field :stacksize
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2Q=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 24
-
-      # @api private
-      def initialize(view, cmd, cmdsize, entryoff, stacksize)
-        super(view, cmd, cmdsize)
-        @entryoff = entryoff
-        @stacksize = stacksize
-      end
+      field :stacksize, :uint64
 
       # @return [Hash] a hash representation of this {EntryPointCommand}
       def to_h
@@ -1622,21 +1279,7 @@ module MachO
     # binary. Corresponds to LC_SOURCE_VERSION.
     class SourceVersionCommand < LoadCommand
       # @return [Integer] the version packed as a24.b10.c10.d10.e10
-      field :version
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2Q=1"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 16
-
-      # @api private
-      def initialize(view, cmd, cmdsize, version)
-        super(view, cmd, cmdsize)
-        @version = version
-      end
+      field :version, :uint64
 
       # A string representation of the sources used to build the binary.
       # @return [String] a string representation of the version
@@ -1668,25 +1311,10 @@ module MachO
     # symbol table information. Corresponds to LC_SYMSEG.
     class SymsegCommand < LoadCommand
       # @return [Integer] the offset to the symbol segment
-      field :offset
+      field :offset, :uint32
 
       # @return [Integer] the size of the symbol segment in bytes
-      field :size
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=4"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 16
-
-      # @api private
-      def initialize(view, cmd, cmdsize, offset, size)
-        super(view, cmd, cmdsize)
-        @offset = offset
-        @size = size
-      end
+      field :size, :uint32
 
       # @return [Hash] a hash representation of this {SymsegCommand}
       def to_h
@@ -1701,37 +1329,16 @@ module MachO
     # string is null-terminated and the command is zero-padded to a multiple of
     # 4. Corresponds to LC_IDENT.
     class IdentCommand < LoadCommand
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 8
     end
 
     # An obsolete load command containing the path to a file to be loaded into
     # memory. Corresponds to LC_FVMFILE.
     class FvmfileCommand < LoadCommand
       # @return [LCStr] the pathname of the file being loaded
-      field :name
+      field :name, :lcstr
 
       # @return [Integer] the virtual address being loaded at
-      field :header_addr
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=4"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 16
-
-      def initialize(view, cmd, cmdsize, name, header_addr)
-        super(view, cmd, cmdsize)
-        @name = LCStr.new(self, name)
-        @header_addr = header_addr
-      end
+      field :header_addr, :uint32
 
       # @return [String] a string representation of the pathname
       def to_s
@@ -1751,28 +1358,13 @@ module MachO
     # into memory. Corresponds to LC_LOADFVMLIB and LC_IDFVMLIB.
     class FvmlibCommand < LoadCommand
       # @return [LCStr] the library's target pathname
-      field :name
+      field :name, :lcstr
 
       # @return [Integer] the library's minor version number
-      field :minor_version
+      field :minor_version, :uint32
 
       # @return [Integer] the library's header address
-      field :header_addr
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=5"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 20
-
-      def initialize(view, cmd, cmdsize, name, minor_version, header_addr)
-        super(view, cmd, cmdsize)
-        @name = LCStr.new(self, name)
-        @minor_version = minor_version
-        @header_addr = header_addr
-      end
+      field :header_addr, :uint32
 
       # @return [String] a string representation of the target pathname
       def to_s
@@ -1793,28 +1385,13 @@ module MachO
     # Corresponds to LC_NOTE.
     class NoteCommand < LoadCommand
       # @return [String] the name of the owner for this note
-      field :data_owner
+      field :data_owner, :string, :size => 16
 
       # @return [Integer] the offset, within the file, of the note
-      field :offset
+      field :offset, :uint64
 
       # @return [Integer] the size, in bytes, of the note
-      field :size
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2Z16Q=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 48
-
-      def initialize(view, cmd, cmdsize, data_owner, offset, size)
-        super(view, cmd, cmdsize)
-        @data_owner = data_owner
-        @offset = offset
-        @size = size
-      end
+      field :size, :uint64
 
       # @return [String] a string representation of data owner of this note
       def to_s
@@ -1836,32 +1413,16 @@ module MachO
     # Corresponds to LC_FILESET_ENTRY.
     class FilesetEntryCommand < LoadCommand
       # @return [Integer] the virtual memory address of the entry
-      field :vmaddr
+      field :vmaddr, :uint64
 
       # @return [Integer] the file offset of the entry
-      field :fileoff
+      field :fileoff, :uint64
 
       # @return [LCStr] the entry's ID
-      field :entry_id
+      field :entry_id, :lcstr
 
       # @return [void]
-      field :reserved
-
-      # @see MachOStructure::FORMAT
-      # @api private
-      FORMAT = "L=2Q=2L=2"
-
-      # @see MachOStructure::SIZEOF
-      # @api private
-      SIZEOF = 28
-
-      def initialize(view, cmd, cmdsize, vmaddr, fileoff, entry_id, reserved)
-        super(view, cmd, cmdsize)
-        @vmaddr = vmaddr
-        @fileoff = fileoff
-        @entry_id = LCStr.new(self, entry_id)
-        @reserved = reserved
-      end
+      field :reserved, :uint32
 
       # @return [Hash] a hash representation of this {FilesetEntryCommand}
       def to_h

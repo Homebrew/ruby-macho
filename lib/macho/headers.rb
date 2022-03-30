@@ -512,7 +512,7 @@ module MachO
 
       # @return [String] the serialized fields of the fat header
       def serialize
-        [magic, nfat_arch].pack(FORMAT)
+        [magic, nfat_arch].pack(self.class.format)
       end
 
       # @return [Hash] a hash representation of this {FatHeader}
@@ -548,7 +548,7 @@ module MachO
 
       # @return [String] the serialized fields of the fat arch
       def serialize
-        [cputype, cpusubtype, offset, size, align].pack(FORMAT)
+        [cputype, cpusubtype, offset, size, align].pack(self.class.format)
       end
 
       # @return [Hash] a hash representation of this {FatArch}
@@ -582,7 +582,7 @@ module MachO
 
       # @return [String] the serialized fields of the fat arch
       def serialize
-        [cputype, cpusubtype, offset, size, align, reserved].pack(FORMAT)
+        [cputype, cpusubtype, offset, size, align, reserved].pack(self.class.format)
       end
 
       # @return [Hash] a hash representation of this {FatArch64}

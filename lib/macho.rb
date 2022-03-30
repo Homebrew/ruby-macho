@@ -12,7 +12,6 @@ require_relative "macho/fat_file"
 require_relative "macho/exceptions"
 require_relative "macho/utils"
 require_relative "macho/tools"
-require_relative "macho/fields"
 
 # The primary namespace for ruby-macho.
 module MachO
