@@ -520,16 +520,16 @@ module MachO
     class DylibCommand < LoadCommand
       # @return [LCStr] the library's path
       #  name as an LCStr
-      field :name
+      field :name, :lcstr
 
       # @return [Integer] the library's build time stamp
-      field :timestamp
+      field :timestamp, :uint32
 
       # @return [Integer] the library's current version number
-      field :current_version
+      field :current_version, :uint32
 
       # @return [Integer] the library's compatibility version number
-      field :compatibility_version
+      field :compatibility_version, :uint32
 
       # @see MachOStructure::FORMAT
       # @api private

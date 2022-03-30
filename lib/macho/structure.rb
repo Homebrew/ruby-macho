@@ -86,7 +86,7 @@ module MachO
       raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
 
       if type_map.key?(name)
-        @min_args += 1 if @option_map.dig(name, :default)
+        @min_args -= 1 unless @option_map.dig(name, :default)
 
         @option_map.delete(name) if options.empty?
       else

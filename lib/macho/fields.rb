@@ -12,8 +12,8 @@ module MachO
     # association of field types to byte size
     # @api private
     BYTE_SIZE = {
-      :lcstr => 0,
       :view => 0,
+      :lcstr => 4,
       :bin_string => nil,
       :string => nil,
       :int32 => 4,
@@ -26,16 +26,19 @@ module MachO
     # association of field types with ruby format codes
     # Binary format codes can be found here:
     # https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-unpack
+    #
+    # The equals sign is used to manually change endianness using
+    # the Utils#specialize_format() method.
     # @api private
     FORMAT_CODE = {
-      :lcstr => "",
       :view => "",
+      :lcstr => "L=",
       :bin_string => "a",
       :string => "Z",
-      :int32 => "l",
-      :uint32 => "L",
+      :int32 => "l=",
+      :uint32 => "L=",
       :uint32_net => "L>", # Same as N
-      :uint64 => "Q",
+      :uint64 => "Q=",
       :uint64_net => "Q>",
     }.freeze
   end
