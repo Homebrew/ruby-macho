@@ -118,7 +118,7 @@ module MachO
 
     # @param subclass [Class] subclass type
     # @api private
-    def self.inherited(subclass)
+    def self.inherited(subclass) # rubocop:disable Lint/MissingSuper
       # Clone all class instance variables
       type_map = @type_map.dup
       field_list = @field_list.dup
