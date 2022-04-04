@@ -70,8 +70,6 @@ module MachO
     # minimum number of required arguments
     @min_args = 0
 
-    # Used to dynamically create an instance of the inherited class
-    # according to the defined fields.
     # @param args [Array[Value]] list of field parameters
     def initialize(*args)
       raise ArgumentError, "Invalid number of arguments" if args.size < self.class.min_args
@@ -138,6 +136,7 @@ module MachO
       #   :mask [Integer] bitmask
       #   :unpack [String] string format
       #   :default [Value] default value
+      #   :to_s [Boolean] flag for generating #to_s
       # @api private
       def field(name, type, **options)
         raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
@@ -168,6 +167,8 @@ module MachO
         else
           def_reader(name, idx)
         end
+
+        def_to_s(name) if options[:to_s]
       end
 
       #
@@ -255,6 +256,15 @@ module MachO
       def def_reader(name, idx)
         define_method(name) do
           @values[idx]
+        end
+      end
+
+      # Generates the to_s method based on the named field.
+      # @param name [Symbol] name of the field
+      # @api private
+      def def_to_s(name)
+        define_method(:to_s) do
+          send(name).to_s
         end
       end
     end

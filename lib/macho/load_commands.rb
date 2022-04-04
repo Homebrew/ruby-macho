@@ -398,7 +398,7 @@ module MachO
     # the task's address space. Corresponds to LC_SEGMENT.
     class SegmentCommand < LoadCommand
       # @return [String] the name of the segment
-      field :segname, :string, :size => 16
+      field :segname, :string, :size => 16, :to_s => true
 
       # @return [Integer] the memory address of the segment
       field :vmaddr, :uint32
@@ -476,11 +476,6 @@ module MachO
         align
       end
 
-      # @return [String] a string representation of the segment name
-      def to_s
-        segname
-      end
-
       # @return [Hash] a hash representation of this {SegmentCommand}
       def to_h
         {
@@ -520,7 +515,7 @@ module MachO
     class DylibCommand < LoadCommand
       # @return [LCStr] the library's path
       #  name as an LCStr
-      field :name, :lcstr
+      field :name, :lcstr, :to_s => true
 
       # @return [Integer] the library's build time stamp
       field :timestamp, :uint32
@@ -545,11 +540,6 @@ module MachO
          compatibility_version].pack(format) + string_payload
       end
 
-      # @return [String] a string representation of the library's pathname
-      def to_s
-        name.to_s
-      end
-
       # @return [Hash] a hash representation of this {DylibCommand}
       def to_h
         {
@@ -567,7 +557,7 @@ module MachO
     class DylinkerCommand < LoadCommand
       # @return [LCStr] the dynamic linker's
       #  path name as an LCStr
-      field :name, :lcstr
+      field :name, :lcstr, :to_s => true
 
       # @param context [SerializationContext]
       #  the context
@@ -580,11 +570,6 @@ module MachO
                                                             :name => name.to_s)
         cmdsize = self.class.bytesize + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:name]].pack(format) + string_payload
-      end
-
-      # @return [String] a string representation of the dynamic linker's pathname
-      def to_s
-        name.to_s
       end
 
       # @return [Hash] a hash representation of this {DylinkerCommand}
@@ -600,18 +585,13 @@ module MachO
     class PreboundDylibCommand < LoadCommand
       # @return [LCStr] the library's path
       #  name as an LCStr
-      field :name, :lcstr
+      field :name, :lcstr, :to_s => true
 
       # @return [Integer] the number of modules in the library
       field :nmodules, :uint32
 
       # @return [Integer] a bit vector of linked modules
       field :linked_modules, :uint32
-
-      # @return [String] a string representation of the library's pathname
-      def to_s
-        name.to_s
-      end
 
       # @return [Hash] a hash representation of this {PreboundDylibCommand}
       def to_h
@@ -707,12 +687,7 @@ module MachO
     # of an umbrella framework. Corresponds to LC_SUB_FRAMEWORK.
     class SubFrameworkCommand < LoadCommand
       # @return [LCStr] the umbrella framework name as an LCStr
-      field :umbrella, :lcstr
-
-      # @return [String] a string represenation of the umbrella framework name
-      def to_s
-        umbrella.to_s
-      end
+      field :umbrella, :lcstr, :to_s => true
 
       # @return [Hash] a hash representation of this {SubFrameworkCommand}
       def to_h
@@ -726,12 +701,7 @@ module MachO
     # of an umbrella framework. Corresponds to LC_SUB_UMBRELLA.
     class SubUmbrellaCommand < LoadCommand
       # @return [LCStr] the subumbrella framework name as an LCStr
-      field :sub_umbrella, :lcstr
-
-      # @return [String] a string represenation of the sub-umbrella framework name
-      def to_s
-        sub_umbrella.to_s
-      end
+      field :sub_umbrella, :lcstr, :to_s => true
 
       # @return [Hash] a hash representation of this {SubUmbrellaCommand}
       def to_h
@@ -745,12 +715,7 @@ module MachO
     # to LC_SUB_LIBRARY.
     class SubLibraryCommand < LoadCommand
       # @return [LCStr] the sublibrary name as an LCStr
-      field :sub_library, :lcstr
-
-      # @return [String] a string represenation of the sub-library name
-      def to_s
-        sublibrary.to_s
-      end
+      field :sub_library, :lcstr, :to_s => true
 
       # @return [Hash] a hash representation of this {SubLibraryCommand}
       def to_h
@@ -764,12 +729,7 @@ module MachO
     # an umbrella framework. Corresponds to LC_SUB_CLIENT.
     class SubClientCommand < LoadCommand
       # @return [LCStr] the subclient name as an LCStr
-      field :sub_client, :lcstr
-
-      # @return [String] a string represenation of the sub-client name
-      def to_s
-        sub_client.to_s
-      end
+      field :sub_client, :lcstr, :to_s => true
 
       # @return [Hash] a hash representation of this {SubClientCommand}
       def to_h
@@ -972,7 +932,7 @@ module MachO
     # Corresponds to LC_RPATH.
     class RpathCommand < LoadCommand
       # @return [LCStr] the path to add to the run path as an LCStr
-      field :path, :lcstr
+      field :path, :lcstr, :to_s => true
 
       # @param context [SerializationContext] the context
       # @return [String] the serialized fields of the load command
@@ -984,11 +944,6 @@ module MachO
                                                             :path => path.to_s)
         cmdsize = self.class.bytesize + string_payload.bytesize
         [cmd, cmdsize, string_offsets[:path]].pack(format) + string_payload
-      end
-
-      # @return [String] a string representation of the run path
-      def to_s
-        path.to_s
       end
 
       # @return [Hash] a hash representation of this {RpathCommand}
@@ -1293,11 +1248,6 @@ module MachO
         segs.join(".")
       end
 
-      # @return [String] an alias for version_string
-      def to_s
-        version_string
-      end
-
       # @return [Hash] a hash representation of this {SourceVersionCommand}
       def to_h
         {
@@ -1335,15 +1285,10 @@ module MachO
     # memory. Corresponds to LC_FVMFILE.
     class FvmfileCommand < LoadCommand
       # @return [LCStr] the pathname of the file being loaded
-      field :name, :lcstr
+      field :name, :lcstr, :to_s => true
 
       # @return [Integer] the virtual address being loaded at
       field :header_addr, :uint32
-
-      # @return [String] a string representation of the pathname
-      def to_s
-        name.to_s
-      end
 
       # @return [Hash] a hash representation of this {FvmfileCommand}
       def to_h
@@ -1358,18 +1303,13 @@ module MachO
     # into memory. Corresponds to LC_LOADFVMLIB and LC_IDFVMLIB.
     class FvmlibCommand < LoadCommand
       # @return [LCStr] the library's target pathname
-      field :name, :lcstr
+      field :name, :lcstr, :to_s => true
 
       # @return [Integer] the library's minor version number
       field :minor_version, :uint32
 
       # @return [Integer] the library's header address
       field :header_addr, :uint32
-
-      # @return [String] a string representation of the target pathname
-      def to_s
-        name.to_s
-      end
 
       # @return [Hash] a hash representation of this {FvmlibCommand}
       def to_h
@@ -1385,18 +1325,13 @@ module MachO
     # Corresponds to LC_NOTE.
     class NoteCommand < LoadCommand
       # @return [String] the name of the owner for this note
-      field :data_owner, :string, :size => 16
+      field :data_owner, :string, :size => 16, :to_s => true
 
       # @return [Integer] the offset, within the file, of the note
       field :offset, :uint64
 
       # @return [Integer] the size, in bytes, of the note
       field :size, :uint64
-
-      # @return [String] a string representation of data owner of this note
-      def to_s
-        data_owner
-      end
 
       # @return [Hash] a hash representation of this {NoteCommand}
       def to_h
@@ -1419,7 +1354,7 @@ module MachO
       field :fileoff, :uint64
 
       # @return [LCStr] the entry's ID
-      field :entry_id, :lcstr
+      field :entry_id, :lcstr, :to_s => true
 
       # @return [void]
       field :reserved, :uint32
