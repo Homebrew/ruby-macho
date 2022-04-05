@@ -15,13 +15,11 @@ module MachO
       # @api private
       BYTE_SIZE = {
         # Binary slices
-        :bin_string => nil,
+        :binary => nil,
         :string => nil,
         :int32 => 4,
         :uint32 => 4,
-        :uint32_net => 4,
         :uint64 => 8,
-        :uint64_net => 8,
         # Classes
         :view => 0,
         :lcstr => 4,
@@ -38,13 +36,11 @@ module MachO
       # @api private
       FORMAT_CODE = {
         # Binary slices
-        :bin_string => "a",
+        :binary => "a",
         :string => "Z",
         :int32 => "l=",
         :uint32 => "L=",
-        :uint32_net => "L>", # Same as N
         :uint64 => "Q=",
-        :uint64_net => "Q>",
         # Classes
         :view => "",
         :lcstr => "L=",
@@ -137,10 +133,12 @@ module MachO
       #   :unpack [String] string format
       #   :default [Value] default value
       #   :to_s [Boolean] flag for generating #to_s
+      #   :endian [Symbol] optionally specify :big or :little endian
       # @api private
       def field(name, type, **options)
         raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
 
+        # Get field idx for size_list and fmt_list
         idx = if @field_idxs.key?(name)
           @field_idxs[name]
         else
@@ -151,8 +149,13 @@ module MachO
           @field_idxs.size - 1
         end
 
+        # Add to size_list and fmt_list
         @size_list[idx] = Fields::BYTE_SIZE[type] || options[:size]
-        @fmt_list[idx] = Fields::FORMAT_CODE[type]
+        @fmt_list[idx] = if options[:endian]
+          Utils.specialize_format(Fields::FORMAT_CODE[type], options[:endian])
+        else
+          Fields::FORMAT_CODE[type]
+        end
         @fmt_list[idx] += options[:size].to_s if options.key?(:size)
 
         # Generate methods

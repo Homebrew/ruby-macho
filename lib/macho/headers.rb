@@ -505,10 +505,10 @@ module MachO
     # @see MachO::FatArch
     class FatHeader < MachOStructure
       # @return [Integer] the magic number of the header (and file)
-      field :magic, :uint32_net
+      field :magic, :uint32, :endian => :big
 
       # @return [Integer] the number of fat architecture structures following the header
-      field :nfat_arch, :uint32_net
+      field :nfat_arch, :uint32, :endian => :big
 
       # @return [String] the serialized fields of the fat header
       def serialize
@@ -532,19 +532,19 @@ module MachO
     # @see MachO::Headers::FatHeader
     class FatArch < MachOStructure
       # @return [Integer] the CPU type of the Mach-O
-      field :cputype, :uint32_net
+      field :cputype, :uint32, :endian => :big
 
       # @return [Integer] the CPU subtype of the Mach-O
-      field :cpusubtype, :uint32_net, :mask => CPU_SUBTYPE_MASK
+      field :cpusubtype, :uint32, :endian => :big, :mask => CPU_SUBTYPE_MASK
 
       # @return [Integer] the file offset to the beginning of the Mach-O data
-      field :offset, :uint32_net
+      field :offset, :uint32, :endian => :big
 
       # @return [Integer] the size, in bytes, of the Mach-O data
-      field :size, :uint32_net
+      field :size, :uint32, :endian => :big
 
       # @return [Integer] the alignment, as a power of 2
-      field :align, :uint32_net
+      field :align, :uint32, :endian => :big
 
       # @return [String] the serialized fields of the fat arch
       def serialize
@@ -572,13 +572,13 @@ module MachO
     # @see MachO::Headers::FatHeader
     class FatArch64 < FatArch
       # @return [Integer] the file offset to the beginning of the Mach-O data
-      field :offset, :uint64_net
+      field :offset, :uint64, :endian => :big
 
       # @return [Integer] the size, in bytes, of the Mach-O data
-      field :size, :uint64_net
+      field :size, :uint64, :endian => :big
 
       # @return [void]
-      field :reserved, :uint32_net, :default => 0
+      field :reserved, :uint32, :endian => :big, :default => 0
 
       # @return [String] the serialized fields of the fat arch
       def serialize
@@ -733,31 +733,31 @@ module MachO
     # Prelinked kernel/"kernelcache" header structure
     class PrelinkedKernelHeader < MachOStructure
       # @return [Integer] the magic number for a compressed header ({COMPRESSED_MAGIC})
-      field :signature, :uint32_net
+      field :signature, :uint32, :endian => :big
 
       # @return [Integer] the type of compression used
-      field :compress_type, :uint32_net
+      field :compress_type, :uint32, :endian => :big
 
       # @return [Integer] a checksum for the uncompressed data
-      field :adler32, :uint32_net
+      field :adler32, :uint32, :endian => :big
 
       # @return [Integer] the size of the uncompressed data, in bytes
-      field :uncompressed_size, :uint32_net
+      field :uncompressed_size, :uint32, :endian => :big
 
       # @return [Integer] the size of the compressed data, in bytes
-      field :compressed_size, :uint32_net
+      field :compressed_size, :uint32, :endian => :big
 
       # @return [Integer] the version of the prelink format
-      field :prelink_version, :uint32_net
+      field :prelink_version, :uint32, :endian => :big
 
       # @return [void]
-      field :reserved, :bin_string, :size => 40, :unpack => "L>10"
+      field :reserved, :binary, :size => 40, :unpack => "L>10"
 
       # @return [void]
-      field :platform_name, :bin_string, :size => 64
+      field :platform_name, :binary, :size => 64
 
       # @return [void]
-      field :root_path, :bin_string, :size => 256
+      field :root_path, :binary, :size => 256
 
       # @return [Boolean] whether this prelinked kernel supports KASLR
       def kaslr?

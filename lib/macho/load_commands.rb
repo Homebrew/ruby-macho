@@ -367,7 +367,7 @@ module MachO
     # LC_UUID.
     class UUIDCommand < LoadCommand
       # @return [Array<Integer>] the UUID
-      field :uuid, :bin_string, :size => 16, :unpack => "C16"
+      field :uuid, :binary, :size => 16, :unpack => "C16"
 
       # @return [String] a string representation of the UUID
       def uuid_string
