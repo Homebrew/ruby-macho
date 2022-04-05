@@ -52,6 +52,11 @@ module MachO
       # To add a new class append it here and add the init method to the def_class_reader method
       # @api private
       CLASS_LIST = %i[lcstr tool_entries two_level_hints_table].freeze
+
+      # A list of fields that don't require arguments
+      # Used to calculate MachOStructure#min_args
+      # @api private
+      NO_ARGS_LIST = %i[two_level_hints_table].freeze
     end
 
     # map of field names to indices
@@ -142,7 +147,7 @@ module MachO
         idx = if @field_idxs.key?(name)
           @field_idxs[name]
         else
-          @min_args += 1 unless options.key?(:default)
+          @min_args += 1 unless options.key?(:default) || Fields::NO_ARGS_LIST.include?(type)
           @field_idxs[name] = @field_idxs.size
           @size_list << nil
           @fmt_list << nil
