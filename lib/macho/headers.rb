@@ -751,13 +751,13 @@ module MachO
       field :prelink_version, :uint32, :endian => :big
 
       # @return [void]
-      field :reserved, :binary, :size => 40, :unpack => "L>10"
+      field :reserved, :string, :size => 40, :unpack => "L>10"
 
       # @return [void]
-      field :platform_name, :binary, :size => 64
+      field :platform_name, :string, :size => 64
 
       # @return [void]
-      field :root_path, :binary, :size => 256
+      field :root_path, :string, :size => 256
 
       # @return [Boolean] whether this prelinked kernel supports KASLR
       def kaslr?

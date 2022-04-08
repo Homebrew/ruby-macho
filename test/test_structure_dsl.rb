@@ -7,8 +7,8 @@ class MachOStructureTest < Minitest::Test
   # that information is reflected in the bytesize, min_args
   # and format.
   class AllFields < MachO::MachOStructure
-    field :binary, :binary, :size => 16
-    field :string, :string, :size => 32
+    field :string, :string, :size => 16
+    field :null_term_str, :string, :padding => :null, :size => 32
     field :int32, :int32
     field :uint32, :uint32
     field :uint64, :uint64
@@ -19,8 +19,8 @@ class MachOStructureTest < Minitest::Test
   end
 
   def test_all_field_types
-    assert_includes AllFields.instance_methods, :binary
     assert_includes AllFields.instance_methods, :string
+    assert_includes AllFields.instance_methods, :null_term_str
     assert_includes AllFields.instance_methods, :int32
     assert_includes AllFields.instance_methods, :uint32
     assert_includes AllFields.instance_methods, :uint64
@@ -66,7 +66,7 @@ class MachOStructureTest < Minitest::Test
   end
 
   class UnpackCmd < MachO::MachOStructure
-    field :unpack_field, :binary, :size => 8, :unpack => "L>2"
+    field :unpack_field, :string, :size => 8, :unpack => "L>2"
   end
 
   def test_unpack_option
@@ -105,5 +105,20 @@ class MachOStructureTest < Minitest::Test
 
   def test_endian_option
     assert_equal EndianCmd.format, "L>L<"
+  end
+
+  class PaddingCmd < MachO::MachOStructure
+    field :str, :string, :size => 12
+    field :null_term_str, :string, :padding => :null, :size => 12
+  end
+
+  def test_padding_option
+    assert_equal PaddingCmd.format, "a12Z12"
+    assert_equal PaddingCmd.bytesize, 24
+
+    padded_str = "Hello\x00World!" * 2
+    padding_cmd = PaddingCmd.new_from_bin(:big, padded_str)
+    assert_equal padding_cmd.str, "Hello\x00World!"
+    assert_equal padding_cmd.null_term_str, "Hello"
   end
 end

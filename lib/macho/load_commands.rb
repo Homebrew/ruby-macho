@@ -367,7 +367,7 @@ module MachO
     # LC_UUID.
     class UUIDCommand < LoadCommand
       # @return [Array<Integer>] the UUID
-      field :uuid, :binary, :size => 16, :unpack => "C16"
+      field :uuid, :string, :size => 16, :unpack => "C16"
 
       # @return [String] a string representation of the UUID
       def uuid_string
@@ -398,7 +398,7 @@ module MachO
     # the task's address space. Corresponds to LC_SEGMENT.
     class SegmentCommand < LoadCommand
       # @return [String] the name of the segment
-      field :segname, :string, :size => 16, :to_s => true
+      field :segname, :string, :padding => :null, :size => 16, :to_s => true
 
       # @return [Integer] the memory address of the segment
       field :vmaddr, :uint32
@@ -1325,7 +1325,7 @@ module MachO
     # Corresponds to LC_NOTE.
     class NoteCommand < LoadCommand
       # @return [String] the name of the owner for this note
-      field :data_owner, :string, :size => 16, :to_s => true
+      field :data_owner, :string, :padding => :null, :size => 16, :to_s => true
 
       # @return [Integer] the offset, within the file, of the note
       field :offset, :uint64

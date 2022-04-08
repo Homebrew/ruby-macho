@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module MachO
-  # A general purpose pseudo-structure.
+  # A general purpose pseudo-structure. Described in detail in docs/machostructure-dsl.md.
   # @abstract
   class MachOStructure
     # Constants used for parsing MachOStructure fields
@@ -9,14 +9,14 @@ module MachO
       # 1. All fields with empty strings and zeros aren't used
       #    to calculate the format and sizeof variables.
       # 2. All fields with nil should provide those values manually
-      #    via the :size and :fmt parameters.
+      #    via the :size parameter.
 
       # association of field types to byte size
       # @api private
       BYTE_SIZE = {
         # Binary slices
-        :binary => nil,
         :string => nil,
+        :null_padded_string => nil,
         :int32 => 4,
         :uint32 => 4,
         :uint64 => 8,
@@ -36,8 +36,8 @@ module MachO
       # @api private
       FORMAT_CODE = {
         # Binary slices
-        :binary => "a",
-        :string => "Z",
+        :string => "a",
+        :null_padded_string => "Z",
         :int32 => "l=",
         :uint32 => "L=",
         :uint64 => "Q=",
@@ -51,12 +51,12 @@ module MachO
       # A list of classes that must get initialized
       # To add a new class append it here and add the init method to the def_class_reader method
       # @api private
-      CLASS_LIST = %i[lcstr tool_entries two_level_hints_table].freeze
+      CLASSES_TO_INIT = %i[lcstr tool_entries two_level_hints_table].freeze
 
-      # A list of fields that don't require arguments
+      # A list of fields that don't require arguments in the initializer
       # Used to calculate MachOStructure#min_args
       # @api private
-      NO_ARGS_LIST = %i[two_level_hints_table].freeze
+      NO_ARG_REQUIRED = %i[two_level_hints_table].freeze
     end
 
     # map of field names to indices
@@ -139,6 +139,7 @@ module MachO
       #   :default [Value] default value
       #   :to_s [Boolean] flag for generating #to_s
       #   :endian [Symbol] optionally specify :big or :little endian
+      #   :padding [Symbol] optionally specify :null padding
       # @api private
       def field(name, type, **options)
         raise ArgumentError, "Invalid field type #{type}" unless Fields::FORMAT_CODE.key?(type)
@@ -147,12 +148,15 @@ module MachO
         idx = if @field_idxs.key?(name)
           @field_idxs[name]
         else
-          @min_args += 1 unless options.key?(:default) || Fields::NO_ARGS_LIST.include?(type)
+          @min_args += 1 unless options.key?(:default) || Fields::NO_ARG_REQUIRED.include?(type)
           @field_idxs[name] = @field_idxs.size
           @size_list << nil
           @fmt_list << nil
           @field_idxs.size - 1
         end
+
+        # Update string type if padding is specified
+        type = :null_padded_string if type == :string && options[:padding] == :null
 
         # Add to size_list and fmt_list
         @size_list[idx] = Fields::BYTE_SIZE[type] || options[:size]
@@ -164,7 +168,7 @@ module MachO
         @fmt_list[idx] += options[:size].to_s if options.key?(:size)
 
         # Generate methods
-        if Fields::CLASS_LIST.include?(type)
+        if Fields::CLASSES_TO_INIT.include?(type)
           def_class_reader(name, type, idx)
         elsif options.key?(:mask)
           def_mask_reader(name, idx, options[:mask])
@@ -184,7 +188,7 @@ module MachO
       #
 
       # Generates a reader method for classes that need to be initialized.
-      # These classes are defined in the Fields::CLASS_LIST array.
+      # These classes are defined in the Fields::CLASSES_TO_INIT array.
       # @param name [Symbol] name of internal field
       # @param type [Symbol] type of field in terms of binary size
       # @param idx [Integer] the index of the field value in the @values array

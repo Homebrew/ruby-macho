@@ -89,11 +89,11 @@ module MachO
     # Represents a section of a segment for 32-bit architectures.
     class Section < MachOStructure
       # @return [String] the name of the section, including null pad bytes
-      field :sectname, :string, :size => 16
+      field :sectname, :string, :padding => :null, :size => 16
 
       # @return [String] the name of the segment's section, including null
       #  pad bytes
-      field :segname, :string, :size => 16
+      field :segname, :string, :padding => :null, :size => 16
 
       # @return [Integer] the memory address of the section
       field :addr, :uint32
