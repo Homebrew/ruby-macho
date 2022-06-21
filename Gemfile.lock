@@ -8,7 +8,7 @@ GEM
       simplecov (>= 0.15, < 0.22)
     docile (1.4.0)
     iniparse (1.5.0)
-    minitest (5.16.0)
+    minitest (5.16.1)
     overcommit (0.59.1)
       childprocess (>= 0.6.3, < 5)
       iniparse (~> 1.4)
