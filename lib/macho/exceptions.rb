@@ -105,8 +105,8 @@ module MachO
     # @param cputype [Integer] the CPU type of the unknown pair
     # @param cpusubtype [Integer] the CPU sub-type of the unknown pair
     def initialize(cputype, cpusubtype)
-      super "Unrecognized CPU sub-type: 0x%08<cpusubtype>x" \
-            " (for CPU type: 0x%08<cputype>x" % { :cputype => cputype, :cpusubtype => cpusubtype }
+      super "Unrecognized CPU sub-type: 0x%08<cpusubtype>x " \
+            "(for CPU type: 0x%08<cputype>x" % { :cputype => cputype, :cpusubtype => cpusubtype }
     end
   end
 
@@ -141,8 +141,8 @@ module MachO
     # @param expected_arity [Integer] the number of arguments expected
     # @param actual_arity [Integer] the number of arguments received
     def initialize(cmd_sym, expected_arity, actual_arity)
-      super "Expected #{expected_arity} arguments for #{cmd_sym} creation," \
-            " got #{actual_arity}"
+      super "Expected #{expected_arity} arguments for #{cmd_sym} creation, " \
+            "got #{actual_arity}"
     end
   end
 
@@ -158,8 +158,8 @@ module MachO
   class LCStrMalformedError < MachOError
     # @param lc [MachO::LoadCommand] the load command containing the string
     def initialize(lc)
-      super "Load command #{lc.type} at offset #{lc.view.offset} contains a" \
-            " malformed string"
+      super "Load command #{lc.type} at offset #{lc.view.offset} contains a " \
+            "malformed string"
     end
   end
 
@@ -225,8 +225,8 @@ module MachO
   class FatArchOffsetOverflowError < MachOError
     # @param offset [Integer] the offending offset
     def initialize(offset)
-      super "Offset #{offset} exceeds the 32-bit width of a fat_arch offset." \
-            " Consider merging with `fat64: true`"
+      super "Offset #{offset} exceeds the 32-bit width of a fat_arch offset. " \
+            "Consider merging with `fat64: true`"
     end
   end
 
