@@ -13,4 +13,5 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ">= 2.6"
   s.homepage = "https://github.com/Homebrew/ruby-macho"
   s.license = "MIT"
+  s.metadata["rubygems_mfa_required"] = "true"
 end

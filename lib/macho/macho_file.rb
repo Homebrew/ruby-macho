@@ -60,7 +60,7 @@ module MachO
 
       @filename = filename
       @options = opts
-      @raw_data = File.open(@filename, "rb", &:read)
+      @raw_data = File.binread(@filename)
       populate_fields
     end
 
@@ -160,8 +160,8 @@ module MachO
     #  the instance fields
     # @raise [OffsetInsertionError] if the offset is not in the load command region
     # @raise [HeaderPadError] if the new command exceeds the header pad buffer
-    # @note Calling this method with an arbitrary offset in the load command
-    #  region **will leave the object in an inconsistent state**.
+    # @note Calling this method with an arbitrary offset in the load command region
+    # **will leave the object in an inconsistent state**.
     def insert_command(offset, lc, options = {})
       context = LoadCommands::LoadCommand::SerializationContext.context_for(self)
       cmd_raw = lc.serialize(context)
@@ -381,11 +381,9 @@ module MachO
     #  rpaths simultaneously.
     # @return [void]
     # @raise [RpathUnknownError] if no such old runtime path exists
-    # @raise [RpathExistsError] if the new runtime path already exists
     def change_rpath(old_path, new_path, options = {})
       old_lc = command(:LC_RPATH).find { |r| r.path.to_s == old_path }
       raise RpathUnknownError, old_path if old_lc.nil?
-      raise RpathExistsError, new_path if rpaths.include?(new_path)
 
       new_lc = LoadCommands::LoadCommand.create(:LC_RPATH, new_path)
 
@@ -439,7 +437,7 @@ module MachO
     # @param filename [String] the file to write to
     # @return [void]
     def write(filename)
-      File.open(filename, "wb") { |f| f.write(@raw_data) }
+      File.binwrite(filename, @raw_data)
     end
 
     # Write all Mach-O data to the file used to initialize the instance.
@@ -449,7 +447,7 @@ module MachO
     def write!
       raise MachOError, "no initial file to write to" if @filename.nil?
 
-      File.open(@filename, "wb") { |f| f.write(@raw_data) }
+      File.binwrite(@filename, @raw_data)
     end
 
     # @return [Hash] a hash representation of this {MachOFile}
@@ -592,7 +590,7 @@ module MachO
           LoadCommands::LoadCommand
         end
 
-        view = MachOView.new(@raw_data, endianness, offset)
+        view = MachOView.new(self, @raw_data, endianness, offset)
         command = klass.new_from_bin(view)
 
         load_commands << command
@@ -611,8 +609,8 @@ module MachO
       segments.each do |seg|
         seg.sections.each do |sect|
           next if sect.empty?
-          next if sect.flag?(:S_ZEROFILL)
-          next if sect.flag?(:S_THREAD_LOCAL_ZEROFILL)
+          next if sect.type?(:S_ZEROFILL)
+          next if sect.type?(:S_THREAD_LOCAL_ZEROFILL)
           next unless sect.offset < offset
 
           offset = sect.offset

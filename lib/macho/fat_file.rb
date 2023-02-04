@@ -96,7 +96,7 @@ module MachO
 
       @filename = filename
       @options = opts
-      @raw_data = File.open(@filename, "rb", &:read)
+      @raw_data = File.binread(@filename)
       populate_fields
     end
 
@@ -296,7 +296,7 @@ module MachO
     # @param filename [String] the file to write to
     # @return [void]
     def write(filename)
-      File.open(filename, "wb") { |f| f.write(@raw_data) }
+      File.binwrite(filename, @raw_data)
     end
 
     # Write all (fat) data to the file used to initialize the instance.
@@ -306,7 +306,7 @@ module MachO
     def write!
       raise MachOError, "no initial file to write to" if filename.nil?
 
-      File.open(@filename, "wb") { |f| f.write(@raw_data) }
+      File.binwrite(@filename, @raw_data)
     end
 
     # @return [Hash] a hash representation of this {FatFile}
@@ -327,6 +327,8 @@ module MachO
     # @raise [MagicError] if the magic is not valid Mach-O magic
     # @raise [MachOBinaryError] if the magic is for a non-fat Mach-O file
     # @raise [JavaClassFileError] if the file is a Java classfile
+    # @raise [ZeroArchitectureError] if the file has no internal slices
+    #  (i.e., nfat_arch == 0) and the permissive option is not set
     # @api private
     def populate_fat_header
       # the smallest fat Mach-O header is 8 bytes
@@ -345,6 +347,9 @@ module MachO
       # but this is extremely unlikely and in practice distinguishes the two
       # formats.
       raise JavaClassFileError if fh.nfat_arch > 30
+
+      # Rationale: return an error if the file has no internal slices.
+      raise ZeroArchitectureError if fh.nfat_arch.zero?
 
       fh
     end
@@ -374,6 +379,13 @@ module MachO
 
       fat_archs.each do |arch|
         machos << MachOFile.new_from_bin(@raw_data[arch.offset, arch.size], **options)
+
+        # Make sure that each fat_arch and internal slice.
+        # contain matching cputypes and cpusubtypes
+        next if machos.last.header.cputype == arch.cputype &&
+                machos.last.header.cpusubtype == arch.cpusubtype
+
+        raise CPUTypeMismatchError.new(arch.cputype, arch.cpusubtype, machos.last.header.cputype, machos.last.header.cpusubtype)
       end
 
       machos

@@ -28,9 +28,11 @@ class MachOLoadCommandCreationTest < Minitest::Test
       assert lc.name
       assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, lc.name
       assert_equal "test", lc.name.to_s
+      assert_equal lc.name.to_s, lc.to_s
       assert_equal 0, lc.timestamp
       assert_equal 0, lc.current_version
       assert_equal 0, lc.compatibility_version
+      assert_instance_of String, lc.view.inspect
     end
   end
 
@@ -42,5 +44,6 @@ class MachOLoadCommandCreationTest < Minitest::Test
     assert lc.path
     assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, lc.path
     assert_equal "test", lc.path.to_s
+    assert_equal lc.path.to_s, lc.to_s
   end
 end

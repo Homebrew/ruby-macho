@@ -112,6 +112,7 @@ class MachOFileTest < Minitest::Test
         assert_kind_of MachO::LoadCommands::SegmentCommand, seg if file.magic32?
         assert_kind_of MachO::LoadCommands::SegmentCommand64, seg if file.magic64?
         assert_kind_of String, seg.segname
+        assert_equal seg.segname, seg.to_s
         assert_kind_of Integer, seg.vmaddr
         assert_kind_of Integer, seg.vmsize
         assert_kind_of Integer, seg.fileoff
@@ -121,6 +122,7 @@ class MachOFileTest < Minitest::Test
         assert_kind_of Integer, seg.nsects
         assert_kind_of Integer, seg.flags
         refute seg.flag?(:THIS_IS_A_MADE_UP_FLAG)
+        assert(MachO::LoadCommands::SEGMENT_FLAGS.keys.one? { |sf| seg.flag?(sf) }) if seg.flags != 0
 
         sections = seg.sections
 
@@ -141,6 +143,11 @@ class MachOFileTest < Minitest::Test
           assert_kind_of Integer, sect.nreloc
           assert_kind_of Integer, sect.flags
           refute sect.flag?(:THIS_IS_A_MADE_UP_FLAG)
+          assert_kind_of Integer, sect.type
+          assert MachO::Sections::SECTION_TYPES.values.include?(sect.type)
+          assert(MachO::Sections::SECTION_TYPES.keys.one? { |st| sect.type?(st) })
+          assert_kind_of Integer, sect.attributes
+          assert(MachO::Sections::SECTION_ATTRIBUTES.keys.any? { |sa| sect.attribute?(sa) })
           assert_kind_of Integer, sect.reserved1
           assert_kind_of Integer, sect.reserved2
           assert_kind_of Integer, sect.reserved3 if sect.is_a? MachO::Sections::Section64
@@ -409,6 +416,14 @@ class MachOFileTest < Minitest::Test
       # there should be at least one rpath in each binary
       refute_empty rpaths
 
+      # We should ignore errors when changing to an existing rpath
+      # This is the same behaviour as `install_name_tool`
+      file.change_rpath(rpaths.first, rpaths.first)
+      new_rpaths = file.rpaths
+
+      assert_equal new_rpaths.first, rpaths.first
+      refute_empty new_rpaths.first, rpaths.first
+
       file.change_rpath(rpaths.first, "/usr/lib")
       new_rpaths = file.rpaths
 
@@ -569,16 +584,22 @@ class MachOFileTest < Minitest::Test
     end
 
     assert_raises MachO::RpathExistsError do
-      file.change_rpath(file.rpaths.first, file.rpaths.first)
-    end
-
-    assert_raises MachO::RpathExistsError do
       file.add_rpath(file.rpaths.first)
     end
 
     assert_raises MachO::RpathUnknownError do
       file.delete_rpath("/this/rpath/doesn't/exist")
     end
+  end
+
+  def test_fail_loading_fat
+    filename = fixture(%w[i386 x86_64], "libhello.dylib")
+
+    ex = assert_raises(MachO::FatBinaryError) do
+      MachO::MachOFile.new_from_bin File.read(filename)
+    end
+
+    assert_match(/must be/, ex.inspect)
   end
 
   def test_to_h

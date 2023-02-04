@@ -4,24 +4,24 @@ module MachO
   # Classes and constants for parsing sections in Mach-O binaries.
   module Sections
     # type mask
-    SECTION_TYPE = 0x000000ff
+    SECTION_TYPE_MASK = 0x000000ff
 
     # attributes mask
-    SECTION_ATTRIBUTES = 0xffffff00
+    SECTION_ATTRIBUTES_MASK = 0xffffff00
 
     # user settable attributes mask
-    SECTION_ATTRIBUTES_USR = 0xff000000
+    SECTION_ATTRIBUTES_USR_MASK = 0xff000000
 
     # system settable attributes mask
-    SECTION_ATTRIBUTES_SYS = 0x00ffff00
+    SECTION_ATTRIBUTES_SYS_MASK = 0x00ffff00
 
     # maximum specifiable section alignment, as a power of 2
     # @note see `MAXSECTALIGN` macro in `cctools/misc/lipo.c`
     MAX_SECT_ALIGN = 15
 
-    # association of section flag symbols to values
+    # association of section type symbols to values
     # @api private
-    SECTION_FLAGS = {
+    SECTION_TYPES = {
       :S_REGULAR => 0x0,
       :S_ZEROFILL => 0x1,
       :S_CSTRING_LITERALS => 0x2,
@@ -44,6 +44,12 @@ module MachO
       :S_THREAD_LOCAL_VARIABLES => 0x13,
       :S_THREAD_LOCAL_VARIABLE_POINTERS => 0x14,
       :S_THREAD_LOCAL_INIT_FUNCTION_POINTERS => 0x15,
+      :S_INIT_FUNC_OFFSETS => 0x16,
+    }.freeze
+
+    # association of section attribute symbols to values
+    # @api private
+    SECTION_ATTRIBUTES = {
       :S_ATTR_PURE_INSTRUCTIONS => 0x80000000,
       :S_ATTR_NO_TOC => 0x40000000,
       :S_ATTR_STRIP_STATIC_SYMS => 0x20000000,
@@ -54,6 +60,13 @@ module MachO
       :S_ATTR_SOME_INSTRUCTIONS => 0x00000400,
       :S_ATTR_EXT_RELOC => 0x00000200,
       :S_ATTR_LOC_RELOC => 0x00000100,
+    }.freeze
+
+    # association of section flag symbols to values
+    # @api private
+    SECTION_FLAGS = {
+      **SECTION_TYPES,
+      **SECTION_ATTRIBUTES,
     }.freeze
 
     # association of section name symbols to names
@@ -76,61 +89,38 @@ module MachO
     # Represents a section of a segment for 32-bit architectures.
     class Section < MachOStructure
       # @return [String] the name of the section, including null pad bytes
-      attr_reader :sectname
+      field :sectname, :string, :padding => :null, :size => 16
 
       # @return [String] the name of the segment's section, including null
       #  pad bytes
-      attr_reader :segname
+      field :segname, :string, :padding => :null, :size => 16
 
       # @return [Integer] the memory address of the section
-      attr_reader :addr
+      field :addr, :uint32
 
       # @return [Integer] the size, in bytes, of the section
-      attr_reader :size
+      field :size, :uint32
 
       # @return [Integer] the file offset of the section
-      attr_reader :offset
+      field :offset, :uint32
 
       # @return [Integer] the section alignment (power of 2) of the section
-      attr_reader :align
+      field :align, :uint32
 
       # @return [Integer] the file offset of the section's relocation entries
-      attr_reader :reloff
+      field :reloff, :uint32
 
       # @return [Integer] the number of relocation entries
-      attr_reader :nreloc
+      field :nreloc, :uint32
 
       # @return [Integer] flags for type and attributes of the section
-      attr_reader :flags
+      field :flags, :uint32
 
       # @return [void] reserved (for offset or index)
-      attr_reader :reserved1
+      field :reserved1, :uint32
 
       # @return [void] reserved (for count or sizeof)
-      attr_reader :reserved2
-
-      # @see MachOStructure::FORMAT
-      FORMAT = "Z16Z16L=9"
-
-      # @see MachOStructure::SIZEOF
-      SIZEOF = 68
-
-      # @api private
-      def initialize(sectname, segname, addr, size, offset, align, reloff,
-                     nreloc, flags, reserved1, reserved2)
-        super()
-        @sectname = sectname
-        @segname = segname
-        @addr = addr
-        @size = size
-        @offset = offset
-        @align = align
-        @reloff = reloff
-        @nreloc = nreloc
-        @flags = flags
-        @reserved1 = reserved1
-        @reserved2 = reserved2
-      end
+      field :reserved2, :uint32
 
       # @return [String] the section's name
       def section_name
@@ -147,6 +137,33 @@ module MachO
         size.zero?
       end
 
+      # @return [Integer] the raw numeric type of this section
+      def type
+        flags & SECTION_TYPE_MASK
+      end
+
+      # @example
+      #  puts "this section is regular" if sect.type?(:S_REGULAR)
+      # @param type_sym [Symbol] a section type symbol
+      # @return [Boolean] whether this section is of the given type
+      def type?(type_sym)
+        type == SECTION_TYPES[type_sym]
+      end
+
+      # @return [Integer] the raw numeric attributes of this section
+      def attributes
+        flags & SECTION_ATTRIBUTES_MASK
+      end
+
+      # @example
+      #  puts "pure instructions" if sect.attribute?(:S_ATTR_PURE_INSTRUCTIONS)
+      # @param attr_sym [Symbol] a section attribute symbol
+      # @return [Boolean] whether this section is of the given type
+      def attribute?(attr_sym)
+        !!(attributes & SECTION_ATTRIBUTES[attr_sym])
+      end
+
+      # @deprecated Use {#type?} or {#attribute?} instead.
       # @example
       #  puts "this section is regular" if sect.flag?(:S_REGULAR)
       # @param flag [Symbol] a section flag symbol
@@ -179,22 +196,14 @@ module MachO
 
     # Represents a section of a segment for 64-bit architectures.
     class Section64 < Section
+      # @return [Integer] the memory address of the section
+      field :addr, :uint64
+
+      # @return [Integer] the size, in bytes, of the section
+      field :size, :uint64
+
       # @return [void] reserved
-      attr_reader :reserved3
-
-      # @see MachOStructure::FORMAT
-      FORMAT = "Z16Z16Q=2L=8"
-
-      # @see MachOStructure::SIZEOF
-      SIZEOF = 80
-
-      # @api private
-      def initialize(sectname, segname, addr, size, offset, align, reloff,
-                     nreloc, flags, reserved1, reserved2, reserved3)
-        super(sectname, segname, addr, size, offset, align, reloff,
-          nreloc, flags, reserved1, reserved2)
-        @reserved3 = reserved3
-      end
+      field :reserved3, :uint32
 
       # @return [Hash] a hash representation of this {Section64}
       def to_h

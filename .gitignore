@@ -16,3 +16,9 @@
 /test/src/*/*.dylib
 /test/src/*/*.o
 /test/src/*/*.so
+
+
+# IDE support
+.ruby-version
+.idea/
+.vscode/

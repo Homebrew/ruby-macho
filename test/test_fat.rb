@@ -36,6 +36,18 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_zero_arch_file
+    assert_raises MachO::ZeroArchitectureError do
+      MachO::FatFile.new("test/bin/llvm/macho-invalid-fat-header")
+    end
+  end
+
+  def test_mismatch_cpu_arch_file
+    assert_raises MachO::CPUTypeMismatchError do
+      MachO::FatFile.new("test/bin/llvm/macho-invalid-fat_cputype")
+    end
+  end
+
   def test_fat_header
     filenames = FAT_ARCH_PAIRS.map { |a| fixture(a, "hello.bin") }
 
@@ -497,10 +509,10 @@ class FatFileTest < Minitest::Test
     file.change_install_name("/usr/lib/libz.1.dylib", "foo", :strict => false)
 
     # ...but not all slices will have the modified dylib
-    refute (file.machos.all? { |m| m.linked_dylibs.include?("foo") })
+    refute(file.machos.all? { |m| m.linked_dylibs.include?("foo") })
 
     # ...but at least one will
-    assert (file.machos.any? { |m| m.linked_dylibs.include?("foo") })
+    assert(file.machos.any? { |m| m.linked_dylibs.include?("foo") })
   end
 
   def test_dylib_load_commands
@@ -515,6 +527,16 @@ class FatFileTest < Minitest::Test
         assert_kind_of MachO::LoadCommands::DylibCommand, lc
       end
     end
+  end
+
+  def test_fail_loading_thin
+    filename = fixture("x86_64", "libhello.dylib")
+
+    ex = assert_raises(MachO::MachOBinaryError) do
+      MachO::FatFile.new_from_bin File.read(filename)
+    end
+
+    assert_match(/must be/, ex.inspect)
   end
 
   def test_to_h
