@@ -43,21 +43,8 @@ module MachO
     end
 
     class CSBlob < CSStructure
-      attr_reader :magic
-
-      attr_reader :length
-
-      # NOTE(ww): SuperBlobs and other code signing structures appear to always be
-      # big-endian for...reasons.
-      FORMAT = "L>2"
-
-      SIZEOF = 8
-
-      def initialize(view, magic, length)
-        super(view)
-        @magic = magic
-        @length = length
-      end
+      field :magic, :uint32, endian: :big
+      field :length, :uint32, endian: :big
 
       def magic_sym
         Headers::CS_MAGICS[magic]
@@ -76,26 +63,11 @@ module MachO
 
     class SuperBlob < CSBlob
       class BlobIndex < CSStructure
-        attr_reader :type
-
-        attr_reader :offset
-
-        FORMAT = "L>2"
-
-        SIZEOF = 8
-
-        def initialize(view, type, offset)
-          super(view)
-          @type = type
-          @offset = offset
-        end
+        field :type, :uint32, endian: :big
+        field :offset, :uint32, endian: :big
       end
 
-      attr_reader :count
-
-      FORMAT = "L>3"
-
-      SIZEOF = 12
+      field :count, :uint32, endian: :big
 
       def self.new_from_bin(view)
         bin = view.raw_data.slice(view.offset, bytesize)
