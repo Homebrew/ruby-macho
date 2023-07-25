@@ -428,7 +428,7 @@ module MachO
     def delete_rpath(path, options = {})
       uniq = options.fetch(:uniq, false)
       last = options.fetch(:last, false)
-      raise ArgumentError, "Cannot set both :uniq and :last to true!" if uniq && last
+      raise ArgumentError, "Cannot set both :uniq and :last to true" if uniq && last
 
       search_method = uniq || last ? :select : :find
       rpath_cmds = command(:LC_RPATH).public_send(search_method) { |r| r.path.to_s == path }
