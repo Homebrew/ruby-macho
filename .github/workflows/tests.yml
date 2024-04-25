@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches: master
-  pull_request: []
+  pull_request:
 jobs:
   tests:
     strategy:
@@ -24,4 +24,6 @@ jobs:
       run: bundle exec rake
 
     - name: Run RuboCop
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: bundle exec rubocop -D lib/
