@@ -4,10 +4,10 @@ source "https://rubygems.org"
 
 group :test, :development do
   gem "benchmark-ips"
-  gem "codecov", :require => false
   gem "minitest"
   gem "rake"
   gem "rubocop"
+  gem "simplecov-cobertura", :require => false
 end
 
 group :development do

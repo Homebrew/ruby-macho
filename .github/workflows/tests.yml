@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Set up Git repository
-      uses: actions/checkout@main
+      uses: actions/checkout@v4
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@70da3bbf44ac06db1b0547ce2acc9380a5270d1e # v1.175.0
@@ -27,3 +27,10 @@ jobs:
 
     - name: Run RuboCop
       run: bundle exec rubocop -D lib/
+
+    - name: Upload coverage results
+      uses: codecov/codecov-action@125fc84a9a348dbcf27191600683ec096ec9021c # v4.4.1
+      with:
+        files: coverage/coverage.xml
+        disable_search: true
+        token: ${{ secrets.CODECOV_TOKEN }}

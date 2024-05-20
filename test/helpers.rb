@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-# if we're running the tests on the CI, generate a codecov coverage report
+# if we're running the tests on the CI, generate a coverage report
 if ENV["CI"]
   require "simplecov"
+  require "simplecov-cobertura"
+  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
   SimpleCov.start
-
-  require "codecov"
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
 require "digest/sha1"
