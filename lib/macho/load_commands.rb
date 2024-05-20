@@ -65,6 +65,7 @@ module MachO
       (LC_REQ_DYLD | 0x33) => :LC_DYLD_EXPORTS_TRIE,
       (LC_REQ_DYLD | 0x34) => :LC_DYLD_CHAINED_FIXUPS,
       (LC_REQ_DYLD | 0x35) => :LC_FILESET_ENTRY,
+      0x36 => :LC_ATOM_INFO,
     }.freeze
 
     # association of symbol representations to load command constants
@@ -153,6 +154,7 @@ module MachO
       :LC_DYLD_EXPORTS_TRIE => "LinkeditDataCommand",
       :LC_DYLD_CHAINED_FIXUPS => "LinkeditDataCommand",
       :LC_FILESET_ENTRY => "FilesetEntryCommand",
+      :LC_ATOM_INFO => "LinkeditDataCommand",
     }.freeze
 
     # association of segment name symbols to names
@@ -958,7 +960,7 @@ module MachO
     # the __LINKEDIT segment. Corresponds to LC_CODE_SIGNATURE,
     # LC_SEGMENT_SPLIT_INFO, LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
     # LC_DYLIB_CODE_SIGN_DRS, LC_LINKER_OPTIMIZATION_HINT, LC_DYLD_EXPORTS_TRIE,
-    # or LC_DYLD_CHAINED_FIXUPS.
+    # LC_DYLD_CHAINED_FIXUPS, or LC_ATOM_INFO.
     class LinkeditDataCommand < LoadCommand
       # @return [Integer] offset to the data in the __LINKEDIT segment
       field :dataoff, :uint32
