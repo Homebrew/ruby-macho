@@ -235,12 +235,12 @@ class MachOFileTest < Minitest::Test
 
   def test_extra_dylib
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "libextrahello.dylib") }
-    unusual_dylib_lcs = %i[
-      LC_LOAD_UPWARD_DYLIB
-      LC_LAZY_LOAD_DYLIB
-      LC_LOAD_WEAK_DYLIB
-      LC_REEXPORT_DYLIB
-    ]
+    unusual_dylib_lcs = {
+      LC_LOAD_UPWARD_DYLIB: :DYLIB_USE_UPWARD,
+      LC_LAZY_LOAD_DYLIB: nil,
+      LC_LOAD_WEAK_DYLIB: :DYLIB_USE_WEAK_LINK,
+      LC_REEXPORT_DYLIB: :DYLIB_USE_REEXPORT,
+    }
 
     filenames.each do |fn|
       file = MachO::MachOFile.new(fn)
@@ -248,7 +248,7 @@ class MachOFileTest < Minitest::Test
       assert file.dylib?
 
       # make sure we can read more unusual dylib load commands
-      unusual_dylib_lcs.each do |cmdname|
+      unusual_dylib_lcs.each do |cmdname, flag_name|
         lc = file[cmdname].first
 
         # PPC and x86-family binaries don't have the same dylib LCs, so ignore
@@ -262,7 +262,34 @@ class MachOFileTest < Minitest::Test
 
         assert dylib_name
         assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, dylib_name
+
+        assert lc.flag?(flag_name) if flag_name
+        (unusual_dylib_lcs.values - [flag_name]).compact.each do |other_flag_name|
+          refute lc.flag?(other_flag_name)
+        end
       end
+    end
+  end
+
+  def test_dylib_use_command
+    filenames = SINGLE_64_ARCHES.map { |a| fixture(a, "dylib_use_command-weak-delay.bin") }
+
+    filenames.each do |fn|
+      file = MachO::MachOFile.new(fn)
+
+      lc = file[:LC_LOAD_WEAK_DYLIB].first
+      lc2 = file[:LC_LOAD_DYLIB].first
+
+      assert_instance_of MachO::LoadCommands::DylibUseCommand, lc
+      assert_instance_of MachO::LoadCommands::DylibCommand, lc2
+
+      refute_equal lc.flags, 0
+
+      assert lc.flag?(:DYLIB_USE_WEAK_LINK)
+      assert lc.flag?(:DYLIB_USE_DELAYED_INIT)
+      refute lc.flag?(:DYLIB_USE_UPWARD)
+
+      refute lc2.flag?(:DYLIB_USE_WEAK_LINK)
     end
   end
 

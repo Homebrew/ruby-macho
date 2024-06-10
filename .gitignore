@@ -22,3 +22,6 @@
 .ruby-version
 .idea/
 .vscode/
+
+# macOS metadata file
+.DS_Store

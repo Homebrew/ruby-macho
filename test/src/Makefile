@@ -1,6 +1,7 @@
 # Usage:
 #   make USE=10.6-xcode3.2.6
 #   make USE=10.11-xcode7.3
+#   make USE=15-xcode16.0
 
 HELLO_SRC    = hello.c
 LIBHELLO_SRC = libhello.c
@@ -42,13 +43,24 @@ else ifeq ($(USE),10.6-xcode3.2.6)
   USE_DIRS := i386 x86_64 ppc fat-i386-x86_64 fat-i386-ppc
   NO_UPWARD := 1
   NO_LAZY := 1
+  NO_DELAY_INIT := 1
 else ifeq ($(USE),10.11-xcode7.3)
   USE_DIRS := i386 x86_64 fat-i386-x86_64
+  NO_DELAY_INIT := 1
+else ifeq ($(USE),15-xcode16.0)
+  USE_DIRS := x86_64
+  NO_LAZY := 1
 else
   # Warn about unspecified subset, but effectively fall back to 10.11-xcode7.3.
   $(warning USE - Option either unset or invalid. Using a safe fallback.)
-  $(warning USE - Valid choices: all, 10.6-xcode3.2.6, 10.11-xcode7.3.)
+  $(warning USE - Valid choices: all, 10.6-xcode3.2.6, 10.11-xcode7.3, 15-xcode16.0.)
   USE_DIRS := i386 x86_64 fat-i386-x86_64
+  NO_DELAY_INIT := 1
+  NO_LAZY := 1
+endif
+
+ifeq ($(NO_DELAY_INIT),)
+  TARGET_FILES += dylib_use_command-weak-delay.bin
 endif
 
 # Setup target names from all/used architecture directories.
@@ -84,10 +96,10 @@ $(ALL_DIRS):
 
 # Setup architecture-specific per-file targets (`<arch>/<file>`).
 %/hello.o: $(HELLO_SRC) %
-	$(CC) $(ARCH_FLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -c $<
 
 %/hello.bin: $(HELLO_SRC) %
-	$(CC) $(ARCH_FLAGS) -o $@ $(RPATH_FLAGS) $<
+	$(CC) $(CFLAGS) $(ARCH_FLAGS) -o $@ $(RPATH_FLAGS) $<
 
 %/hello_expected.bin: %/hello.bin
 	cp $< $@
@@ -97,18 +109,21 @@ $(ALL_DIRS):
 	cp $< $@
 	install_name_tool -rpath made_up_path /usr/lib $@
 
+%/dylib_use_command-weak-delay.bin: $(HELLO_SRC) %
+	$(CC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -Wl,-weak-l,z -Wl,-delay-l,z $<
+
 %/libhello.dylib: $(LIBHELLO_SRC) %
-	$(CC) $(ARCH_FLAGS) -o $@ -dynamiclib $<
+	$(CC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -dynamiclib $<
 
 %/libhello_expected.dylib: %/libhello.dylib
 	cp $< $@
 	install_name_tool -id test $@
 
 %/libextrahello.dylib: $(LIBHELLO_SRC) % %/libhello.dylib
-	$(CC) $(ARCH_FLAGS) -o $@ -dynamiclib $< $(LIBEXTRA_LDADD)
+	$(CC) $(CFLAGS) $(ARCH_FLAGS) -o $@ -dynamiclib $< $(LIBEXTRA_LDADD)
 
 %/hellobundle.so: $(LIBHELLO_SRC) %
-	$(CC) $(ARCH_FLAGS) -bundle $< -o $@
+	$(CC) $(CFLAGS) $(ARCH_FLAGS) -bundle $< -o $@
 
 # build inconsistent binaries
 .PHONY: inconsistent
