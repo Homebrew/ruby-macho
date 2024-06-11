@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 $LOAD_PATH.unshift "#{File.dirname(__FILE__)}/lib"
+
+require "bundler/gem_tasks"
 require "rake/testtask"
 require_relative "test/bench"
 
