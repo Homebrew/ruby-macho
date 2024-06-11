@@ -69,6 +69,25 @@ class MachOLoadCommandSerializationTest < Minitest::Test
                                                     lc.compatibility_version)
       blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
 
+      assert_instance_of lc.class, lc2
+      assert_equal blob, lc.serialize(ctx)
+      assert_equal blob, lc2.serialize(ctx)
+    end
+  end
+
+  def test_serialize_load_dylib_new
+    filenames = SINGLE_64_ARCHES.map { |a| fixture(a, "dylib_use_command-weak-delay.bin") }
+
+    filenames.each do |filename|
+      file = MachO::MachOFile.new(filename)
+      ctx = MachO::LoadCommands::LoadCommand::SerializationContext.context_for(file)
+      lc = file[:LC_LOAD_WEAK_DYLIB].first
+      lc2 = MachO::LoadCommands::LoadCommand.create(:LC_LOAD_WEAK_DYLIB, lc.name.to_s,
+                                                    lc.marker, lc.current_version,
+                                                    lc.compatibility_version, lc.flags)
+      blob = lc.view.raw_data[lc.view.offset, lc.cmdsize]
+
+      assert_instance_of lc.class, lc2
       assert_equal blob, lc.serialize(ctx)
       assert_equal blob, lc2.serialize(ctx)
     end

@@ -24,7 +24,7 @@ class MachOLoadCommandCreationTest < Minitest::Test
       lc = MachO::LoadCommands::LoadCommand.create(cmd_sym, "test", 0, 0, 0)
 
       assert lc
-      assert_kind_of MachO::LoadCommands::DylibCommand, lc
+      assert_instance_of MachO::LoadCommands::DylibCommand, lc
       assert lc.name
       assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, lc.name
       assert_equal "test", lc.name.to_s
@@ -32,6 +32,26 @@ class MachOLoadCommandCreationTest < Minitest::Test
       assert_equal 0, lc.timestamp
       assert_equal 0, lc.current_version
       assert_equal 0, lc.compatibility_version
+      assert_instance_of String, lc.view.inspect
+    end
+  end
+
+  def test_create_dylib_commands_new
+    # all dylib commands are creatable, so test them all
+    dylib_commands = %i[LC_LOAD_DYLIB LC_LOAD_WEAK_DYLIB]
+    dylib_commands.each do |cmd_sym|
+      lc = MachO::LoadCommands::LoadCommand.create(cmd_sym, "test", MachO::LoadCommands::DYLIB_USE_MARKER, 0, 0, 0)
+
+      assert lc
+      assert_instance_of MachO::LoadCommands::DylibUseCommand, lc
+      assert lc.name
+      assert_kind_of MachO::LoadCommands::LoadCommand::LCStr, lc.name
+      assert_equal "test", lc.name.to_s
+      assert_equal lc.name.to_s, lc.to_s
+      assert_equal MachO::LoadCommands::DYLIB_USE_MARKER, lc.timestamp
+      assert_equal 0, lc.current_version
+      assert_equal 0, lc.compatibility_version
+      assert_equal 0, lc.flags
       assert_instance_of String, lc.view.inspect
     end
   end
