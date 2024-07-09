@@ -48,7 +48,7 @@ module Helpers
   end
 
   def delete_if_exists(file)
-    File.delete(file) if File.exist?(file)
+    FileUtils.rm_f(file)
   end
 
   def equal_sha1_hashes(file1, file2)
