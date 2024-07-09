@@ -610,7 +610,7 @@ module MachO
 
         if dylib_command.timestamp == DYLIB_USE_MARKER &&
            dylib_command.name.to_i == DylibUseCommand.bytesize
-          super
+          super(view)
         else
           dylib_command
         end

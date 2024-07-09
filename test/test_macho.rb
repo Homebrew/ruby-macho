@@ -236,10 +236,10 @@ class MachOFileTest < Minitest::Test
   def test_extra_dylib
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "libextrahello.dylib") }
     unusual_dylib_lcs = {
-      :LC_LOAD_UPWARD_DYLIB => :DYLIB_USE_UPWARD,
-      :LC_LAZY_LOAD_DYLIB => nil,
-      :LC_LOAD_WEAK_DYLIB => :DYLIB_USE_WEAK_LINK,
-      :LC_REEXPORT_DYLIB => :DYLIB_USE_REEXPORT,
+      LC_LOAD_UPWARD_DYLIB: :DYLIB_USE_UPWARD,
+      LC_LAZY_LOAD_DYLIB: nil,
+      LC_LOAD_WEAK_DYLIB: :DYLIB_USE_WEAK_LINK,
+      LC_REEXPORT_DYLIB: :DYLIB_USE_REEXPORT,
     }
 
     filenames.each do |fn|
@@ -519,7 +519,7 @@ class MachOFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -562,7 +562,7 @@ class MachOFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -591,7 +591,7 @@ class MachOFileTest < Minitest::Test
       assert_operator file.sizeofcmds, :<, orig_sizeofcmds
       assert_operator file.rpaths.size, :<, orig_npaths
       # libdupe rpaths: ["foo", "bar", "foo"]
-      assert_equal file.rpaths, %w[foo bar] if filename.end_with?("libdupe.dylib")
+      assert_equal file.rpaths, ["foo", "bar"] if filename.end_with?("libdupe.dylib")
 
       file.write(actual)
       # ensure we can actually re-load and parse the modified file
@@ -605,7 +605,7 @@ class MachOFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -642,7 +642,7 @@ class MachOFileTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end

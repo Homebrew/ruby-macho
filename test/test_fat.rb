@@ -449,7 +449,7 @@ class FatFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -480,7 +480,7 @@ class FatFileTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end

@@ -206,7 +206,7 @@ class MachOToolsTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -229,7 +229,7 @@ class MachOToolsTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -255,7 +255,7 @@ class MachOToolsTest < Minitest::Test
       refute_includes modified.rpaths, "made_up_path"
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
@@ -279,7 +279,7 @@ class MachOToolsTest < Minitest::Test
       refute_includes modified.rpaths, "made_up_path"
     end
   ensure
-    groups.each_value do |actual|
+    groups.each do |_, actual|
       delete_if_exists(actual)
     end
   end
