@@ -450,6 +450,14 @@ module MachO
     # @api private
     MH_FILESET = 0xc
 
+    # gpu program
+    # @api private
+    MH_GPU_EXECUTE = 0xd
+
+    # gpu support functions
+    # @api private
+    MH_GPU_DYLIB = 0xe
+
     # association of filetypes to Symbol representations
     # @api private
     MH_FILETYPES = {
@@ -465,6 +473,8 @@ module MachO
       MH_DSYM => :dsym,
       MH_KEXT_BUNDLE => :kext_bundle,
       MH_FILESET => :fileset,
+      MH_GPU_EXECUTE => :gpu_execute,
+      MH_GPU_DYLIB => :gpu_dylib,
     }.freeze
 
     # association of mach header flag symbols to values
@@ -495,9 +505,9 @@ module MachO
       :MH_DEAD_STRIPPABLE_DYLIB => 0x400000,
       :MH_HAS_TLV_DESCRIPTORS => 0x800000,
       :MH_NO_HEAP_EXECUTION => 0x1000000,
-      :MH_APP_EXTENSION_SAFE => 0x02000000,
-      :MH_NLIST_OUTOFSYNC_WITH_DYLDINFO => 0x04000000,
-      :MH_SIM_SUPPORT => 0x08000000,
+      :MH_APP_EXTENSION_SAFE => 0x2000000,
+      :MH_NLIST_OUTOFSYNC_WITH_DYLDINFO => 0x4000000,
+      :MH_SIM_SUPPORT => 0x8000000,
       :MH_DYLIB_IN_CACHE => 0x80000000,
     }.freeze
 
