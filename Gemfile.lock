@@ -16,7 +16,7 @@ GEM
       iniparse (~> 1.4)
       rexml (~> 3.2)
     parallel (1.26.1)
-    parser (3.3.4.1)
+    parser (3.3.4.2)
       ast (~> 2.4.1)
       racc
     racc (1.8.1)
