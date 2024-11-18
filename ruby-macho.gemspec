@@ -14,4 +14,5 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/Homebrew/ruby-macho"
   s.license = "MIT"
   s.metadata["rubygems_mfa_required"] = "true"
+  s.metadata["funding_uri"] = "https://github.com/sponsors/Homebrew"
 end
