@@ -488,7 +488,7 @@ module MachO
         align = 0
         segalign = 1
 
-        while (segalign & vmaddr).zero?
+        while segalign.nobits?(vmaddr)
           segalign <<= 1
           align += 1
         end
