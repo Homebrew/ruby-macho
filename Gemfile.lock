@@ -8,7 +8,7 @@ GEM
     docile (1.4.1)
     iniparse (1.5.0)
     json (2.9.1)
-    language_server-protocol (3.17.0.3)
+    language_server-protocol (3.17.0.4)
     logger (1.6.5)
     minitest (5.25.4)
     overcommit (0.64.1)
