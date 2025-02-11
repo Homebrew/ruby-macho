@@ -7,7 +7,7 @@ GEM
       logger (~> 1.5)
     docile (1.4.1)
     iniparse (1.5.0)
-    json (2.9.1)
+    json (2.10.1)
     language_server-protocol (3.17.0.4)
     logger (1.6.5)
     minitest (5.25.4)
