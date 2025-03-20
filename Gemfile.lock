@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    ast (2.4.2)
+    ast (2.4.3)
     benchmark-ips (2.14.0)
     childprocess (5.1.0)
       logger (~> 1.5)
@@ -17,7 +17,7 @@ GEM
       iniparse (~> 1.4)
       rexml (>= 3.3.9)
     parallel (1.26.3)
-    parser (3.3.7.1)
+    parser (3.3.7.2)
       ast (~> 2.4.1)
       racc
     racc (1.8.1)
