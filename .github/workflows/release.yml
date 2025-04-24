@@ -26,8 +26,9 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@ca041f971d66735f3e5ff1e21cc13e2d51e7e535 # v1.233.0
         with:
-          bundler-cache: true
           ruby-version: ruby
+
+      - run: bundle install --jobs=4
 
       # Release
       - uses: rubygems/release-gem@a25424ba2ba8b387abc8ef40807c2c85b96cbe32 # v1.1.1
