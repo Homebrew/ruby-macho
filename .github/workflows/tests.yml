@@ -23,7 +23,7 @@ jobs:
         persist-credentials: false
 
     - name: Set up Ruby
-      uses: ruby/setup-ruby@829114fc20da43a41d27359103ec7a63020954d4 # v1.255.0
+      uses: ruby/setup-ruby@efbf473cab83af4468e8606cc33eca9281bb213f # v1.256.0
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
@@ -37,7 +37,7 @@ jobs:
       run: bundle exec rubocop -D lib/
 
     - name: Upload coverage results
-      uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
+      uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # v5.5.0
       with:
         files: coverage/coverage.xml
         disable_search: true
