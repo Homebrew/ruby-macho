@@ -60,14 +60,14 @@ module MachO
       MH_CIGAM_64 => "MH_CIGAM_64",
     }.freeze
 
-    # mask for CPUs with 64-bit architectures (when running a 64-bit ABI?)
+    # mask for 64-bit CPU architectures with 64-bit types
     # @api private
     CPU_ARCH_ABI64 = 0x01000000
 
-    # mask for CPUs with 64-bit architectures (when running a 32-bit ABI?)
+    # mask for 64-bit CPU architectures with 32-bit types (ILP32)
     # @see https://github.com/Homebrew/ruby-macho/issues/113
     # @api private
-    CPU_ARCH_ABI32 = 0x02000000
+    CPU_ARCH_ABI64_32 = 0x02000000
 
     # any CPU (unused?)
     # @api private
@@ -97,9 +97,10 @@ module MachO
     # @api private
     CPU_TYPE_ARM64 = (CPU_TYPE_ARM | CPU_ARCH_ABI64)
 
-    # 64-bit ARM compatible CPUs (running in 32-bit mode?)
+    # 64-bit ARM compatible CPUs (with 32-bit types)
     # @see https://github.com/Homebrew/ruby-macho/issues/113
-    CPU_TYPE_ARM64_32 = (CPU_TYPE_ARM | CPU_ARCH_ABI32)
+    # @api private
+    CPU_TYPE_ARM64_32 = (CPU_TYPE_ARM | CPU_ARCH_ABI64_32)
 
     # PowerPC compatible CPUs
     # @api private
