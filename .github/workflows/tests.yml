@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8 # v1.286.0
+        uses: ruby/setup-ruby@8d27f39a5e7ad39aebbcbd1324f7af020229645c # v1.287.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -42,3 +42,11 @@ jobs:
           files: coverage/coverage.xml
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  check:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}
