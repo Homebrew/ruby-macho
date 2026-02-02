@@ -43,10 +43,10 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  check:
-    needs: tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
-        with:
-          jobs: ${{ toJSON(needs) }}
+  # check:
+  #   needs: tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+  #       with:
+  #         jobs: ${{ toJSON(needs) }}
