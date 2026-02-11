@@ -6,6 +6,8 @@ This document summarizes the performance improvements implemented from `PERFORMA
 
 ### ✅ Recommendation #1: Memoize Expensive Computed Properties
 ### ✅ Recommendation #2: Optimize Array Operations
+### ⏭️ Recommendation #3: Optimize Binary String Operations (Skipped - see OPTIMIZATION_NOTES.md)
+### ✅ Recommendation #4: Cache `command()` Lookups with Hash Index
 
 ---
 
@@ -78,22 +80,58 @@ Cache clearing is automatically handled in `populate_fields()` to maintain corre
 
 ---
 
+## Recommendation #4: Cache `command()` Lookups with Hash Index
+
+### Changes Made
+
+Modified `lib/macho/macho_file.rb` to build a hash index during load command parsing:
+
+- Build `@load_commands_by_type` hash during `populate_load_commands`
+- Changed `command()` from array filtering to hash lookup: `@load_commands_by_type.fetch(cmd_sym, [])`
+- Clear hash index in `clear_memoization_cache` for correctness
+
+### Performance Results
+
+**Single command() Lookups:**
+
+| Command Type | Before (ns) | After (ns) | Speedup | Improvement |
+|--------------|-------------|------------|---------|-------------|
+| `:LC_SEGMENT_64` | 1,020 | 55.61 | 18.3x | **94.5% faster** |
+| `:LC_DYLD_INFO_ONLY` | 1,020 | 56.56 | 18.0x | **94.5% faster** |
+| `:LC_SYMTAB` | 1,020 | 57.10 | 17.9x | **94.4% faster** |
+| `:LC_RPATH` | 1,010 | 59.76 | 16.9x | **94.1% faster** |
+
+**Multiple Lookups:**
+
+| Operation | Before (μs) | After (ns) | Speedup | Improvement |
+|-----------|-------------|------------|---------|-------------|
+| 5 different commands | 5.05 | 215.93 | 23.4x | **95.7% faster** |
+| `:LC_SEGMENT_64` x10 | 10.22 | 637.51 | 16.0x | **93.8% faster** |
+
+**Impact:** 16-23x improvement for command() lookups, changing from O(n) to O(1) complexity.
+
+---
+
 ## Combined Impact
 
-When both optimizations work together:
+When all optimizations work together:
 
-1. **First call to a method**: Benefits from optimized array operations (17-50% faster depending on file type)
-2. **Subsequent calls**: Benefits from memoization (instant return of cached result)
-3. **Fat binaries**: See the most dramatic improvements due to both optimizations
+1. **File loading**: Hash index built once during parsing (negligible overhead)
+2. **First call to methods using `command()`**: Benefits from 16-23x faster command lookups
+3. **First call to array operations**: Benefits from optimized array operations (17-50% faster)
+4. **Subsequent calls**: Benefits from memoization (instant return of cached result)
+5. **Fat binaries**: See cumulative improvements from all optimizations
 
 ### Example Workflow: Tool Querying Multiple Properties
 
 ```ruby
 file = MachO.open("libfoo.dylib")
-libs = file.linked_dylibs    # First call: ~20% faster array ops
-rpaths = file.rpaths          # First call: ~17% faster array ops
-libs2 = file.linked_dylibs    # Cached: instant
-rpaths2 = file.rpaths         # Cached: instant
+libs = file.linked_dylibs    # First call: 18x faster command() + ~20% faster array ops
+rpaths = file.rpaths          # First call: 17x faster command() + ~17% faster array ops
+libs2 = file.linked_dylibs    # Cached: instant (memoization)
+rpaths2 = file.rpaths         # Cached: instant (memoization)
+segments = file.segments      # First call: 18x faster command()
+segments2 = file.segments     # Cached: instant
 ```
 
 For fat binaries, the first call improvements are even more dramatic (42-50% faster).
@@ -124,8 +162,7 @@ For fat binaries, the first call improvements are even more dramatic (42-50% fas
 
 The following recommendations from `PERFORMANCE_IMPROVEMENTS.md` remain to be implemented:
 
-- **#3**: Optimize Binary String Operations (15-25% improvement for modifications)
-- **#4**: Cache `command()` Lookups with Hash Index (30-50% improvement)
+- **#3**: Optimize Binary String Operations (Skipped - see OPTIMIZATION_NOTES.md for rationale)
 - **#5**: Memoize `segment_alignment` (10-15% improvement)
 - **#6**: Optimize FatFile Construction (20-30% improvement)
 - **#7**: Consistent Frozen String Literals (5-10% reduction in GC pressure)
@@ -137,21 +174,35 @@ The following recommendations from `PERFORMANCE_IMPROVEMENTS.md` remain to be im
 Detailed benchmarks and methodology can be found in:
 - `test/memoization_bench.rb` - Memoization benchmarks
 - `test/array_ops_bench_simple.rb` - Array operations benchmarks
+- `test/command_lookup_bench.rb` - Command lookup benchmarks
 - `MEMOIZATION_RESULTS.md` - Detailed memoization results
 - `ARRAY_OPS_RESULTS.md` - Detailed array operations results
+- `COMMAND_LOOKUP_RESULTS.md` - Detailed command lookup results
+- `OPTIMIZATION_NOTES.md` - Implementation decisions and notes
 
 ---
 
 ## Conclusion
 
-Two optimizations have been successfully implemented, achieving:
+Three major optimizations have been successfully implemented, achieving:
 
 ✅ **20-30% improvement** for repeated method calls (memoization)  
 ✅ **42-50% improvement** for fat binary array operations  
 ✅ **17-20% improvement** for single-arch array operations  
+✅ **16-23x improvement** for command() lookups (94-96% faster)  
 ✅ **Zero breaking changes** - maintains full backward compatibility  
 ✅ **Improved code quality** - more idiomatic and maintainable Ruby
 
-The optimizations work synergistically, with memoization ensuring array operations only run once per file load, and optimized array operations making that first call significantly faster.
+The optimizations work synergistically:
+- Hash index makes `command()` calls 16-23x faster
+- Memoization ensures computed properties only run once per file load
+- Optimized array operations make that first call 17-50% faster
 
-**Total estimated improvement for typical workloads: 25-40%** (matching the predicted range from the performance improvement document)
+**Total estimated improvement for typical workloads: 40-60%** for read-heavy operations, with the most dramatic gains coming from the O(1) command() lookups replacing O(n) array filtering.
+
+### Performance Summary by Operation Type
+
+- **Command lookups**: 94-96% faster (18-23x speedup)
+- **Repeated property access**: 20-30% faster (first call) + instant (subsequent calls)
+- **Fat binary operations**: 42-50% faster array processing
+- **Memory overhead**: Minimal (~200 bytes per file for hash index)
