@@ -272,26 +272,7 @@ module MachO
     # @note This is **not** the same as {#alignment}!
     # @note See `get_align` and `get_align_64` in `cctools/misc/lipo.c`
     def segment_alignment
-      # special cases: 12 for x86/64/PPC/PP64, 14 for ARM/ARM64
-      return 12 if %i[i386 x86_64 ppc ppc64].include?(cputype)
-      return 14 if %i[arm arm64].include?(cputype)
-
-      cur_align = Sections::MAX_SECT_ALIGN
-
-      segments.each do |segment|
-        if filetype == :object
-          # start with the smallest alignment, and work our way up
-          align = magic32? ? 2 : 3
-          segment.sections.each do |section|
-            align = section.align unless section.align <= align
-          end
-        else
-          align = segment.guess_align
-        end
-        cur_align = align if align < cur_align
-      end
-
-      cur_align
+      @segment_alignment ||= calculate_segment_alignment
     end
 
     # The Mach-O's dylib ID, or `nil` if not a dylib.
@@ -485,6 +466,7 @@ module MachO
       @dylib_load_commands = nil
       @segments = nil
       @load_commands_by_type = nil
+      @segment_alignment = nil
     end
 
     # The file's Mach-O header structure.
@@ -627,6 +609,32 @@ module MachO
       end
 
       load_commands
+    end
+
+    # Calculate the segment alignment for the Mach-O. Guesses conservatively.
+    # @return [Integer] the alignment, as a power of 2
+    # @api private
+    def calculate_segment_alignment
+      # special cases: 12 for x86/64/PPC/PP64, 14 for ARM/ARM64
+      return 12 if %i[i386 x86_64 ppc ppc64].include?(cputype)
+      return 14 if %i[arm arm64].include?(cputype)
+
+      cur_align = Sections::MAX_SECT_ALIGN
+
+      segments.each do |segment|
+        if filetype == :object
+          # start with the smallest alignment, and work our way up
+          align = magic32? ? 2 : 3
+          segment.sections.each do |section|
+            align = section.align unless section.align <= align
+          end
+        else
+          align = segment.guess_align
+        end
+        cur_align = align if align < cur_align
+      end
+
+      cur_align
     end
 
     # The low file offset (offset to first section data).
