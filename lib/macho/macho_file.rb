@@ -245,6 +245,7 @@ module MachO
     #  The exception to this rule is when methods like {#add_command} and
     #  {#delete_command} have been called with `repopulate = false`.
     def populate_fields
+      clear_memoization_cache
       @header = populate_mach_header
       @load_commands = populate_load_commands
     end
@@ -252,14 +253,14 @@ module MachO
     # All load commands responsible for loading dylibs.
     # @return [Array<LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
-      load_commands.select { |lc| LoadCommands::DYLIB_LOAD_COMMANDS.include?(lc.type) }
+      @dylib_load_commands ||= load_commands.select { |lc| LoadCommands::DYLIB_LOAD_COMMANDS.include?(lc.type) }
     end
 
     # All segment load commands in the Mach-O.
     # @return [Array<LoadCommands::SegmentCommand>] if the Mach-O is 32-bit
     # @return [Array<LoadCommands::SegmentCommand64>] if the Mach-O is 64-bit
     def segments
-      if magic32?
+      @segments ||= if magic32?
         command(:LC_SEGMENT)
       else
         command(:LC_SEGMENT_64)
@@ -338,7 +339,7 @@ module MachO
       # library, but at this point we're really only interested in a list of
       # unique libraries this Mach-O file links to, thus: `uniq`. (This is also
       # for consistency with `FatFile` that merges this list across all archs.)
-      dylib_load_commands.map(&:name).map(&:to_s).uniq
+      @linked_dylibs ||= dylib_load_commands.map { |lc| lc.name.to_s }.uniq
     end
 
     # Changes the shared library `old_name` to `new_name`
@@ -368,7 +369,7 @@ module MachO
     # All runtime paths searched by the dynamic linker for the Mach-O.
     # @return [Array<String>] an array of all runtime paths
     def rpaths
-      command(:LC_RPATH).map(&:path).map(&:to_s)
+      @rpaths ||= command(:LC_RPATH).map { |lc| lc.path.to_s }
     end
 
     # Changes the runtime path `old_path` to `new_path`
@@ -474,6 +475,16 @@ module MachO
     end
 
     private
+
+    # Clears all memoized values. Called when the file is repopulated.
+    # @return [void]
+    # @api private
+    def clear_memoization_cache
+      @linked_dylibs = nil
+      @rpaths = nil
+      @dylib_load_commands = nil
+      @segments = nil
+    end
 
     # The file's Mach-O header structure.
     # @return [Headers::MachHeader] if the Mach-O is 32-bit
