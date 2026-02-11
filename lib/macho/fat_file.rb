@@ -165,7 +165,7 @@ module MachO
     # All load commands responsible for loading dylibs in the file's Mach-O's.
     # @return [Array<LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
-      machos.map(&:dylib_load_commands).flatten
+      machos.flat_map(&:dylib_load_commands)
     end
 
     # Changes the file's dylib ID to `new_id`. If the file is not a dylib,
@@ -199,7 +199,7 @@ module MachO
       # Individual architectures in a fat binary can link to different subsets
       # of libraries, but at this point we want to have the full picture, i.e.
       # the union of all libraries used by all architectures.
-      machos.map(&:linked_dylibs).flatten.uniq
+      machos.flat_map(&:linked_dylibs).uniq
     end
 
     # Changes all dependent shared library install names from `old_name` to
@@ -229,7 +229,7 @@ module MachO
     # @see MachOFile#rpaths
     def rpaths
       # Can individual architectures have different runtime paths?
-      machos.map(&:rpaths).flatten.uniq
+      machos.flat_map(&:rpaths).uniq
     end
 
     # Change the runtime path `old_path` to `new_path` in the file's Mach-Os.
