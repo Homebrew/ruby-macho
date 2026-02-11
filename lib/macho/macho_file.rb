@@ -147,7 +147,7 @@ module MachO
     # @return [Array<LoadCommands::LoadCommand>] an array of load commands
     #  corresponding to `name`
     def command(name)
-      load_commands.select { |lc| lc.type == name.to_sym }
+      @load_commands_by_type.fetch(name.to_sym, [])
     end
 
     alias [] command
@@ -484,6 +484,7 @@ module MachO
       @rpaths = nil
       @dylib_load_commands = nil
       @segments = nil
+      @load_commands_by_type = nil
     end
 
     # The file's Mach-O header structure.
@@ -600,6 +601,7 @@ module MachO
       permissive = options.fetch(:permissive, false)
       offset = header.class.bytesize
       load_commands = []
+      @load_commands_by_type = Hash.new { |h, k| h[k] = [] }
 
       header.ncmds.times do
         fmt = Utils.specialize_format("L=", endianness)
@@ -620,6 +622,7 @@ module MachO
         command = klass.new_from_bin(view)
 
         load_commands << command
+        @load_commands_by_type[command.type] << command
         offset += command.cmdsize
       end
 
