@@ -69,6 +69,7 @@ module MachO
       0x37 => :LC_FUNCTION_VARIANTS,
       0x38 => :LC_FUNCTION_VARIANT_FIXUPS,
       0x39 => :LC_TARGET_TRIPLE,
+      0x3a => :LC_LAZY_LOAD_DYLIB_INFO,
     }.freeze
 
     # association of symbol representations to load command constants
@@ -161,6 +162,7 @@ module MachO
       :LC_FUNCTION_VARIANTS => "LinkeditDataCommand",
       :LC_FUNCTION_VARIANT_FIXUPS => "LinkeditDataCommand",
       :LC_TARGET_TRIPLE => "TargetTripleCommand",
+      :LC_LAZY_LOAD_DYLIB_INFO => "LinkeditDataCommand",
     }.freeze
 
     # association of segment name symbols to names
@@ -1078,7 +1080,7 @@ module MachO
     # LC_SEGMENT_SPLIT_INFO, LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
     # LC_DYLIB_CODE_SIGN_DRS, LC_LINKER_OPTIMIZATION_HINT, LC_DYLD_EXPORTS_TRIE,
     # LC_DYLD_CHAINED_FIXUPS, LC_ATOM_INFO, LC_FUNCTION_VARIANTS,
-    # or LC_FUNCTION_VARIANT_FIXUPS.
+    # LC_FUNCTION_VARIANT_FIXUPS, or LC_LAZY_LOAD_DYLIB_INFO.
     class LinkeditDataCommand < LoadCommand
       # @return [Integer] offset to the data in the __LINKEDIT segment
       field :dataoff, :uint32
