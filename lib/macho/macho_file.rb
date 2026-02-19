@@ -147,7 +147,7 @@ module MachO
     # @return [Array<LoadCommands::LoadCommand>] an array of load commands
     #  corresponding to `name`
     def command(name)
-      @load_commands_by_type.fetch(name.to_sym, [])
+      @load_commands_by_type.fetch(name.to_sym, []).dup
     end
 
     alias [] command
@@ -254,6 +254,7 @@ module MachO
     # @return [Array<LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
       @dylib_load_commands ||= load_commands.select { |lc| LoadCommands::DYLIB_LOAD_COMMANDS.include?(lc.type) }
+      @dylib_load_commands.dup
     end
 
     # All segment load commands in the Mach-O.
@@ -321,6 +322,7 @@ module MachO
       # unique libraries this Mach-O file links to, thus: `uniq`. (This is also
       # for consistency with `FatFile` that merges this list across all archs.)
       @linked_dylibs ||= dylib_load_commands.map { |lc| lc.name.to_s }.uniq
+      @linked_dylibs.dup
     end
 
     # Changes the shared library `old_name` to `new_name`
@@ -351,6 +353,7 @@ module MachO
     # @return [Array<String>] an array of all runtime paths
     def rpaths
       @rpaths ||= command(:LC_RPATH).map { |lc| lc.path.to_s }
+      @rpaths.dup
     end
 
     # Changes the runtime path `old_path` to `new_path`
