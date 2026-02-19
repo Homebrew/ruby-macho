@@ -22,6 +22,7 @@
 .ruby-version
 .idea/
 .vscode/
+mise.toml
 
 # macOS metadata file
 .DS_Store

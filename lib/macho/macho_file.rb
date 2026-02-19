@@ -147,7 +147,7 @@ module MachO
     # @return [Array<LoadCommands::LoadCommand>] an array of load commands
     #  corresponding to `name`
     def command(name)
-      load_commands.select { |lc| lc.type == name.to_sym }
+      @load_commands_by_type.fetch(name.to_sym, []).dup
     end
 
     alias [] command
@@ -245,6 +245,7 @@ module MachO
     #  The exception to this rule is when methods like {#add_command} and
     #  {#delete_command} have been called with `repopulate = false`.
     def populate_fields
+      clear_memoization_cache
       @header = populate_mach_header
       @load_commands = populate_load_commands
     end
@@ -252,14 +253,15 @@ module MachO
     # All load commands responsible for loading dylibs.
     # @return [Array<LoadCommands::DylibCommand>] an array of DylibCommands
     def dylib_load_commands
-      load_commands.select { |lc| LoadCommands::DYLIB_LOAD_COMMANDS.include?(lc.type) }
+      @dylib_load_commands ||= load_commands.select { |lc| LoadCommands::DYLIB_LOAD_COMMANDS.include?(lc.type) }
+      @dylib_load_commands.dup
     end
 
     # All segment load commands in the Mach-O.
     # @return [Array<LoadCommands::SegmentCommand>] if the Mach-O is 32-bit
     # @return [Array<LoadCommands::SegmentCommand64>] if the Mach-O is 64-bit
     def segments
-      if magic32?
+      @segments ||= if magic32?
         command(:LC_SEGMENT)
       else
         command(:LC_SEGMENT_64)
@@ -271,26 +273,7 @@ module MachO
     # @note This is **not** the same as {#alignment}!
     # @note See `get_align` and `get_align_64` in `cctools/misc/lipo.c`
     def segment_alignment
-      # special cases: 12 for x86/64/PPC/PP64, 14 for ARM/ARM64
-      return 12 if %i[i386 x86_64 ppc ppc64].include?(cputype)
-      return 14 if %i[arm arm64].include?(cputype)
-
-      cur_align = Sections::MAX_SECT_ALIGN
-
-      segments.each do |segment|
-        if filetype == :object
-          # start with the smallest alignment, and work our way up
-          align = magic32? ? 2 : 3
-          segment.sections.each do |section|
-            align = section.align unless section.align <= align
-          end
-        else
-          align = segment.guess_align
-        end
-        cur_align = align if align < cur_align
-      end
-
-      cur_align
+      @segment_alignment ||= calculate_segment_alignment
     end
 
     # The Mach-O's dylib ID, or `nil` if not a dylib.
@@ -338,7 +321,8 @@ module MachO
       # library, but at this point we're really only interested in a list of
       # unique libraries this Mach-O file links to, thus: `uniq`. (This is also
       # for consistency with `FatFile` that merges this list across all archs.)
-      dylib_load_commands.map(&:name).map(&:to_s).uniq
+      @linked_dylibs ||= dylib_load_commands.map { |lc| lc.name.to_s }.uniq
+      @linked_dylibs.dup
     end
 
     # Changes the shared library `old_name` to `new_name`
@@ -368,7 +352,8 @@ module MachO
     # All runtime paths searched by the dynamic linker for the Mach-O.
     # @return [Array<String>] an array of all runtime paths
     def rpaths
-      command(:LC_RPATH).map(&:path).map(&:to_s)
+      @rpaths ||= command(:LC_RPATH).map { |lc| lc.path.to_s }
+      @rpaths.dup
     end
 
     # Changes the runtime path `old_path` to `new_path`
@@ -474,6 +459,18 @@ module MachO
     end
 
     private
+
+    # Clears all memoized values. Called when the file is repopulated.
+    # @return [void]
+    # @api private
+    def clear_memoization_cache
+      @linked_dylibs = nil
+      @rpaths = nil
+      @dylib_load_commands = nil
+      @segments = nil
+      @load_commands_by_type = nil
+      @segment_alignment = nil
+    end
 
     # The file's Mach-O header structure.
     # @return [Headers::MachHeader] if the Mach-O is 32-bit
@@ -589,6 +586,7 @@ module MachO
       permissive = options.fetch(:permissive, false)
       offset = header.class.bytesize
       load_commands = []
+      @load_commands_by_type = Hash.new { |h, k| h[k] = [] }
 
       header.ncmds.times do
         fmt = Utils.specialize_format("L=", endianness)
@@ -609,10 +607,37 @@ module MachO
         command = klass.new_from_bin(view)
 
         load_commands << command
+        @load_commands_by_type[command.type] << command
         offset += command.cmdsize
       end
 
       load_commands
+    end
+
+    # Calculate the segment alignment for the Mach-O. Guesses conservatively.
+    # @return [Integer] the alignment, as a power of 2
+    # @api private
+    def calculate_segment_alignment
+      # special cases: 12 for x86/64/PPC/PP64, 14 for ARM/ARM64
+      return 12 if %i[i386 x86_64 ppc ppc64].include?(cputype)
+      return 14 if %i[arm arm64].include?(cputype)
+
+      cur_align = Sections::MAX_SECT_ALIGN
+
+      segments.each do |segment|
+        if filetype == :object
+          # start with the smallest alignment, and work our way up
+          align = magic32? ? 2 : 3
+          segment.sections.each do |section|
+            align = section.align unless section.align <= align
+          end
+        else
+          align = segment.guess_align
+        end
+        cur_align = align if align < cur_align
+      end
+
+      cur_align
     end
 
     # The low file offset (offset to first section data).
