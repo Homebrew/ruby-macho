@@ -261,7 +261,7 @@ module MachO
     # @return [Array<LoadCommands::SegmentCommand>] if the Mach-O is 32-bit
     # @return [Array<LoadCommands::SegmentCommand64>] if the Mach-O is 64-bit
     def segments
-      @segments ||= if magic32?
+      if magic32?
         command(:LC_SEGMENT)
       else
         command(:LC_SEGMENT_64)
@@ -467,7 +467,6 @@ module MachO
       @linked_dylibs = nil
       @rpaths = nil
       @dylib_load_commands = nil
-      @segments = nil
       @load_commands_by_type = nil
       @segment_alignment = nil
     end
