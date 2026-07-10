@@ -1,0 +1,12 @@
+--- !mach-o
+IsLittleEndian: true
+FileHeader:
+  magic: 0xFEEDFACF
+  cputype: 0x01000007
+  cpusubtype: 0x00000003
+  filetype: 0x00000001
+  ncmds: 0
+  sizeofcmds: 8
+  flags: 0x00002000
+  reserved: 0x00000000
+...
