@@ -92,6 +92,7 @@ module MachO
       LC_ID_DYLIB
       LC_RPATH
       LC_LOAD_DYLINKER
+      LC_CODE_SIGNATURE
     ].freeze
 
     # association of load command symbols to string representations of classes
@@ -1089,6 +1090,25 @@ module MachO
 
       # @return [Integer] size of the data in the __LINKEDIT segment
       field :datasize, :uint32
+
+      # @param context [SerializationContext] the context
+      # @return [String] the serialized fields of the load command
+      # @api private
+      def serialize(context)
+        raise LoadCommandNotSerializableError, type unless serializable?
+
+        format = Utils.specialize_format(self.class.format, context.endianness)
+        [cmd, self.class.bytesize, dataoff, datasize].pack(format)
+      end
+
+      # The embedded signature referenced by this command.
+      # @return [CodeSigning::SuperBlob]
+      # @raise [CodeSigningError] if this is not an LC_CODE_SIGNATURE command
+      def superblob
+        raise CodeSigningError, "#{type} does not contain a code signature" unless type == :LC_CODE_SIGNATURE
+
+        CodeSigning::SuperBlob.new(view.raw_data.byteslice(dataoff, datasize))
+      end
 
       # @return [Hash] a hash representation of this {LinkeditDataCommand}
       def to_h
