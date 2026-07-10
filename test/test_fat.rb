@@ -36,6 +36,20 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_invalid_header_is_rejected_before_full_read
+    tempfile_with_data("invalid_header", [MachO::Headers::FAT_MAGIC, 31].pack("N2") + ("x" * 1024)) do |invalid_header|
+      assert_raises MachO::JavaClassFileError do
+        Class.new(MachO::FatFile) do
+          def populate_fat_header
+            raise "read entire file" if serialize.bytesize > MachO::Headers::FatHeader.bytesize
+
+            super
+          end
+        end.new(invalid_header.path)
+      end
+    end
+  end
+
   def test_zero_arch_file
     assert_raises MachO::ZeroArchitectureError do
       MachO::FatFile.new("test/bin/llvm/macho-invalid-fat-header")

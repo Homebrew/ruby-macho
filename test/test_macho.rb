@@ -27,6 +27,20 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_invalid_header_is_rejected_before_full_read
+    tempfile_with_data("invalid_header", [MachO::Headers::MH_MAGIC, 0, 0, MachO::Headers::MH_EXECUTE, 0, 0, 0].pack("N7") + ("x" * 1024)) do |invalid_header|
+      assert_raises MachO::CPUTypeError do
+        Class.new(MachO::MachOFile) do
+          def populate_mach_header
+            raise "read entire file" if serialize.bytesize > MachO::Headers::MachHeader.bytesize
+
+            super
+          end
+        end.new(invalid_header.path)
+      end
+    end
+  end
+
   def test_load_commands
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 

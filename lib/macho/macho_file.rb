@@ -60,7 +60,12 @@ module MachO
 
       @filename = filename
       @options = opts
-      @raw_data = File.binread(@filename)
+      File.open(@filename, "rb") do |file|
+        @raw_data = file.read(Headers::MachHeader.bytesize)
+        @raw_data ||= ""
+        populate_mach_header if !opts.fetch(:decompress, false) || !Utils.compressed_magic?(@raw_data.unpack1("N"))
+        @raw_data << file.read.to_s
+      end
       populate_fields
     end
 
