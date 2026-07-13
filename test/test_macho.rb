@@ -27,6 +27,71 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_load_command_with_size_smaller_than_its_structure
+    assert_raises MachO::LoadCommandSizeError do
+      MachO::MachOFile.new(fixture(:yaml2obj, "load-cmdsize-too-small.macho"))
+    end
+  end
+
+  def test_load_command_with_size_beyond_its_region
+    assert_raises MachO::LoadCommandSizeError do
+      MachO::MachOFile.new(fixture(:yaml2obj, "load-cmdsize-too-large.macho"))
+    end
+  end
+
+  def test_declared_load_commands_are_truncated
+    assert_raises MachO::TruncatedFileError do
+      MachO::MachOFile.new(fixture(:yaml2obj, "truncated-load-commands.macho"))
+    end
+  end
+
+  def test_declared_load_command_region_is_truncated
+    assert_raises MachO::TruncatedFileError do
+      MachO::MachOFile.new(fixture(:yaml2obj, "truncated-load-command-region.macho"))
+    end
+  end
+
+  def test_load_command_with_unaligned_size
+    assert_raises MachO::LoadCommandSizeError do
+      MachO::MachOFile.new(fixture(:yaml2obj, "unaligned-cmdsize.macho"))
+    end
+  end
+
+  def test_load_command_with_invalid_string_offset
+    command = MachO::MachOFile.new(fixture(:yaml2obj, "invalid-lcstr-offset.macho"))[:LC_LOAD_DYLINKER].first
+
+    assert_raises MachO::LCStrMalformedError do
+      command.name
+    end
+  end
+
+  def test_minimal_macho
+    file = MachO::MachOFile.new(fixture(:yaml2obj, "minimal.macho"))
+
+    assert file.object?
+    assert_equal :arm64, file.cputype
+  end
+
+  def test_big_endian_macho
+    file = MachO::MachOFile.new(fixture(:yaml2obj, "big-endian.macho"))
+
+    assert_equal :big, file.endianness
+    assert file.magic32?
+    assert_equal :i386, file.cputype
+  end
+
+  def test_build_version_command
+    command = MachO::MachOFile.new(fixture(:yaml2obj, "build-version.macho"))[:LC_BUILD_VERSION].first
+
+    assert_equal "8.0.0", command.minos_string
+    assert_equal "9.0.0", command.sdk_string
+    assert_equal 1, command.tool_entries.tools.size
+  end
+
+  def test_rpath_command
+    assert_equal ["/usr/lib"], MachO::MachOFile.new(fixture(:yaml2obj, "rpath.macho")).rpaths
+  end
+
   def test_invalid_header_is_rejected_before_full_read
     tempfile_with_data("invalid_header", [MachO::Headers::MH_MAGIC, 0, 0, MachO::Headers::MH_EXECUTE, 0, 0, 0].pack("N7") + ("x" * 1024)) do |invalid_header|
       assert_raises MachO::CPUTypeError do
@@ -40,7 +105,6 @@ class MachOFileTest < Minitest::Test
       end
     end
   end
-
   def test_load_commands
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 

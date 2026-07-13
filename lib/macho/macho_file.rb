@@ -584,17 +584,27 @@ module MachO
 
     # All load commands in the file.
     # @return [Array<LoadCommands::LoadCommand>] an array of load commands
+    # @raise [TruncatedFileError] if the declared load command data is incomplete
     # @raise [LoadCommandError] if an unknown load command is encountered
+    # @raise [LoadCommandSizeError] if a load command's size is invalid
     # @api private
     def populate_load_commands
       permissive = options.fetch(:permissive, false)
       offset = header.class.bytesize
+      load_commands_end = offset + sizeofcmds
+      raise TruncatedFileError if load_commands_end > @raw_data.bytesize
+
       load_commands = []
       @load_commands_by_type = Hash.new { |h, k| h[k] = [] }
 
       header.ncmds.times do
+        raise TruncatedFileError if offset + LoadCommands::LoadCommand.bytesize > load_commands_end
+
         fmt = Utils.specialize_format("L=", endianness)
         cmd = @raw_data.slice(offset, 4).unpack1(fmt)
+        cmdsize = @raw_data.slice(offset + 4, 4).unpack1(fmt)
+        raise LoadCommandSizeError, cmdsize if cmdsize % 4 != 0 || offset + cmdsize > load_commands_end
+
         cmd_sym = LoadCommands::LOAD_COMMANDS[cmd]
 
         raise LoadCommandError, cmd unless cmd_sym || permissive
@@ -606,6 +616,8 @@ module MachO
         else
           LoadCommands::LoadCommand
         end
+
+        raise LoadCommandSizeError, cmdsize if cmdsize < klass.bytesize
 
         view = MachOView.new(self, @raw_data, endianness, offset)
         command = klass.new_from_bin(view)

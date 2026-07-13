@@ -332,6 +332,8 @@ module MachO
           view = lc.view
 
           if view
+            raise LCStrMalformedError, lc if lc_str < lc.class.bytesize || lc_str >= lc.cmdsize
+
             lc_str_abs = view.offset + lc_str
             lc_end = view.offset + lc.cmdsize - 1
             raw_string = view.raw_data.slice(lc_str_abs..lc_end)

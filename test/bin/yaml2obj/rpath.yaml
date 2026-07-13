@@ -1,0 +1,18 @@
+--- !mach-o
+IsLittleEndian: true
+FileHeader:
+  magic: 0xFEEDFACF
+  cputype: 0x01000007
+  cpusubtype: 0x00000003
+  filetype: 0x00000002
+  ncmds: 1
+  sizeofcmds: 24
+  flags: 0x00000000
+  reserved: 0x00000000
+LoadCommands:
+  - cmd: LC_RPATH
+    cmdsize: 24
+    path: 12
+    Content: /usr/lib
+    ZeroPadBytes: 3
+...

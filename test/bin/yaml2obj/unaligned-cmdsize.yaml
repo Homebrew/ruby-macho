@@ -1,0 +1,17 @@
+--- !mach-o
+IsLittleEndian: true
+FileHeader:
+  magic: 0xFEEDFACF
+  cputype: 0x01000007
+  cpusubtype: 0x00000003
+  filetype: 0x00000002
+  ncmds: 1
+  sizeofcmds: 25
+  flags: 0x00000000
+  reserved: 0x00000000
+LoadCommands:
+  - cmd: LC_UUID
+    cmdsize: 25
+    uuid: 00112233-4455-6677-8899-AABBCCDDEEFF
+    ZeroPadBytes: 1
+...
