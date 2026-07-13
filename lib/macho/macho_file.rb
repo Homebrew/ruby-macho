@@ -438,6 +438,13 @@ module MachO
       rpath_cmds.reverse_each { |cmd| delete_command(cmd) }
     end
 
+    # Replaces the embedded signature with a pure-Ruby ad-hoc signature.
+    # @param identifier [String, nil] the signing identifier
+    # @return [void]
+    def codesign!(identifier: nil)
+      CodeSigning::AdhocSigner.new(self, identifier || CodeSigning.identifier(self, filename)).sign!
+    end
+
     # Write all Mach-O data to the given filename.
     # @param filename [String] the file to write to
     # @return [void]
@@ -663,6 +670,9 @@ module MachO
       offset = @raw_data.size
 
       segments.each do |seg|
+        offset = seg.fileoff if seg.nsects.zero? && seg.fileoff.positive? &&
+                                seg.filesize.positive? && seg.fileoff < offset
+
         seg.sections.each do |sect|
           next if sect.empty?
           next if sect.type?(:S_ZEROFILL)

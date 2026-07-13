@@ -45,12 +45,25 @@ lc_vers = file[:LC_VERSION_MIN_MACOSX].first
 puts lc_vers.version_string # => "10.10.0"
 ```
 
+### Ad-hoc code signing
+
+Changing a Mach-O load command invalidates any existing code signature. This is
+especially important when Homebrew pours bottles on Apple Silicon, where native
+code must remain signed after its paths are rewritten. `MachO.codesign!` creates
+the required ad-hoc signature in Ruby instead of invoking `/usr/bin/codesign`:
+
+```ruby
+MachO.codesign!("/path/to/my/binary")
+```
+
+
 ### What works?
 
 * Reading data from x86/x86_64/arm64/PPC Mach-O files (other architectures are unsupported, but may work)
 * Changing the IDs of Mach-O and Fat dylibs
 * Changing install names in Mach-O and Fat files
 * Adding, deleting, and modifying rpaths.
+* Parsing embedded code signatures and applying ad-hoc signatures in pure Ruby.
 
 ### What needs to be done?
 
@@ -73,6 +86,8 @@ overcommit --install
 * Constants were taken from Apple, Inc's
 [`loader.h` in `cctools/include/mach-o`](https://opensource.apple.com/source/cctools/cctools-973.0.1/include/mach-o/loader.h.auto.html).
 (Apple Public Source License 2.0).
+* Code-signing constants and structures follow Apple, Inc's
+[`cs_blobs.h` in XNU](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h).
 * Binary files used for testing were taken from The LLVM Project. ([Apache License v2.0 with LLVM Exceptions](test/bin/llvm/LICENSE.txt)).
 
 ### License
