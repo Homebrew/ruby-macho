@@ -56,30 +56,6 @@ the required ad-hoc signature in Ruby instead of invoking `/usr/bin/codesign`:
 MachO.codesign!("/path/to/my/binary")
 ```
 
-The implementation follows the public structures used by
-[XNU](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-and [ld64](https://github.com/apple-oss-distributions/ld64). For each thin
-Mach-O slice it adds or replaces `LC_CODE_SIGNATURE`, resizes `__LINKEDIT` then
-hashes the final pre-signature bytes in 4 KiB pages. It emits a SHA-256
-CodeDirectory, adding a SHA-1 alternate only when the declared deployment target
-requires legacy hash agility. Fat binaries are signed one slice at a time then
-laid out again with updated architecture offsets and sizes.
-
-When replacing a non-linker signature, the signer preserves its requirements,
-entitlements, flags, runtime version and executable-segment flags. Linker
-signatures use fresh ad-hoc metadata, matching Apple's replacement behaviour.
-Code-signing blobs use their mandated big-endian representation independently
-of the Mach-O byte order, while the load command retains the slice byte order.
-
-The complete signature is built and validated before the file is written. This
-leaves the on-disk file unchanged on validation errors, while the final in-place
-write preserves its inode, mode and hard links. Adding a missing load command
-requires 16 bytes of existing header padding; ruby-macho raises
-`MachO::CodeSigningError` rather than moving segments when that space is absent.
-Only ad-hoc signing is provided: certificate identities, Developer ID signing,
-notarisation and policy assessment remain outside ruby-macho's scope. See
-[issue #262](https://github.com/Homebrew/ruby-macho/issues/262) for the original
-design discussion.
 
 ### What works?
 
