@@ -43,10 +43,13 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  check:
+  conclusion:
     needs: tests
-    runs-on: ubuntu-latest
+    if: always()
+    runs-on: ubuntu-slim
     steps:
-      - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
-        with:
-          jobs: ${{ toJSON(needs) }}
+      - name: Result
+        env:
+          RESULT: ${{ needs.tests.result }}
+        run: |
+          [[ "${RESULT}" == success ]]
