@@ -12,6 +12,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    env:
+      BUNDLE_FROZEN: "true"
+
     permissions:
       contents: write
       id-token: write
