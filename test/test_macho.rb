@@ -96,6 +96,32 @@ class MachOFileTest < Minitest::Test
     assert_equal 1, command.tool_entries.tools.size
   end
 
+  def test_build_version_with_too_many_tools
+    assert_build_version_tools_exceed_cmdsize(:yaml2obj, "build-version.macho")
+  end
+
+  def test_build_version_tool_entries_exceed_command_boundary
+    bin = File.binread(fixture(:yaml2obj, "build-version.macho"))
+
+    # Increase sizeofcmds by 8 (from 32 to 40) so the load command region
+    # includes 8 extra bytes after LC_BUILD_VERSION
+    bin[20, 4] = [40].pack("L<")
+
+    # Set ntools to 2 (original is 1). This would require 24 + 2*8 = 40 bytes
+    # within the command, but cmdsize is only 32.
+    bin[52, 4] = [2].pack("L<")
+
+    # Append 8 bytes of zero data (simulating an unrelated tool entry)
+    bin << ("\x00" * 8)
+
+    file = MachO::MachOFile.new_from_bin(bin)
+    command = file[:LC_BUILD_VERSION].first
+
+    assert_raises MachO::LoadCommandSizeError do
+      command.tool_entries.tools
+    end
+  end
+
   def test_rpath_command
     assert_equal ["/usr/lib"], MachO::MachOFile.new(fixture(:yaml2obj, "rpath.macho")).rpaths
   end
@@ -832,6 +858,22 @@ class MachOFileTest < Minitest::Test
 
     assert_raises MachO::LoadCommandSizeError do
       segment.sections
+    end
+  end
+
+  def assert_build_version_tools_exceed_cmdsize(arch, fixture_name)
+    bin = File.binread(fixture(arch, fixture_name))
+    file = MachO::MachOFile.new_from_bin(bin)
+    command = file[:LC_BUILD_VERSION].first
+
+    ntools = ((command.cmdsize - command.class.bytesize) / 8) + 1
+    ntools_offset = command.view.offset + 20
+    bin[ntools_offset, 4] = [ntools].pack(file.endianness == :little ? "L<" : "L>")
+
+    command = MachO::MachOFile.new_from_bin(bin)[:LC_BUILD_VERSION].first
+
+    assert_raises MachO::LoadCommandSizeError do
+      command.tool_entries.tools
     end
   end
 end

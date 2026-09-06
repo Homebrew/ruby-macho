@@ -1254,15 +1254,26 @@ module MachO
       # A representation of the tool versions exposed
       # by a {BuildVersionCommand} (`LC_BUILD_VERSION`).
       class ToolEntries
+        TOOL_BYTESIZE = 8
+        UINT32S_PER_TOOL = 2
+
         # @return [Array<Tool>] all tools
         attr_reader :tools
 
         # @param view [MachO::MachOView] the view into the current Mach-O
         # @param ntools [Integer] the number of tools
+        # @param cmdsize [Integer] the size of the load command
         # @api private
-        def initialize(view, ntools)
-          format = Utils.specialize_format("L=#{ntools * 2}", view.endianness)
-          raw_table = view.raw_data[view.offset + 24, ntools * 8]
+        def initialize(view, ntools, cmdsize)
+          command_bytesize = BuildVersionCommand.bytesize
+          length = ntools * TOOL_BYTESIZE
+          offset = view.offset + command_bytesize
+
+          available = view.raw_data.bytesize - offset
+          raise LoadCommandSizeError, cmdsize if length > available || command_bytesize + length > cmdsize
+
+          format = Utils.specialize_format("L=#{ntools * UINT32S_PER_TOOL}", view.endianness)
+          raw_table = view.raw_data[offset, length]
           blobs = raw_table.unpack(format).each_slice(2).to_a
 
           @tools = blobs.map { |b| Tool.new(*b) }
