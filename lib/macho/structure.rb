@@ -212,7 +212,7 @@ module MachO
         when :tool_entries
           define_method(name) do
             instance_variable_defined?("@#{name}") ||
-              instance_variable_set("@#{name}", LoadCommands::BuildVersionCommand::ToolEntries.new(view, @values[idx]))
+              instance_variable_set("@#{name}", LoadCommands::BuildVersionCommand::ToolEntries.new(view, @values[idx], cmdsize))
 
             instance_variable_get("@#{name}")
           end

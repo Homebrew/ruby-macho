@@ -96,6 +96,56 @@ class MachOFileTest < Minitest::Test
     assert_equal 1, command.tool_entries.tools.size
   end
 
+  def test_build_version_with_too_many_tools
+    assert_build_version_tools_exceed_cmdsize(:yaml2obj, "build-version.macho")
+  end
+
+  def test_build_version_tool_entries_exceed_command_boundary
+    bin = File.binread(fixture(:yaml2obj, "build-version.macho"))
+
+    # Increase sizeofcmds by 8 (from 32 to 40) so the load command region
+    # includes 8 extra bytes after LC_BUILD_VERSION
+    bin[20, 4] = [40].pack("L<")
+
+    # Set ntools to 2 (original is 1). This would require 24 + 2*8 = 40 bytes
+    # within the command, but cmdsize is only 32.
+    bin[52, 4] = [2].pack("L<")
+
+    # Append 8 bytes of zero data (simulating an unrelated tool entry)
+    bin << ("\x00" * 8)
+
+    file = MachO::MachOFile.new_from_bin(bin)
+    command = file[:LC_BUILD_VERSION].first
+
+    assert_raises MachO::LoadCommandSizeError do
+      command.tool_entries.tools
+    end
+  end
+
+  def test_twolevel_hints_with_table_beyond_file
+    assert_raises MachO::LoadCommandSizeError do
+      twolevel_hints_command(1).table
+    end
+  end
+
+  def test_twolevel_hints_with_empty_table
+    assert_empty twolevel_hints_command(0).table.hints
+  end
+
+  def test_twolevel_hints_with_table_ending_at_file_end
+    command = twolevel_hints_command(1, [0x01000002].pack("L<"))
+
+    hint = command.table.hints.first
+    assert_equal 1, hint.isub_image
+    assert_equal 2, hint.itoc
+  end
+
+  def test_twolevel_hints_with_maximum_count
+    assert_raises MachO::LoadCommandSizeError do
+      twolevel_hints_command(0xFFFFFFFF).table
+    end
+  end
+
   def test_rpath_command
     assert_equal ["/usr/lib"], MachO::MachOFile.new(fixture(:yaml2obj, "rpath.macho")).rpaths
   end
@@ -815,6 +865,20 @@ class MachOFileTest < Minitest::Test
 
   private
 
+  def twolevel_hints_command(nhints, table = "")
+    bin = File.binread(fixture(:yaml2obj, "build-version.macho")) + table
+    file = MachO::MachOFile.new_from_bin(bin)
+    format = file.endianness == :little ? "L<" : "L>"
+    offset = file.header.class.bytesize
+    htoffset = bin.bytesize - table.bytesize
+    bin[offset, 4] = [MachO::LoadCommands::LOAD_COMMAND_CONSTANTS[:LC_TWOLEVEL_HINTS]].pack(format)
+    bin[offset + 4, 4] = [MachO::LoadCommands::TwolevelHintsCommand.bytesize].pack(format)
+    bin[offset + 8, 4] = [htoffset].pack(format)
+    bin[offset + 12, 4] = [nhints].pack(format)
+
+    MachO::MachOFile.new_from_bin(bin)[:LC_TWOLEVEL_HINTS].first
+  end
+
   def assert_segment_sections_exceed_cmdsize(arch, command_type)
     bin = File.binread(fixture(arch, "hello.bin"))
     file = MachO::MachOFile.new_from_bin(bin)
@@ -832,6 +896,22 @@ class MachOFileTest < Minitest::Test
 
     assert_raises MachO::LoadCommandSizeError do
       segment.sections
+    end
+  end
+
+  def assert_build_version_tools_exceed_cmdsize(arch, fixture_name)
+    bin = File.binread(fixture(arch, fixture_name))
+    file = MachO::MachOFile.new_from_bin(bin)
+    command = file[:LC_BUILD_VERSION].first
+
+    ntools = ((command.cmdsize - command.class.bytesize) / 8) + 1
+    ntools_offset = command.view.offset + 20
+    bin[ntools_offset, 4] = [ntools].pack(file.endianness == :little ? "L<" : "L>")
+
+    command = MachO::MachOFile.new_from_bin(bin)[:LC_BUILD_VERSION].first
+
+    assert_raises MachO::LoadCommandSizeError do
+      command.tool_entries.tools
     end
   end
 end
