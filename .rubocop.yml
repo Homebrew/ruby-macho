@@ -1,6 +1,11 @@
 AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
   TargetRubyVersion: 3.3
   NewCops: enable
+  SuggestExtensions:
+    rubocop-minitest: false
+    rubocop-rake: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
@@ -66,4 +71,3 @@ Naming/VariableNumber:
 Metrics/BlockLength:
   Exclude:
     - 'test/**'
-

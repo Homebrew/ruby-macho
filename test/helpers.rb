@@ -4,8 +4,22 @@
 if ENV["CI"]
   require "simplecov"
   require "simplecov-cobertura"
-  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
-  SimpleCov.start
+  all_test_files = Dir[File.join(__dir__, "test_*.rb")].map { |path| File.expand_path(path) }.sort
+  selected_test_files = if File.basename($PROGRAM_NAME).start_with?("test_")
+    [File.expand_path($PROGRAM_NAME)]
+  else
+    ARGV.grep(/test_.*\.rb\z/).map { |path| File.expand_path(path) }.sort
+  end
+  filtered = ARGV.any? { |argument| argument.match?(/\A(?:-[nei]|--(?:name|exclude|include)(?:=|\z))/) }
+
+  SimpleCov.command_name "Minitest"
+  SimpleCov.start do
+    formatter SimpleCov::Formatter::CoberturaFormatter
+    cover "lib/**/*.rb"
+    enable_coverage :branch
+    minimum_coverage :line => 94, :branch => 70 if !filtered && selected_test_files == all_test_files
+    skip "/test/"
+  end
 end
 
 require "digest/sha1"
@@ -16,7 +30,7 @@ require "tempfile"
 require "macho"
 
 module Helpers
-  OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/.freeze
+  OTOOL_RX = /\t(.*) \(compatibility version (?:\d+\.)*\d+, current version (?:\d+\.)*\d+\)/
 
   # architectures used in testing 32-bit single-arch binaries
   SINGLE_32_ARCHES = %i[
@@ -51,7 +65,7 @@ module Helpers
     FileUtils.rm_f(file)
   end
 
-  def equal_sha1_hashes(file1, file2)
+  def equal_sha1_hashes?(file1, file2)
     digest1 = Digest::SHA1.file(file1).to_s
     digest2 = Digest::SHA1.file(file2).to_s
 

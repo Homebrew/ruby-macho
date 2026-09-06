@@ -11,6 +11,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     env:
       BUNDLE_FROZEN: "true"
@@ -32,6 +33,14 @@ jobs:
           ruby-version: ruby
 
       - run: bundle install --jobs=4
+
+      - name: Verify release metadata
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: bundle exec rake verify_release_tag verify_unpublished_version
+
+      - name: Run release checks
+        run: bundle exec rake
 
       # Release
       - uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1

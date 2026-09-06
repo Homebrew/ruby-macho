@@ -1,7 +1,7 @@
 ruby-macho
 ================
 
-[![Gem Version](https://badge.fury.io/rb/ruby-macho.svg)](http://badge.fury.io/rb/ruby-macho)
+[![Gem Version](https://badge.fury.io/rb/ruby-macho.svg)](https://badge.fury.io/rb/ruby-macho)
 [![CI](https://github.com/Homebrew/ruby-macho/actions/workflows/tests.yml/badge.svg)](https://github.com/Homebrew/ruby-macho/actions/workflows/tests.yml)
 [![Coverage Status](https://codecov.io/gh/Homebrew/ruby-macho/branch/main/graph/badge.svg)](https://codecov.io/gh/Homebrew/ruby-macho)
 
@@ -23,7 +23,7 @@ $ gem install ruby-macho
 
 ### Documentation
 
-Full documentation is available on [RubyDoc](http://www.rubydoc.info/gems/ruby-macho/).
+Full documentation is available on [RubyDoc](https://www.rubydoc.info/gems/ruby-macho/).
 
 A quick example of what ruby-macho can do:
 
@@ -65,21 +65,10 @@ MachO.codesign!("/path/to/my/binary")
 * Adding, deleting, and modifying rpaths.
 * Parsing embedded code signatures and applying ad-hoc signatures in pure Ruby.
 
-### What needs to be done?
+### Contributing
 
-* Unit and performance testing.
-
-### Contributing, setting up `overcommit` and the linters
-
-In order to keep the repo, docs and data tidy, we use a tool called [`overcommit`](https://github.com/sds/overcommit)
-to connect up the git hooks to a set of quality checks.  The fastest way to get setup is to run the following to make
-sure you have all the tools:
-
-```shell
-gem install overcommit bundler
-bundle install
-overcommit --install
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for repository setup, checks, fixture
+guidance, and the contribution process.
 
 ### Attribution
 

@@ -3,6 +3,7 @@
 /doc/
 
 # Gems for redistribution.
+/pkg/
 /ruby-macho-*.gem
 
 # Testing.

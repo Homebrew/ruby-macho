@@ -43,7 +43,7 @@ module MachO
 
   # Raised when a file's magic bytes are not valid Mach-O magic.
   class MagicError < NotAMachOError
-    # @param num [Integer] the unknown number
+    # @param magic [Integer] the unknown magic number
     def initialize(magic)
       super("Unrecognized Mach-O magic: 0x%02<magic>x" % { :magic => magic })
     end
