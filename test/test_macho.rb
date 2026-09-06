@@ -122,6 +122,30 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_twolevel_hints_with_table_beyond_file
+    assert_raises MachO::LoadCommandSizeError do
+      twolevel_hints_command(1).table
+    end
+  end
+
+  def test_twolevel_hints_with_empty_table
+    assert_empty twolevel_hints_command(0).table.hints
+  end
+
+  def test_twolevel_hints_with_table_ending_at_file_end
+    command = twolevel_hints_command(1, [0x01000002].pack("L<"))
+
+    hint = command.table.hints.first
+    assert_equal 1, hint.isub_image
+    assert_equal 2, hint.itoc
+  end
+
+  def test_twolevel_hints_with_maximum_count
+    assert_raises MachO::LoadCommandSizeError do
+      twolevel_hints_command(0xFFFFFFFF).table
+    end
+  end
+
   def test_rpath_command
     assert_equal ["/usr/lib"], MachO::MachOFile.new(fixture(:yaml2obj, "rpath.macho")).rpaths
   end
@@ -840,6 +864,20 @@ class MachOFileTest < Minitest::Test
   end
 
   private
+
+  def twolevel_hints_command(nhints, table = "")
+    bin = File.binread(fixture(:yaml2obj, "build-version.macho")) + table
+    file = MachO::MachOFile.new_from_bin(bin)
+    format = file.endianness == :little ? "L<" : "L>"
+    offset = file.header.class.bytesize
+    htoffset = bin.bytesize - table.bytesize
+    bin[offset, 4] = [MachO::LoadCommands::LOAD_COMMAND_CONSTANTS[:LC_TWOLEVEL_HINTS]].pack(format)
+    bin[offset + 4, 4] = [MachO::LoadCommands::TwolevelHintsCommand.bytesize].pack(format)
+    bin[offset + 8, 4] = [htoffset].pack(format)
+    bin[offset + 12, 4] = [nhints].pack(format)
+
+    MachO::MachOFile.new_from_bin(bin)[:LC_TWOLEVEL_HINTS].first
+  end
 
   def assert_segment_sections_exceed_cmdsize(arch, command_type)
     bin = File.binread(fixture(arch, "hello.bin"))

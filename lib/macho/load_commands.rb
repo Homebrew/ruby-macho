@@ -985,6 +985,8 @@ module MachO
       # A representation of the two-level namespace lookup hints table exposed
       # by a {TwolevelHintsCommand} (`LC_TWOLEVEL_HINTS`).
       class TwolevelHintsTable
+        HINT_BYTESIZE = 4
+
         # @return [Array<TwolevelHint>] all hints in the table
         attr_reader :hints
 
@@ -993,8 +995,12 @@ module MachO
         # @param nhints [Integer] the number of two-level hints in the table
         # @api private
         def initialize(view, htoffset, nhints)
+          length = nhints * HINT_BYTESIZE
+          available = view.raw_data.bytesize - htoffset
+          raise LoadCommandSizeError, length if length > available
+
           format = Utils.specialize_format("L=#{nhints}", view.endianness)
-          raw_table = view.raw_data[htoffset, nhints * 4]
+          raw_table = view.raw_data[htoffset, length]
           blobs = raw_table.unpack(format)
 
           @hints = blobs.map { |b| TwolevelHint.new(b) }
