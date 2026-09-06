@@ -472,6 +472,9 @@ module MachO
         offset = view.offset + self.class.bytesize
         length = nsects * klass.bytesize
 
+        available = view.raw_data.bytesize - offset
+        raise LoadCommandSizeError, cmdsize if length > available || self.class.bytesize + length > cmdsize
+
         bins = view.raw_data[offset, length]
         bins.unpack("a#{klass.bytesize}" * nsects).map do |bin|
           klass.new_from_bin(view.endianness, bin)

@@ -65,6 +65,14 @@ class MachOFileTest < Minitest::Test
     end
   end
 
+  def test_segment_with_too_many_sections
+    assert_segment_sections_exceed_cmdsize(:i386, :LC_SEGMENT)
+  end
+
+  def test_segment_64_with_too_many_sections
+    assert_segment_sections_exceed_cmdsize(:x86_64, :LC_SEGMENT_64)
+  end
+
   def test_minimal_macho
     file = MachO::MachOFile.new(fixture(:yaml2obj, "minimal.macho"))
 
@@ -801,6 +809,28 @@ class MachOFileTest < Minitest::Test
       # the structure should contain a format and a bytesize
       assert_kind_of String, lc_hsh["structure"]["format"]
       assert_kind_of Integer, lc_hsh["structure"]["bytesize"]
+    end
+  end
+
+  private
+
+  def assert_segment_sections_exceed_cmdsize(arch, command_type)
+    bin = File.binread(fixture(arch, "hello.bin"))
+    file = MachO::MachOFile.new_from_bin(bin)
+    segment = file[command_type].first
+    section_class = if segment.is_a?(MachO::LoadCommands::SegmentCommand64)
+      MachO::Sections::Section64
+    else
+      MachO::Sections::Section
+    end
+    nsects = ((segment.cmdsize - segment.class.bytesize) / section_class.bytesize) + 1
+    nsects_offset = segment.view.offset + segment.class.bytesize - 8
+    bin[nsects_offset, 4] = [nsects].pack(file.endianness == :little ? "L<" : "L>")
+
+    segment = MachO::MachOFile.new_from_bin(bin)[command_type].first
+
+    assert_raises MachO::LoadCommandSizeError do
+      segment.sections
     end
   end
 end
