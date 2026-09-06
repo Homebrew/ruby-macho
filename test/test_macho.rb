@@ -113,6 +113,7 @@ class MachOFileTest < Minitest::Test
       end
     end
   end
+
   def test_load_commands
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 
@@ -431,7 +432,7 @@ class MachOFileTest < Minitest::Test
 
       file.write(actual)
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::MachOFile.new(actual)
       exp = MachO::MachOFile.new(expected)
@@ -471,7 +472,7 @@ class MachOFileTest < Minitest::Test
 
       file.write(actual)
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::MachOFile.new(actual)
       exp = MachO::MachOFile.new(expected)
@@ -546,7 +547,7 @@ class MachOFileTest < Minitest::Test
 
       file.write(actual)
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::MachOFile.new(actual)
       exp = MachO::MachOFile.new(expected)
@@ -605,7 +606,7 @@ class MachOFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
@@ -648,7 +649,7 @@ class MachOFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
@@ -691,7 +692,7 @@ class MachOFileTest < Minitest::Test
       assert_operator modified.rpaths.size, :<, orig_npaths
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
@@ -728,7 +729,7 @@ class MachOFileTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end

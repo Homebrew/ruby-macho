@@ -20,24 +20,11 @@ which bundle > /dev/null 2>&1 \
 # Setup required Gems for testing.
 echo ">> Checking if required Gems are installed and installing missing Gems."
 if ! bundle check ; then
-  ensure bundle install --path vendor/bundle
+  ensure bundle config set --local path vendor/bundle
+  ensure bundle install
 fi
 echo
 
-# Run rubocop.
-echo ">> Running style enforcement."
-bundle exec rubocop -DES lib/
-result="$?"
-echo
-
-echo ">> Done: ${result}."
-
-# Run the test suite.
-echo ">> Running test suite."
-bundle exec rake test
-result="$?"
-echo
-
-# Be done and return result of test suite.
-echo ">> Done: ${result}."
-exit "${result}"
+# Run the repository-owned checks.
+echo ">> Running repository checks."
+exec bundle exec rake

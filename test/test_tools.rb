@@ -40,7 +40,7 @@ class MachOToolsTest < Minitest::Test
       FileUtils.cp filename, actual
       MachO::Tools.change_dylib_id(actual, "test")
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::MachOFile.new(actual)
       exp = MachO::MachOFile.new(expected)
@@ -64,7 +64,7 @@ class MachOToolsTest < Minitest::Test
       FileUtils.cp filename, actual
       MachO::Tools.change_dylib_id(actual, "test")
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::FatFile.new(actual)
       exp = MachO::FatFile.new(expected)
@@ -89,7 +89,7 @@ class MachOToolsTest < Minitest::Test
       oldname = MachO::Tools.dylibs(actual).first
       MachO::Tools.change_install_name(actual, oldname, "test")
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::MachOFile.new(actual)
       exp = MachO::MachOFile.new(expected)
@@ -114,7 +114,7 @@ class MachOToolsTest < Minitest::Test
       oldname = MachO::Tools.dylibs(actual).first
       MachO::Tools.change_install_name(actual, oldname, "test")
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       act = MachO::FatFile.new(actual)
       exp = MachO::FatFile.new(expected)
@@ -138,7 +138,7 @@ class MachOToolsTest < Minitest::Test
       FileUtils.cp filename, actual
       MachO::Tools.change_rpath(actual, "made_up_path", "/usr/lib")
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       file = MachO::MachOFile.new(filename)
       act = MachO::MachOFile.new(actual)
@@ -168,7 +168,7 @@ class MachOToolsTest < Minitest::Test
       FileUtils.cp filename, actual
       MachO::Tools.change_rpath(actual, "made_up_path", "/usr/lib")
 
-      assert equal_sha1_hashes(actual, expected)
+      assert equal_sha1_hashes?(actual, expected)
 
       file = MachO::FatFile.new(filename)
       act = MachO::FatFile.new(actual)
@@ -206,7 +206,7 @@ class MachOToolsTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
@@ -229,7 +229,7 @@ class MachOToolsTest < Minitest::Test
       assert_includes modified.rpaths, "/foo/bar/baz"
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
@@ -255,7 +255,7 @@ class MachOToolsTest < Minitest::Test
       refute_includes modified.rpaths, "made_up_path"
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
@@ -279,7 +279,7 @@ class MachOToolsTest < Minitest::Test
       refute_includes modified.rpaths, "made_up_path"
     end
   ensure
-    groups.each do |_, actual|
+    groups.each do |(_filename, actual)|
       delete_if_exists(actual)
     end
   end
