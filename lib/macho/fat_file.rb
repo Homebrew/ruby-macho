@@ -371,6 +371,7 @@ module MachO
 
     # Obtain an array of fat architectures from raw file data.
     # @return [Array<Headers::FatArch>] an array of fat architectures
+    # @raise [TruncatedFileError] if the file is too small to contain all fat architectures
     # @api private
     def populate_fat_archs
       archs = []
@@ -380,7 +381,13 @@ module MachO
       fa_len   = fa_klass.bytesize
 
       header.nfat_arch.times do |i|
-        archs << fa_klass.new_from_bin(:big, @raw_data[fa_off + (fa_len * i), fa_len])
+        arch_off = fa_off + (fa_len * i)
+        arch_bin = @raw_data[arch_off, fa_len]
+        raise TruncatedFileError if arch_bin.nil? || arch_bin.bytesize < fa_len
+
+        arch = fa_klass.new_from_bin(:big, arch_bin)
+        raise FatArchAlignmentError, arch.align if arch.align > Headers::MAX_FAT_ARCH_ALIGN
+        archs << arch
       end
 
       archs
