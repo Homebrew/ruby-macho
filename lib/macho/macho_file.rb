@@ -344,10 +344,10 @@ module MachO
       old_lc = dylib_load_commands.find { |d| d.name.to_s == old_name }
       raise DylibUnknownError, old_name if old_lc.nil?
 
-      new_lc = LoadCommands::LoadCommand.create(old_lc.type, new_name,
-                                                old_lc.timestamp,
-                                                old_lc.current_version,
-                                                old_lc.compatibility_version)
+      args = [new_name, old_lc.timestamp, old_lc.current_version,
+              old_lc.compatibility_version]
+      args << old_lc.flags if old_lc.is_a?(LoadCommands::DylibUseCommand)
+      new_lc = LoadCommands::LoadCommand.create(old_lc.type, *args)
 
       replace_command(old_lc, new_lc)
     end
