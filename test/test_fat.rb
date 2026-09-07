@@ -56,6 +56,81 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_invalid_fat_arch_alignment_32
+    # Build a valid Fat file and then corrupt the alignment field to exceed MAX_FAT_ARCH_ALIGN
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat = MachO::FatFile.new_from_machos(*machos)
+    fat_bin = fat.serialize
+
+    # FAT_MAGIC (32-bit) FatArch structure: cputype(4) + cpusubtype(4) + offset(4) + size(4) + align(4) = 20 bytes
+    # First FatArch starts at offset 8 (FatHeader is 8 bytes)
+    # align is at offset 8 + 16 = 24
+    fat_header_size = MachO::Headers::FatHeader.bytesize
+    align_offset = fat_header_size + 16 # cputype(4) + cpusubtype(4) + offset(4) + size(4)
+
+    # Set alignment to MAX_FAT_ARCH_ALIGN + 1 (16)
+    fat_bin[align_offset, 4] = [MachO::Headers::MAX_FAT_ARCH_ALIGN + 1].pack("N")
+
+    assert_raises MachO::FatArchAlignmentError do
+      MachO::FatFile.new_from_bin(fat_bin)
+    end
+  end
+
+  def test_invalid_fat_arch_alignment_64
+    # Build a valid Fat64 file and then corrupt the alignment field to exceed MAX_FAT_ARCH_ALIGN
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat = MachO::FatFile.new_from_machos(*machos, :fat64 => true)
+    fat_bin = fat.serialize
+
+    # FAT_MAGIC_64 (64-bit) FatArch64 structure: cputype(4) + cpusubtype(4) + offset(8) + size(8) + align(4) + reserved(4) = 32 bytes
+    # First FatArch64 starts at offset 8 (FatHeader is 8 bytes)
+    # align is at offset 8 + 24 = 32
+    fat_header_size = MachO::Headers::FatHeader.bytesize
+    align_offset = fat_header_size + 24 # cputype(4) + cpusubtype(4) + offset(8) + size(8)
+
+    # Set alignment to MAX_FAT_ARCH_ALIGN + 1 (16)
+    fat_bin[align_offset, 4] = [MachO::Headers::MAX_FAT_ARCH_ALIGN + 1].pack("N")
+
+    assert_raises MachO::FatArchAlignmentError do
+      MachO::FatFile.new_from_bin(fat_bin)
+    end
+  end
+
+  def test_max_valid_fat_arch_alignment_accepted
+    # Build a valid Fat file and set alignment to exactly MAX_FAT_ARCH_ALIGN
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat = MachO::FatFile.new_from_machos(*machos)
+    fat_bin = fat.serialize
+
+    fat_header_size = MachO::Headers::FatHeader.bytesize
+    align_offset = fat_header_size + 16
+
+    # Set alignment to MAX_FAT_ARCH_ALIGN (15) - should be accepted
+    fat_bin[align_offset, 4] = [MachO::Headers::MAX_FAT_ARCH_ALIGN].pack("N")
+
+    # Should parse without raising
+    parsed = MachO::FatFile.new_from_bin(fat_bin)
+    assert_equal MachO::Headers::MAX_FAT_ARCH_ALIGN, parsed.fat_archs.first.align
+  end
+
+  def test_truncated_fat_arch_32
+    # FAT_MAGIC + nfat_arch=1 + FatArch with only 16 bytes (cputype, cpusubtype, offset, size) missing align (4 bytes)
+    # Total = 8 + 16 = 24 bytes instead of 28 bytes
+    bin = [MachO::Headers::FAT_MAGIC, 1, MachO::Headers::CPU_TYPE_I386, 3, 24, 0].pack("N6")
+    assert_raises MachO::TruncatedFileError do
+      MachO::FatFile.new_from_bin(bin)
+    end
+  end
+
+  def test_truncated_fat_arch_64
+    # FAT_MAGIC_64 + nfat_arch=1 + FatArch64 with 24 bytes (cputype, cpusubtype, offset(8), size(8)) missing align(4) + reserved(4)
+    # Total = 8 + 24 = 32 bytes instead of 40 bytes
+    bin = [MachO::Headers::FAT_MAGIC_64, 1].pack("N2") + [MachO::Headers::CPU_TYPE_I386, 3, 24, 0].pack("N2Q>2")
+    assert_raises MachO::TruncatedFileError do
+      MachO::FatFile.new_from_bin(bin)
+    end
+  end
+
   def test_mismatch_cpu_arch_file
     assert_raises MachO::CPUTypeMismatchError do
       MachO::FatFile.new("test/bin/llvm/macho-invalid-fat_cputype")

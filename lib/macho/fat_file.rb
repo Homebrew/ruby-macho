@@ -387,6 +387,7 @@ module MachO
 
         arch = fa_klass.new_from_bin(:big, arch_bin)
         raise FatArchAlignmentError, arch.align if arch.align > Headers::MAX_FAT_ARCH_ALIGN
+
         archs << arch
       end
 
