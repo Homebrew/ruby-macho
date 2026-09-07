@@ -238,6 +238,15 @@ module MachO
     end
   end
 
+  # Raised when a fat architecture record specifies an invalid alignment value.
+  # @param align [Integer] the invalid alignment exponent
+  class FatArchAlignmentError < NotAMachOError
+    # @param align [Integer] the invalid alignment exponent
+    def initialize(align)
+      super("Invalid fat architecture alignment: 2**#{align} exceeds maximum supported value")
+    end
+  end
+
   # Raised when attempting to parse a compressed Mach-O without explicitly
   # requesting decompression.
   class CompressedMachOError < MachOError
