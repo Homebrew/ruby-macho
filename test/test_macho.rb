@@ -552,6 +552,28 @@ class MachOFileTest < Minitest::Test
     assert_equal old_dylib_types, new_dylib_types
   end
 
+  def test_change_install_name_preserves_dylib_use_flags
+    file = MachO::MachOFile.new(fixture(:x86_64, "dylib_use_command-weak-delay.bin"))
+    old_lc = file.dylib_load_commands.find do |lc|
+      lc.is_a?(MachO::LoadCommands::DylibUseCommand)
+    end
+
+    assert_equal 9, old_lc.flags
+    assert old_lc.flag?(:DYLIB_USE_WEAK_LINK)
+    assert old_lc.flag?(:DYLIB_USE_DELAYED_INIT)
+
+    file.change_install_name(old_lc.name.to_s, "new.dylib")
+
+    new_lc = file.dylib_load_commands.find { |lc| lc.name.to_s == "new.dylib" }
+    assert_instance_of MachO::LoadCommands::DylibUseCommand, new_lc
+    assert_equal old_lc.timestamp, new_lc.timestamp
+    assert_equal old_lc.current_version, new_lc.current_version
+    assert_equal old_lc.compatibility_version, new_lc.compatibility_version
+    assert_equal old_lc.flags, new_lc.flags
+    assert new_lc.flag?(:DYLIB_USE_WEAK_LINK)
+    assert new_lc.flag?(:DYLIB_USE_DELAYED_INIT)
+  end
+
   def test_get_rpaths
     filenames = SINGLE_ARCHES.map { |a| fixture(a, "hello.bin") }
 
