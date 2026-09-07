@@ -248,6 +248,31 @@ class MachOCodeSigningTest < Minitest::Test
     end
   end
 
+  def test_rejects_invalid_fat_alignment_before_signing
+    # Build a valid Fat file and then corrupt the alignment field to exceed MAX_FAT_ARCH_ALIGN
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat = MachO::FatFile.new_from_machos(*machos)
+    fat_bin = fat.serialize
+
+    # FAT_MAGIC (32-bit) FatArch structure: align at offset 8 + 16 = 24
+    fat_header_size = MachO::Headers::FatHeader.bytesize
+    align_offset = fat_header_size + 16
+
+    # Set alignment to MAX_FAT_ARCH_ALIGN + 1 (16)
+    fat_bin[align_offset, 4] = [MachO::Headers::MAX_FAT_ARCH_ALIGN + 1].pack("N")
+
+    tempfile_with_data("hello", fat_bin) do |file|
+      original = File.binread(file.path)
+
+      assert_raises MachO::CodeSigningError do
+        MachO.codesign!(file.path)
+      end
+
+      # File should not be modified when parsing fails
+      assert_equal original, File.binread(file.path)
+    end
+  end
+
   private
 
   def entitlement_blob

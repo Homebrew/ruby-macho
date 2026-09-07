@@ -537,6 +537,12 @@ module MachO
       end
     end
 
+    # Maximum supported fat architecture alignment exponent.
+    # The fat architecture `align` field stores an exponent N where the actual
+    # alignment is 2**N. This limit matches MAXSECTALIGN from cctools and
+    # prevents excessive padding allocation during Fat file reconstruction.
+    MAX_FAT_ARCH_ALIGN = 15
+
     # 32-bit fat binary header architecture structure. A 32-bit fat Mach-O has one or more of
     #  these, indicating one or more internal Mach-O blobs.
     # @note "32-bit" indicates the fact that this structure stores 32-bit offsets, not that the
