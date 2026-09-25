@@ -8,7 +8,7 @@ GEM
     drb (2.2.3)
     erb (6.0.7)
     iniparse (1.5.0)
-    io-console (0.9.2)
+    io-console (0.9.4)
     irb (1.18.0)
       pp (>= 0.6.0)
       prism (>= 1.3.0)
@@ -64,7 +64,7 @@ GEM
       parser (>= 3.3.7.2)
       prism (~> 1.7)
     ruby-progressbar (1.13.0)
-    simplecov (1.2.0)
+    simplecov (1.3.0)
     simplecov-cobertura (4.0.0)
       rexml
       simplecov (~> 1.0)
@@ -95,7 +95,7 @@ CHECKSUMS
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   iniparse (1.5.0) sha256=36a165e98d8a250b7631c4a7f9afba32af78f089970cd6446a39771189c761f1
-  io-console (0.9.2) sha256=efa74f891dd03c0939a931dfc6e74c2813d904763d456ea9762b0525e748db08
+  io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   json (3.0.2) sha256=8e6d7e7b11384c21230430cef90b71f14849a34a1f4452796670f7c981bd19df
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
@@ -119,7 +119,7 @@ CHECKSUMS
   rubocop (1.91.0) sha256=9c82b7bf391c5d7e3798c5b9996e22a1fe3bd7468e351dfdeb96140c058296d0
   rubocop-ast (1.50.0) sha256=b9ca88300da0803ee222ad20cdb30494c0a784eed06fdc35d254b06d662788db
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
-  simplecov (1.2.0) sha256=ea6acd05eece5a41990e2a5171c57d15700d329326c7666c85ee8c6a0dd0977e
+  simplecov (1.3.0) sha256=d9886307863c1ead47657dcbed869bfffd82318808b09014d8f0ff77dcfe7492
   simplecov-cobertura (4.0.0) sha256=e4fb3159b1ecea545b44f5452a8611305323e78ad23eae8aed35924d072e01ea
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
