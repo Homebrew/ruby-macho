@@ -396,11 +396,14 @@ module MachO
 
     # Obtain an array of Mach-O blobs from raw file data.
     # @return [Array<MachOFile>] an array of Mach-Os
+    # @raise [TruncatedFileError] if the file is too small to contain all fat slices
     # @api private
     def populate_machos
       machos = []
 
       fat_archs.each do |arch|
+        raise TruncatedFileError if arch.offset + arch.size > @raw_data.bytesize
+
         machos << MachOFile.new_from_bin(@raw_data[arch.offset, arch.size], **options)
 
         # Make sure that each fat_arch and internal slice.

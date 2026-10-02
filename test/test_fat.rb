@@ -131,6 +131,64 @@ class FatFileTest < Minitest::Test
     end
   end
 
+  def test_fat_slice_offset_past_eof
+    # FatArch: cputype(4) + cpusubtype(4) + offset(4) + size(4) + align(4).
+    # Push the first slice's offset past the end of the file.
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat_bin = MachO::FatFile.new_from_machos(*machos).serialize
+
+    offset_at = MachO::Headers::FatHeader.bytesize + 8
+    fat_bin[offset_at, 4] = [fat_bin.bytesize + 1024].pack("N")
+
+    assert_raises MachO::TruncatedFileError do
+      MachO::FatFile.new_from_bin(fat_bin)
+    end
+  end
+
+  def test_fat_slice_size_past_eof
+    # Inflate the first slice's size so offset + size exceeds the file size.
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat_bin = MachO::FatFile.new_from_machos(*machos).serialize
+
+    size_at = MachO::Headers::FatHeader.bytesize + 12
+    fat_bin[size_at, 4] = [fat_bin.bytesize * 4].pack("N")
+
+    assert_raises MachO::TruncatedFileError do
+      MachO::FatFile.new_from_bin(fat_bin)
+    end
+  end
+
+  def test_fat64_slice_offset_past_eof
+    # FatArch64: cputype(4) + cpusubtype(4) + offset(8) + size(8) + align(4) + reserved(4).
+    # Use a 64-bit offset that would wrap if arithmetic were not arbitrary precision.
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat_bin = MachO::FatFile.new_from_machos(*machos, :fat64 => true).serialize
+
+    offset_at = MachO::Headers::FatHeader.bytesize + 8
+    size_at = MachO::Headers::FatHeader.bytesize + 16
+    fat_bin[offset_at, 8] = [(2**64) - 8].pack("Q>")
+    fat_bin[size_at, 8] = [16].pack("Q>")
+
+    assert_raises MachO::TruncatedFileError do
+      MachO::FatFile.new_from_bin(fat_bin)
+    end
+  end
+
+  def test_fat_slice_offset_at_eof_is_rejected
+    # offset == filesize with size == 0 yields an empty slice, which is not a Mach-O.
+    machos = SINGLE_ARCHES.map { |a| MachO::MachOFile.new(fixture(a, "hello.bin")) }
+    fat_bin = MachO::FatFile.new_from_machos(*machos).serialize
+
+    offset_at = MachO::Headers::FatHeader.bytesize + 8
+    size_at = MachO::Headers::FatHeader.bytesize + 12
+    fat_bin[offset_at, 4] = [fat_bin.bytesize].pack("N")
+    fat_bin[size_at, 4] = [0].pack("N")
+
+    assert_raises MachO::TruncatedFileError do
+      MachO::FatFile.new_from_bin(fat_bin)
+    end
+  end
+
   def test_mismatch_cpu_arch_file
     assert_raises MachO::CPUTypeMismatchError do
       MachO::FatFile.new("test/bin/llvm/macho-invalid-fat_cputype")
